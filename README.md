@@ -43,17 +43,29 @@ chromdriver binary/executable.
 Below is an example of using this package via node.
 
 ```javascript
-var childProcess = require('child_process')
-var chromedriver = require('chromedriver')
-var binPath = chromedriver.path
+var childProcess = require('child_process');
+var chromedriver = require('chromedriver');
+var binPath = chromedriver.path;
 
 var childArgs = [
   'some argument'
-]
+];
 
 childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
   // handle results
-})
+});
+
+```
+
+You can also use the start and stop methods:
+
+
+```javascript
+var chromedriver = require('chromedriver');
+
+chromedriver.start();
+//run your tests
+chromedriver.stop();
 
 ```
 
