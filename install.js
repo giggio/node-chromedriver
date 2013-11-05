@@ -11,24 +11,28 @@ var mkdirp = require('mkdirp')
 var path = require('path')
 var rimraf = require('rimraf').sync
 var url = require('url')
+var util = require('util')
 
 var libPath = path.join(__dirname, 'lib', 'chromedriver')
-var downloadUrl = 'http://chromedriver.googlecode.com/files/chromedriver_'
+var downloadUrl = 'http://chromedriver.storage.googleapis.com/%s/chromedriver_%s.zip'
+var platform = process.platform
 
-if (process.platform === 'linux' && process.arch === 'x64') {
-  downloadUrl += 'linux64'
-} else if (process.platform === 'linux') {
-  downloadUrl += 'linux32'
-} else if (process.platform === 'darwin') {
-  downloadUrl += 'mac32'
-} else if (process.platform === 'win32') {
-  downloadUrl += 'win32'
+if (platform === 'linux') {
+  if (process.arch === 'x64') {
+    platform += '64'
+  } else {
+    platform += '32'
+  }
+} else if (platform === 'darwin') {
+  platform = 'mac32'
+} else if (platform === 'win32') {
+  helper.version = '2.4'
 } else {
   console.log('Unexpected platform or architecture:', process.platform, process.arch)
   process.exit(1)
 }
 
-downloadUrl += '_' + helper.version + '.zip';
+downloadUrl = util.format(downloadUrl, helper.version, platform);
 
 var fileName = downloadUrl.split('/').pop()
 
