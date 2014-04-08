@@ -180,17 +180,25 @@ function copyIntoPlace(tmpPath, targetPath) {
   console.log("Copying to target path", targetPath);
   fs.mkdirSync(targetPath);
 
-  var deferred = kew.defer()
   // Look for the extracted directory, so we can rename it.
-  var files = fs.readdirSync(tmpPath)
-  for (var i = 0; i < files.length; i++) {
-    var file = path.join(tmpPath, files[i]);
-    var targetFile = path.join(targetPath, files[i]);
-    fs.createReadStream(file).pipe(fs.createWriteStream(targetFile));
-  }
-  deferred.resolve(true)
+  var files = fs.readdirSync(tmpPath);
+  var promises = files.map(function (name) {
+    var deferred = kew.defer();
 
-  return deferred.promise
+    var file = path.join(tmpPath, name);
+    var reader = fs.createReadStream(file);
+
+    var targetFile = path.join(targetPath, name);
+    var writer = fs.createWriteStream(targetFile);
+    writer.on("finish", function() {
+      deferred.resolve(true);
+    });
+
+    reader.pipe(writer);
+    return deferred.promise;
+  });
+
+  return kew.all(promises);
 }
 
 
