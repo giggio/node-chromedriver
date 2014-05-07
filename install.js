@@ -47,16 +47,11 @@ npmconf.load(function(err, conf) {
   var promise = kew.resolve(true)
 
   // Start the install.
-  if (!fs.existsSync(downloadedFile)) {
-    promise = promise.then(function () {
-      console.log('Downloading', downloadUrl)
-      console.log('Saving to', downloadedFile)
-      return requestBinary(getRequestOptions(conf.get('proxy')), downloadedFile)
-    })
-
-  } else {
-    console.log('Download already available at', downloadedFile)
-  }
+  promise = promise.then(function () {
+    console.log('Downloading', downloadUrl)
+    console.log('Saving to', downloadedFile)
+    return requestBinary(getRequestOptions(conf.get('proxy')), downloadedFile)
+  })
 
   promise.then(function () {
     return extractDownload(downloadedFile, tmpPath)
