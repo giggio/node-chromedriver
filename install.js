@@ -190,7 +190,7 @@ function copyIntoPlace(tmpPath, targetPath) {
 
     var targetFile = path.join(targetPath, name);
     var writer = fs.createWriteStream(targetFile);
-    writer.on("finish", function() {
+    writer.on("close", function() {
       deferred.resolve(true);
     });
 
