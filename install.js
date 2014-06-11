@@ -14,7 +14,7 @@ var url = require('url')
 var util = require('util')
 
 var libPath = path.join(__dirname, 'lib', 'chromedriver')
-var downloadUrl = 'http://chromedriver.storage.googleapis.com/%s/chromedriver_%s.zip'
+var downloadUrl = (process.env.CHROMEDRIVER_CDNURL || 'http://chromedriver.storage.googleapis.com') + '/%s/chromedriver_%s.zip'
 var platform = process.platform
 
 if (platform === 'linux') {
