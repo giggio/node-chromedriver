@@ -26,8 +26,7 @@ if (platform === 'linux') {
 } else if (platform === 'darwin') {
   platform = 'mac32'
 } else if (platform !== 'win32') {
-  console.log('Unexpected platform or architecture:', process.platform, process.arch)
-  process.exit(1)
+  platform = 'win32'
 }
 
 downloadUrl = util.format(downloadUrl, helper.version, platform);
