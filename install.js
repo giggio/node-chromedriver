@@ -204,7 +204,7 @@ function fixFilePermissions() {
     // 64 == 0100 (no octal literal in strict mode)
     if (!(stat.mode & 64)) {
       console.log('Fixing file permissions')
-      fs.chmodSync(helper.path, '755')
+      fs.chmodSync(helper.path, '755+x')
     }
   }
 }
