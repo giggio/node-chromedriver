@@ -1,6 +1,6 @@
 {
   "name": "chromedriver",
-  "version": "2.10.0-1",
+  "version": "2.11.0",
   "keywords": ["chromedriver", "selenium"],
   "description": "ChromeDriver for Selenium",
   "homepage": "https://github.com/giggio/node-chromedriver",
