@@ -24,6 +24,27 @@ The package has been set up to fetch and run ChromeDriver for MacOS (darwin),
 Linux based platforms (as identified by nodejs), and Windows.  If you
 spot any platform weirdnesses, let us know or send a patch.
 
+### Custom binaries url
+
+To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_cdnurl`.
+Default is `http://chromedriver.storage.googleapis.com`.
+
+```shell
+npm install chromedriver --chromedriver_cdnurl=http://npm.taobao.org/mirrors/chromedriver
+```
+
+Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+
+```
+chromedriver_cdnurl=http://npm.taobao.org/mirrors/chromedriver
+```
+
+Another option is to use PATH variable `CHROMEDRIVER_CDNURL`.
+
+```shell
+CHROMEDRIVER_CDNURL=http://npm.taobao.org/mirrors/chromedriver npm install chromedriver
+```
+
 Running
 -------
 
