@@ -4,13 +4,12 @@ var AdmZip = require('adm-zip')
 var cp = require('child_process')
 var fs = require('fs')
 var helper = require('./lib/chromedriver')
-var http = require('http')
 var kew = require('kew')
 var npmconf = require('npmconf')
 var mkdirp = require('mkdirp')
 var path = require('path')
+var request = require('request')
 var rimraf = require('rimraf').sync
-var url = require('url')
 var util = require('util')
 
 var libPath = path.join(__dirname, 'lib', 'chromedriver')
@@ -53,7 +52,7 @@ npmconf.load(function(err, conf) {
   promise = promise.then(function () {
     console.log('Downloading', downloadUrl)
     console.log('Saving to', downloadedFile)
-    return requestBinary(getRequestOptions(conf.get('proxy')), downloadedFile)
+    return requestBinary(downloadedFile)
   })
 
   promise.then(function () {
@@ -69,6 +68,7 @@ npmconf.load(function(err, conf) {
     console.log('Done. ChromeDriver binary available at', helper.path)
   })
   .fail(function (err) {
+    console.error(err)
     console.error('ChromeDriver installation failed', err.stack)
     process.exit(1)
   })
@@ -102,56 +102,41 @@ function findSuitableTempDirectory(npmConf) {
 }
 
 
-function getRequestOptions(proxyUrl) {
-  if (proxyUrl) {
-    var options = url.parse(proxyUrl)
-    options.path = downloadUrl
-    options.headers = { Host: url.parse(downloadUrl).host }
-    // Turn basic authorization into proxy-authorization.
-    if (options.auth) {
-      options.headers['Proxy-Authorization'] = 'Basic ' + new Buffer(options.auth).toString('base64')
-      delete options.auth
-    }
-
-    return options
-  } else {
-    return url.parse(downloadUrl)
-  }
-}
-
-
-function requestBinary(requestOptions, filePath) {
+function requestBinary(filePath) {
   var deferred = kew.defer()
 
   var count = 0
   var notifiedCount = 0
-  var outFile = fs.openSync(filePath, 'w')
-
-  var client = http.get(requestOptions, function (response) {
-    var status = response.statusCode
-    console.log('Receiving...')
-
-    if (status === 200) {
-      response.addListener('data',   function (data) {
-        fs.writeSync(outFile, data, 0, data.length, null)
-        count += data.length
-        if ((count - notifiedCount) > 800000) {
-          console.log('Received ' + Math.floor(count / 1024) + 'K...')
-          notifiedCount = count
-        }
-      })
-
-      response.addListener('end',   function () {
-        console.log('Received ' + Math.floor(count / 1024) + 'K total.')
-        fs.closeSync(outFile)
-        deferred.resolve(true)
-      })
-
-    } else {
-      client.abort()
-      deferred.reject('Error with http request: ' + util.inspect(response.headers))
+  var reportProgress = function(data) {
+    count += data.length
+    if ((count - notifiedCount) > 800000) {
+      console.log('Received ' + Math.floor(count / 1024) + 'K...')
+      notifiedCount = count
     }
-  })
+  }
+
+  console.log('Receiving...')
+  request({uri: downloadUrl, encoding: null}, function(err, response, body) {
+    if (err) {
+      deferred.reject('Error with http request: ' + err)
+      return
+    }
+
+    if (response.statusCode !== 200) {
+      deferred.reject('Error with http request: ' + util.inspect(response.headers))
+      return
+    }
+
+    console.log('Received ' + Math.floor(body.length / 1024) + 'K total.')
+    fs.writeFile(filePath, body, function(err) {
+      if (err) {
+        deferred.reject('Error writing to file ' + filePath)
+      } else {
+        deferred.resolve(true)
+      }
+    })
+
+  }).on('data', reportProgress)
 
   return deferred.promise
 }
