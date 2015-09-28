@@ -167,8 +167,7 @@ function getRequestOptions(downloadPath) {
 
 function getLatestVersion(requestOptions) {
   var deferred = kew.defer();
-  var protocol = requestOptions.protocol === 'https:' ? https : http;
-  var client = protocol.get(requestOptions, function (response) {
+  var client = get(requestOptions, function (response) {
     var body = '';
     if (response.statusCode === 200) {
       response.addListener('data', function (data) {
@@ -197,8 +196,7 @@ function requestBinary(requestOptions, filePath) {
   var notifiedCount = 0;
   var outFile = fs.openSync(filePath, 'w');
 
-  var protocol = requestOptions.protocol === 'https:' ? https : http;
-  var client = protocol.get(requestOptions, function (response) {
+  var client = get(requestOptions, function (response) {
     var status = response.statusCode;
     console.log('Receiving...');
 
@@ -225,6 +223,22 @@ function requestBinary(requestOptions, filePath) {
   });
 
   return deferred.promise;
+}
+
+
+function get(requestOptions, callback, redirects) {
+  redirects = redirects || 0;
+  var protocol = requestOptions.protocol === 'https:' ? https : http;
+  var client = protocol.get(requestOptions, function (response) {
+    var status = response.statusCode;
+    if ((status === 302 || status === 301 || status === 307) && redirects < 5) {
+      console.log('Redirect to %s', response.headers.location);
+      redirects++;
+      return get(getRequestOptions(response.headers.location), callback, redirects);
+    }
+    callback(response);
+  });
+  return client;
 }
 
 
