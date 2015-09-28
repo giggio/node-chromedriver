@@ -4,7 +4,7 @@ var AdmZip = require('adm-zip')
 var cp = require('child_process')
 var fs = require('fs')
 var helper = require('./lib/chromedriver')
-var http = require('http')
+var urllib = require('urllib')
 var kew = require('kew')
 var npmconf = require('npmconf')
 var mkdirp = require('mkdirp')
@@ -127,7 +127,17 @@ function requestBinary(requestOptions, filePath) {
   var notifiedCount = 0
   var outFile = fs.openSync(filePath, 'w')
 
-  var client = http.get(requestOptions, function (response) {
+  var client = urllib.request(requestOptions.href, {
+    timeout: 20000,
+    followRedirect: true,
+    streaming: true,
+  }, function (err, _, response) {
+    if (err) {
+      fs.closeSync(outFile)
+      deferred.resolve(true)
+      return;
+    }
+
     var status = response.statusCode
     console.log('Receiving...')
 
