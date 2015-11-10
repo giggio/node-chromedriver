@@ -80,15 +80,19 @@ childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
 
 You can also use the start and stop methods:
 
-
 ```javascript
 var chromedriver = require('chromedriver');
 
-chromedriver.start();
-//run your tests
+args = {
+	// optional arguments
+};
+chromedriver.start(args);
+// run your tests
 chromedriver.stop();
 
 ```
+Note: if your tests are ran asynchronously, chromedriver.stop() will have to be
+executed as a callback at the end of your tests
 
 Versioning
 ----------
