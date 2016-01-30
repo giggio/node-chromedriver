@@ -56,6 +56,22 @@ bin/chromedriver [arguments]
 And npm will install a link to the binary in `node_modules/.bin` as
 it is wont to do.
 
+Running with Selenium WebDriver
+-------------------------------
+
+```javascript
+require('chromedriver');
+var webdriver = require('selenium-webdriver');
+var driver = new webdriver.Builder()
+  .forBrowser('chrome')
+  .build();
+```
+
+(Tested for selenium-webdriver version `2.48.2`)
+
+The path will be added to the process automatically, you don't need to configure it.
+But you can get it from `require('chromedriver').path` if you want it.
+
 Running via node
 ----------------
 
