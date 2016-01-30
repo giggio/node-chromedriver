@@ -1,5 +1,10 @@
+sudo: false
 language: node_js
 node_js:
-  - 0.10
-  - 0.12
+  - '4'
+  - '3'
+  - '2'
+  - '1'
+  - '0.12'
+  - '0.10'
 script: "npm install && timeout 10 ./bin/chromedriver || test $? -eq 124"
