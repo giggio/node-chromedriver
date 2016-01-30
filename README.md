@@ -1,5 +1,6 @@
 ChromeDriver
 =======
+[![Build status](https://travis-ci.org/giggio/node-chromedriver.svg)](https://travis-ci.org/giggio/node-chromedriver/)
 
 An NPM wrapper for Selenium [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
 
