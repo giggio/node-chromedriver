@@ -6,4 +6,5 @@ node_js:
   - '2'
   - '3'
   - '4'
+  - '5'
 script: "npm install && timeout 10 ./bin/chromedriver || test $? -eq 124"
