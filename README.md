@@ -83,9 +83,9 @@ You can also use the start and stop methods:
 ```javascript
 var chromedriver = require('chromedriver');
 
-args = {
+args = [
 	// optional arguments
-};
+];
 chromedriver.start(args);
 // run your tests
 chromedriver.stop();
