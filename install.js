@@ -5,6 +5,7 @@ var cp = require('child_process')
 var fs = require('fs')
 var helper = require('./lib/chromedriver')
 var http = require('http')
+var https = require('https')
 var kew = require('kew')
 var npmconf = require('npmconf')
 var mkdirp = require('mkdirp')
@@ -127,7 +128,8 @@ function requestBinary(requestOptions, filePath) {
   var notifiedCount = 0
   var outFile = fs.openSync(filePath, 'w')
 
-  var client = http.get(requestOptions, function (response) {
+  var protocol = requestOptions.protocol === 'https:' ? https : http
+  var client = protocol.get(requestOptions, function (response) {
     var status = response.statusCode
     console.log('Receiving...')
 
