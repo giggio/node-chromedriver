@@ -119,5 +119,5 @@ for (let version of versions) {
 try {
     removeFolder(tempInstallPath);
 } catch (err) {
-    console.error(`Could not delete folder '${tempInstallPathForVersion}'.`);
+    console.error(`Could not delete folder '${tempInstallPath}'.`);
 }
