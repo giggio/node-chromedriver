@@ -5,6 +5,7 @@ var cp = require('child_process')
 var fs = require('fs')
 var helper = require('./lib/chromedriver')
 var http = require('http')
+var https = require('https')
 var kew = require('kew')
 var npmconf = require('npmconf')
 var mkdirp = require('mkdirp')
@@ -103,8 +104,9 @@ function findSuitableTempDirectory(npmConf) {
 
 
 function getRequestOptions(proxyUrl) {
+  var options
   if (proxyUrl) {
-    var options = url.parse(proxyUrl)
+    options = url.parse(proxyUrl)
     options.path = downloadUrl
     options.headers = { Host: url.parse(downloadUrl).host }
     // Turn basic authorization into proxy-authorization.
@@ -112,11 +114,38 @@ function getRequestOptions(proxyUrl) {
       options.headers['Proxy-Authorization'] = 'Basic ' + new Buffer(options.auth).toString('base64')
       delete options.auth
     }
-
-    return options
   } else {
-    return url.parse(downloadUrl)
+    options = url.parse(downloadUrl)
   }
+
+  // Use certificate authority settings from npm
+  var ca = process.env.npm_config_ca
+  if (!ca && process.env.npm_config_cafile) {
+    try {
+      ca = fs.readFileSync(process.env.npm_config_cafile, {encoding: 'utf8'})
+        .split(/\n(?=-----BEGIN CERTIFICATE-----)/g)
+
+      // Comments at the beginning of the file result in the first
+      // item not containing a certificate - in this case the
+      // download will fail
+      if (ca.length > 0 && !/-----BEGIN CERTIFICATE-----/.test(ca[0])) {
+        ca.shift()
+      }
+
+    } catch (e) {
+      console.error('Could not read cafile', process.env.npm_config_cafile, e)
+    }
+  }
+
+  if (ca) {
+    console.log('Using npmconf ca')
+    options.agentOptions = {
+      ca: ca
+    }
+    options.ca = ca
+  }
+
+  return options
 }
 
 
@@ -127,7 +156,8 @@ function requestBinary(requestOptions, filePath) {
   var notifiedCount = 0
   var outFile = fs.openSync(filePath, 'w')
 
-  var client = http.get(requestOptions, function (response) {
+  var protocol = requestOptions.protocol === 'https:' ? https : http
+  var client = protocol.get(requestOptions, function (response) {
     var status = response.statusCode
     console.log('Receiving...')
 
