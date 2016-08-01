@@ -127,7 +127,7 @@ function requestBinary(requestOptions, filePath) {
   var notifiedCount = 0
   var outFile = fs.openSync(filePath, 'w')
 
-  var client = http.get(requestOptions, function (response) {
+  var client = httpGet(requestOptions, function (response) {
     var status = response.statusCode
     console.log('Receiving...')
 
@@ -154,6 +154,18 @@ function requestBinary(requestOptions, filePath) {
   })
 
   return deferred.promise
+}
+
+
+function httpGet(requestOptions, callback) {
+  http.get(requestOptions, function (response) {
+    var status = response.statusCode
+    if (status === 302 || status === 301 || status === 307) {
+      console.log('Redirect to %s', response.headers.location)
+      return httpGet(url.parse(response.headers.location), callback)
+    }
+    callback(response)
+  })
 }
 
 
