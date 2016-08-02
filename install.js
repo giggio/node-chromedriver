@@ -118,6 +118,8 @@ function getRequestOptions(proxyUrl) {
     options = url.parse(downloadUrl)
   }
 
+  options.rejectUnauthorized = !!process.env.npm_config_strict_ssl
+
   // Use certificate authority settings from npm
   var ca = process.env.npm_config_ca
   if (!ca && process.env.npm_config_cafile) {
