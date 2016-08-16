@@ -28,7 +28,7 @@ if (platform === 'linux') {
     platform += '32'
   }
 } else if (platform === 'darwin') {
-  platform = 'mac32'
+  platform = 'mac64'
 } else if (platform !== 'win32') {
   console.log('Unexpected platform or architecture:', process.platform, process.arch)
   process.exit(1)
