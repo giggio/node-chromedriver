@@ -10,5 +10,4 @@ node_js:
   - '6'
 os:
   - linux
-  - osx
 script: "npm install && timeout 10 ./bin/chromedriver || test $? -eq 124"
