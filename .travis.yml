@@ -10,4 +10,5 @@ node_js:
   - '6'
 os:
   - linux
-script: "npm install && timeout 10 ./bin/chromedriver || test $? -eq 124"
+  - osx
+script: "function timeout() { perl -e 'alarm shift; exec @ARGV' \"$@\"; }; npm install && timeout 10 ./bin/chromedriver || test $? -eq 142"
