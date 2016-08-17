@@ -8,4 +8,7 @@ node_js:
   - '4'
   - '5'
   - '6'
+os:
+  - linux
+  - osx
 script: "npm install && timeout 10 ./bin/chromedriver || test $? -eq 124"
