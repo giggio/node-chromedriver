@@ -21,6 +21,7 @@ cdnUrl = cdnUrl.replace(/\/+$/, '')
 var downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip'
 var platform = process.platform
 
+var chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || 'LATEST'
 if (platform === 'linux') {
   if (process.arch === 'x64') {
     platform += '64'
@@ -39,9 +40,7 @@ if (platform === 'linux') {
   process.exit(1)
 }
 
-downloadUrl = util.format(downloadUrl, helper.version, platform);
 
-var fileName = downloadUrl.split('/').pop()
 
 npmconf.load(function(err, conf) {
   if (err) {
@@ -49,14 +48,26 @@ npmconf.load(function(err, conf) {
     console.error(err)
     process.exit(1)
     return
-  }
-
+  }  
+  
+  var fileName = ''; 
   var tmpPath = findSuitableTempDirectory(conf)
-  var downloadedFile = path.join(tmpPath, fileName)
+  var downloadedFile = ''; 
   var promise = kew.resolve(true)
+
+  promise = promise.then(function  () {
+    return getLatestVersion();
+  })
 
   // Start the install.
   promise = promise.then(function () {
+    // if chromedriver_version did not resolve correctly we will fallback to exported version.
+    if(chromedriver_version === 'LATEST') {
+      chromedriver_version = helper.version;
+    }
+    downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
+    fileName = downloadUrl.split('/').pop();
+    downloadedFile = path.join(tmpPath, fileName);
     console.log('Downloading', downloadUrl)
     console.log('Saving to', downloadedFile)
     return requestBinary(getRequestOptions(conf.get('proxy')), downloadedFile)
@@ -155,6 +166,37 @@ function getRequestOptions(proxyUrl) {
   return options
 }
 
+function getLatestVersion() {
+  var deferred = kew.defer();  
+
+  var requestOptions = {
+      hostname: url.parse(cdnUrl).host,
+      port: 80,
+      path: '/LATEST_RELEASE'    
+    };
+  
+  var client = http.get(requestOptions, function (response) {
+    var status = response.statusCode;   
+    var body = '';
+    if (status === 200) {
+      response.addListener('data',   function (data) {         
+        body += data;
+      });
+      response.addListener('end',   function () {       
+      try {
+                chromedriver_version = JSON.parse(body);
+          } catch (err) {
+                deferred.reject('Unable to parse response as JSON', err);                
+          } 
+        deferred.resolve(true)
+      });
+    } else {
+      client.abort()
+      deferred.reject('Error with http request: ' + util.inspect(response.headers));
+    }
+  });
+  return deferred.promise
+}
 
 function requestBinary(requestOptions, filePath) {
   var deferred = kew.defer()
