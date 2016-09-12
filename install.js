@@ -21,7 +21,7 @@ cdnUrl = cdnUrl.replace(/\/+$/, '')
 var downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip'
 var platform = process.platform
 
-var chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || 'LATEST'
+var chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 if (platform === 'linux') {
   if (process.arch === 'x64') {
     platform += '64'
@@ -63,10 +63,6 @@ npmconf.load(function(err, conf) {
 
   // Start the install.
   promise = promise.then(function () {
-    // if chromedriver_version did not resolve correctly we will fallback to exported version.
-    if(chromedriver_version === 'LATEST') {
-      chromedriver_version = helper.version;
-    }
     downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
     fileName = downloadUrl.split('/').pop();
     downloadedFile = path.join(tmpPath, fileName);
