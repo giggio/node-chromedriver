@@ -68,7 +68,7 @@ npmconf.load(function(err, conf) {
     downloadedFile = path.join(tmpPath, fileName);
     console.log('Downloading', downloadUrl)
     console.log('Saving to', downloadedFile)
-    return requestBinary(getRequestOptions(conf.get('proxy')), downloadedFile)
+    return requestBinary(getRequestOptions(conf.get('proxy'), downloadUrl), downloadedFile)
   })
 
   promise.then(function () {
@@ -117,12 +117,12 @@ function findSuitableTempDirectory(npmConf) {
 }
 
 
-function getRequestOptions(proxyUrl) {
+function getRequestOptions(proxyUrl, downloadPath) {
   var options
   if (proxyUrl) {
-    options = url.parse(proxyUrl)
-    options.path = downloadUrl
-    options.headers = { Host: url.parse(downloadUrl).host }
+    options = url.parse(proxyUrl) 
+    options.path = dowloadPath
+    options.headers = { Host: url.parse(downloadPath).host }
     // Turn basic authorization into proxy-authorization.
     if (options.auth) {
       options.headers['Proxy-Authorization'] = 'Basic ' + new Buffer(options.auth).toString('base64')
@@ -166,14 +166,9 @@ function getRequestOptions(proxyUrl) {
 
 function getLatestVersion() {
   var deferred = kew.defer();  
-
-  var requestOptions = {
-      hostname: url.parse(cdnUrl).host,
-      port: 80,
-      path: '/LATEST_RELEASE'    
-    };
   
-  var client = http.get(requestOptions, function (response) {
+  var protocol = requestOptions.protocol === 'https:' ? https : http;
+  var client = protocol.get(getRequestOptions(conf.get('proxy'), cdnUrl + '/LATEST_RELEASE'), function (response) {
     var status = response.statusCode;   
     var body = '';
     if (status === 200) {
