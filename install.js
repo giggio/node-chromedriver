@@ -56,7 +56,9 @@ npmconf.load(function(err, conf) {
   var promise = kew.resolve(true)
 
   promise = promise.then(function  () {
-    return getLatestVersion();
+    if(chromedriver_version === 'LATEST') {
+     return getLatestVersion();
+    } 
   })
 
   // Start the install.
