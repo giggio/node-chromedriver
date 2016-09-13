@@ -57,7 +57,7 @@ npmconf.load(function(err, conf) {
 
   promise = promise.then(function  () {
     if(chromedriver_version === 'LATEST') {
-     return getLatestVersion();
+     return getLatestVersion(getRequestOptions(conf.get('proxy'), cdnUrl + '/LATEST_RELEASE'));
     } 
   })
 
@@ -121,7 +121,7 @@ function getRequestOptions(proxyUrl, downloadPath) {
   var options
   if (proxyUrl) {
     options = url.parse(proxyUrl) 
-    options.path = dowloadPath
+    options.path = downloadPath
     options.headers = { Host: url.parse(downloadPath).host }
     // Turn basic authorization into proxy-authorization.
     if (options.auth) {
@@ -129,7 +129,7 @@ function getRequestOptions(proxyUrl, downloadPath) {
       delete options.auth
     }
   } else {
-    options = url.parse(downloadUrl)
+    options = url.parse(downloadPath)
   }
 
   options.rejectUnauthorized = !!process.env.npm_config_strict_ssl
@@ -164,11 +164,11 @@ function getRequestOptions(proxyUrl, downloadPath) {
   return options
 }
 
-function getLatestVersion() {
+function getLatestVersion(requestOptions) {
   var deferred = kew.defer();  
-  
+
   var protocol = requestOptions.protocol === 'https:' ? https : http;
-  var client = protocol.get(getRequestOptions(conf.get('proxy'), cdnUrl + '/LATEST_RELEASE'), function (response) {
+  var client = protocol.get(requestOptions, function (response) {
     var status = response.statusCode;   
     var body = '';
     if (status === 200) {
