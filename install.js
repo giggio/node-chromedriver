@@ -75,7 +75,7 @@ npmconf.load(function(err, conf) {
     console.log('Done. ChromeDriver binary available at', helper.path)
   })
   .fail(function (err) {
-    console.error('ChromeDriver installation failed', err.stack)
+    console.error('ChromeDriver installation failed', err)
     process.exit(1)
   })
 })
