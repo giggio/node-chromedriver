@@ -1,5 +1,5 @@
 'use strict'
-
+require('es6-object-assign').polyfill()
 var AdmZip = require('adm-zip')
 var cp = require('child_process')
 var fs = require('fs')
