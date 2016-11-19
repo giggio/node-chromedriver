@@ -34,6 +34,12 @@ if (platform === 'linux') {
     console.log('Only Mac 64 bits supported.');
     process.exit(1);
   }
+} else if (platform === 'freebsd') {
+  if (process.arch === 'x64') {
+    platform = 'mac64'
+  } else {
+    platform = 'mac32'
+  }
 } else if (platform !== 'win32') {
   console.log('Unexpected platform or architecture:', process.platform, process.arch)
   process.exit(1)
