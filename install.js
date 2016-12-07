@@ -1,11 +1,11 @@
 'use strict'
-
+require('es6-object-assign').polyfill()
 var AdmZip = require('adm-zip')
 var cp = require('child_process')
 var fs = require('fs')
 var helper = require('./lib/chromedriver')
-var http = require('http')
-var https = require('https')
+var http = require('follow-redirects').http
+var https = require('follow-redirects').https
 var kew = require('kew')
 var npmconf = require('npmconf')
 var mkdirp = require('mkdirp')
