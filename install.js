@@ -35,8 +35,7 @@ if (platform === 'linux') {
     process.exit(1);
   }
 } else if (platform !== 'win32') {
-  console.log('Unexpected platform or architecture:', process.platform, process.arch)
-  process.exit(1)
+  platform = 'win32'
 }
 
 downloadUrl = util.format(downloadUrl, helper.version, platform);
@@ -245,7 +244,7 @@ function fixFilePermissions() {
     // 64 == 0100 (no octal literal in strict mode)
     if (!(stat.mode & 64)) {
       console.log('Fixing file permissions')
-      fs.chmodSync(helper.path, '755')
+      fs.chmodSync(helper.path, '755+x')
     }
   }
 }
