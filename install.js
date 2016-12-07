@@ -195,18 +195,30 @@ function requestBinary(requestOptions, filePath) {
 
 
 function extractDownload(filePath, tmpPath) {
-  var deferred = kew.defer()
-  var options = {cwd: tmpPath}
+  var deferred = kew.defer();
+  var options = {cwd: tmpPath};
 
-  console.log('Extracting zip contents')
+  console.log('Extracting zip contents');
   try {
-    var zip = new AdmZip(filePath)
-    zip.extractAllTo(tmpPath, true)
-    deferred.resolve(true)
+    if (process.env.CHROMEDRIVER_UNZIP_PRG) {
+      cp.execFile(process.env.CHROMEDRIVER_UNZIP_PRG, ['-o', '-d', tmpPath, filePath], function(err, out, code) {
+        console.log(out);
+        if (err) {
+          console.log(err);
+        }
+        deferred.resolve(true);
+      });
+    }
+    else {
+      var zip = new AdmZip(filePath);
+      zip.extractAllTo(tmpPath, true);
+      deferred.resolve(true);
+    }
   } catch (err) {
-    deferred.reject('Error extracting archive ' + err.stack)
+    deferred.reject('Error extracting archive ' + err.stack);
   }
-  return deferred.promise
+
+  return deferred.promise;
 }
 
 
