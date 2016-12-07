@@ -21,6 +21,7 @@ cdnUrl = cdnUrl.replace(/\/+$/, '')
 var downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip'
 var platform = process.platform
 
+var chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 if (platform === 'linux') {
   if (process.arch === 'x64') {
     platform += '64'
@@ -39,9 +40,7 @@ if (platform === 'linux') {
   process.exit(1)
 }
 
-downloadUrl = util.format(downloadUrl, helper.version, platform);
 
-var fileName = downloadUrl.split('/').pop()
 
 npmconf.load(function(err, conf) {
   if (err) {
@@ -49,17 +48,27 @@ npmconf.load(function(err, conf) {
     console.error(err)
     process.exit(1)
     return
-  }
-
+  }  
+  
+  var fileName = ''; 
   var tmpPath = findSuitableTempDirectory(conf)
-  var downloadedFile = path.join(tmpPath, fileName)
+  var downloadedFile = ''; 
   var promise = kew.resolve(true)
+
+  promise = promise.then(function  () {
+    if(chromedriver_version === 'LATEST') {
+     return getLatestVersion(getRequestOptions(conf.get('proxy'), cdnUrl + '/LATEST_RELEASE'));
+    } 
+  })
 
   // Start the install.
   promise = promise.then(function () {
+    downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
+    fileName = downloadUrl.split('/').pop();
+    downloadedFile = path.join(tmpPath, fileName);
     console.log('Downloading', downloadUrl)
     console.log('Saving to', downloadedFile)
-    return requestBinary(getRequestOptions(conf.get('proxy')), downloadedFile)
+    return requestBinary(getRequestOptions(conf.get('proxy'), downloadUrl), downloadedFile)
   })
 
   promise.then(function () {
@@ -108,19 +117,19 @@ function findSuitableTempDirectory(npmConf) {
 }
 
 
-function getRequestOptions(proxyUrl) {
+function getRequestOptions(proxyUrl, downloadPath) {
   var options
   if (proxyUrl) {
-    options = url.parse(proxyUrl)
-    options.path = downloadUrl
-    options.headers = { Host: url.parse(downloadUrl).host }
+    options = url.parse(proxyUrl) 
+    options.path = downloadPath
+    options.headers = { Host: url.parse(downloadPath).host }
     // Turn basic authorization into proxy-authorization.
     if (options.auth) {
       options.headers['Proxy-Authorization'] = 'Basic ' + new Buffer(options.auth).toString('base64')
       delete options.auth
     }
   } else {
-    options = url.parse(downloadUrl)
+    options = url.parse(downloadPath)
   }
 
   options.rejectUnauthorized = !!process.env.npm_config_strict_ssl
@@ -155,6 +164,32 @@ function getRequestOptions(proxyUrl) {
   return options
 }
 
+function getLatestVersion(requestOptions) {
+  var deferred = kew.defer();  
+
+  var protocol = requestOptions.protocol === 'https:' ? https : http;
+  var client = protocol.get(requestOptions, function (response) {
+    var status = response.statusCode;   
+    var body = '';
+    if (status === 200) {
+      response.addListener('data',   function (data) {         
+        body += data;
+      });
+      response.addListener('end',   function () {       
+      try {
+                chromedriver_version = JSON.parse(body);
+          } catch (err) {
+                deferred.reject('Unable to parse response as JSON', err);                
+          } 
+        deferred.resolve(true)
+      });
+    } else {
+      client.abort()
+      deferred.reject('Error with http request: ' + util.inspect(response.headers));
+    }
+  });
+  return deferred.promise
+}
 
 function requestBinary(requestOptions, filePath) {
   var deferred = kew.defer()
