@@ -59,7 +59,7 @@ npmconf.load(function(err, conf) {
   promise = promise.then(function () {
     console.log('Downloading', downloadUrl)
     console.log('Saving to', downloadedFile)
-    return requestBinary(getRequestOptions(conf.get('proxy')), downloadedFile)
+    return requestBinary(getRequestOptions(conf), downloadedFile)
   })
 
   promise.then(function () {
@@ -108,8 +108,9 @@ function findSuitableTempDirectory(npmConf) {
 }
 
 
-function getRequestOptions(proxyUrl) {
-  var options
+function getRequestOptions(conf) {
+  var options = url.parse(downloadUrl);
+  var proxyUrl = options.protocol === 'https:' ? conf.get('https-proxy') : conf.get('proxy');
   if (proxyUrl) {
     options = url.parse(proxyUrl)
     options.path = downloadUrl
