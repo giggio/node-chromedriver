@@ -47,6 +47,26 @@ Another option is to use PATH variable `CHROMEDRIVER_CDNURL`.
 CHROMEDRIVER_CDNURL=http://npm.taobao.org/mirrors/chromedriver npm install chromedriver
 ```
 
+### Custom binaries file
+
+To get the chromedriver from the filesystem instead of a web request use the npm config property `chromedriver_filepath`.
+
+```shell
+npm install chromedriver --chromedriver_filepath=/path/to/chromedriver_mac64.zip
+```
+
+Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+
+```
+chromedriver_filepath=/path/to/chromedriver_mac64.zip
+```
+
+Another option is to use the PATH variable `CHROMEDRIVER_FILEPATH`
+
+```shell
+CHROMEDRIVER=/path/to/chromedriver_mac64.zip
+```
+
 Running
 -------
 
