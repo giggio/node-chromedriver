@@ -45,7 +45,7 @@ if (platform === 'linux') {
   process.exit(1);
 }
 
-npmconf.load(function(err, conf) {
+npmconf.load(function (err, conf) {
   if (err) {
     console.log('Error loading npm config');
     console.error(err);
@@ -53,21 +53,19 @@ npmconf.load(function(err, conf) {
     return;
   }
 
-  var fileName = ''; 
   var tmpPath = findSuitableTempDirectory(conf);
-  var downloadedFile = ''; 
+  var downloadedFile = '';
   var promise = kew.resolve(true);
 
-  promise = promise.then(function  () {
-    if(chromedriver_version === 'LATEST') {
-     return getLatestVersion(getRequestOptions(conf, cdnUrl + '/LATEST_RELEASE'));
-    } 
+  promise = promise.then(function () {
+    if (chromedriver_version === 'LATEST')
+      return getLatestVersion(getRequestOptions(conf, cdnUrl + '/LATEST_RELEASE'));
   });
 
   // Start the install.
   promise = promise.then(function () {
     downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
-    fileName = downloadUrl.split('/').pop();
+    var fileName = downloadUrl.split('/').pop();
     downloadedFile = path.join(tmpPath, fileName);
     console.log('Downloading', downloadUrl);
     console.log('Saving to', downloadedFile);
@@ -77,19 +75,19 @@ npmconf.load(function(err, conf) {
   promise.then(function () {
     return extractDownload(downloadedFile, tmpPath);
   })
-  .then(function () {
-    return copyIntoPlace(tmpPath, libPath);
-  })
-  .then(function () {
-    return fixFilePermissions();
-  })
-  .then(function () {
-    console.log('Done. ChromeDriver binary available at', helper.path);
-  })
-  .fail(function (err) {
-    console.error('ChromeDriver installation failed', err);
-    process.exit(1);
-  });
+    .then(function () {
+      return copyIntoPlace(tmpPath, libPath);
+    })
+    .then(function () {
+      return fixFilePermissions();
+    })
+    .then(function () {
+      console.log('Done. ChromeDriver binary available at', helper.path);
+    })
+    .fail(function (err) {
+      console.error('ChromeDriver installation failed', err);
+      process.exit(1);
+    });
 });
 
 
@@ -142,7 +140,7 @@ function getRequestOptions(conf, downloadPath) {
   var ca = process.env.npm_config_ca;
   if (!ca && process.env.npm_config_cafile) {
     try {
-      ca = fs.readFileSync(process.env.npm_config_cafile, {encoding: 'utf8'})
+      ca = fs.readFileSync(process.env.npm_config_cafile, { encoding: 'utf8' })
         .split(/\n(?=-----BEGIN CERTIFICATE-----)/g);
 
       // Comments at the beginning of the file result in the first
@@ -169,27 +167,25 @@ function getRequestOptions(conf, downloadPath) {
 }
 
 function getLatestVersion(requestOptions) {
-  var deferred = kew.defer();  
-
+  var deferred = kew.defer();
   var protocol = requestOptions.protocol === 'https:' ? https : http;
   var client = protocol.get(requestOptions, function (response) {
-    var status = response.statusCode;   
     var body = '';
-    if (status === 200) {
-      response.addListener('data',   function (data) {         
+    if (response.statusCode === 200) {
+      response.addListener('data', function (data) {
         body += data;
       });
-      response.addListener('end',   function () {       
-      try {
-                chromedriver_version = JSON.parse(body);
-          } catch (err) {
-                deferred.reject('Unable to parse response as JSON', err);                
-          } 
+      response.addListener('end', function () {
+        try {
+          chromedriver_version = JSON.parse(body);
+        } catch (err) {
+          deferred.reject('Unable to parse response as JSON', err);
+        }
         deferred.resolve(true);
       });
     } else {
       client.abort();
-      deferred.reject('Error with http request: ' + util.inspect(response.headers));
+      deferred.reject('Error with ' + requestOptions.protocol + ' request: ' + util.inspect(response.headers));
     }
   });
   return deferred.promise;
@@ -208,7 +204,7 @@ function requestBinary(requestOptions, filePath) {
     console.log('Receiving...');
 
     if (status === 200) {
-      response.addListener('data',   function (data) {
+      response.addListener('data', function (data) {
         fs.writeSync(outFile, data, 0, data.length, null);
         count += data.length;
         if ((count - notifiedCount) > 800000) {
@@ -217,7 +213,7 @@ function requestBinary(requestOptions, filePath) {
         }
       });
 
-      response.addListener('end',   function () {
+      response.addListener('end', function () {
         console.log('Received ' + Math.floor(count / 1024) + 'K total.');
         fs.closeSync(outFile);
         deferred.resolve(true);
@@ -263,7 +259,7 @@ function copyIntoPlace(tmpPath, targetPath) {
 
     var targetFile = path.join(targetPath, name);
     var writer = fs.createWriteStream(targetFile);
-    writer.on("close", function() {
+    writer.on("close", function () {
       deferred.resolve(true);
     });
 
