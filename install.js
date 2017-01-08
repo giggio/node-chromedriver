@@ -6,7 +6,6 @@ var helper = require('./lib/chromedriver');
 var http = require('http');
 var https = require('https');
 var kew = require('kew');
-var npmconf = require('npmconf');
 var mkdirp = require('mkdirp');
 var path = require('path');
 var rimraf = require('rimraf').sync;
@@ -45,56 +44,47 @@ if (platform === 'linux') {
   process.exit(1);
 }
 
-npmconf.load(function (err, conf) {
-  if (err) {
-    console.log('Error loading npm config');
-    console.error(err);
-    process.exit(1);
-    return;
-  }
+var tmpPath = findSuitableTempDirectory();
+var downloadedFile = '';
+var promise = kew.resolve(true);
 
-  var tmpPath = findSuitableTempDirectory(conf);
-  var downloadedFile = '';
-  var promise = kew.resolve(true);
-
-  promise = promise.then(function () {
-    if (chromedriver_version === 'LATEST')
-      return getLatestVersion(getRequestOptions(conf, cdnUrl + '/LATEST_RELEASE'));
-  });
-
-  // Start the install.
-  promise = promise.then(function () {
-    downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
-    var fileName = downloadUrl.split('/').pop();
-    downloadedFile = path.join(tmpPath, fileName);
-    console.log('Downloading', downloadUrl);
-    console.log('Saving to', downloadedFile);
-    return requestBinary(getRequestOptions(conf, downloadUrl), downloadedFile);
-  });
-
-  promise.then(function () {
-    return extractDownload(downloadedFile, tmpPath);
-  })
-    .then(function () {
-      return copyIntoPlace(tmpPath, libPath);
-    })
-    .then(function () {
-      return fixFilePermissions();
-    })
-    .then(function () {
-      console.log('Done. ChromeDriver binary available at', helper.path);
-    })
-    .fail(function (err) {
-      console.error('ChromeDriver installation failed', err);
-      process.exit(1);
-    });
+promise = promise.then(function () {
+  if (chromedriver_version === 'LATEST')
+    return getLatestVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
 });
 
+// Start the install.
+promise = promise.then(function () {
+  downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
+  var fileName = downloadUrl.split('/').pop();
+  downloadedFile = path.join(tmpPath, fileName);
+  console.log('Downloading', downloadUrl);
+  console.log('Saving to', downloadedFile);
+  return requestBinary(getRequestOptions(downloadUrl), downloadedFile);
+});
 
-function findSuitableTempDirectory(npmConf) {
+promise.then(function () {
+  return extractDownload(downloadedFile, tmpPath);
+})
+  .then(function () {
+    return copyIntoPlace(tmpPath, libPath);
+  })
+  .then(function () {
+    return fixFilePermissions();
+  })
+  .then(function () {
+    console.log('Done. ChromeDriver binary available at', helper.path);
+  })
+  .fail(function (err) {
+    console.error('ChromeDriver installation failed', err);
+    process.exit(1);
+  });
+
+
+function findSuitableTempDirectory() {
   var now = Date.now();
   var candidateTmpDirs = [
-    process.env.TMPDIR || npmConf.get('tmp'),
+    process.env.TMPDIR || process.env.npm_config_tmp,
     '/tmp',
     path.join(process.cwd(), 'tmp')
   ];
@@ -118,9 +108,11 @@ function findSuitableTempDirectory(npmConf) {
 }
 
 
-function getRequestOptions(conf, downloadPath) {
+function getRequestOptions(downloadPath) {
   var options = url.parse(downloadUrl);
-  var proxyUrl = options.protocol === 'https:' ? conf.get('https-proxy') : conf.get('proxy');
+  var proxyUrl = options.protocol === 'https:'
+    ? process.env.npm_config_https_proxy
+    : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
   if (proxyUrl) {
     options = url.parse(proxyUrl);
     options.path = downloadPath;
