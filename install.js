@@ -6,7 +6,6 @@ var helper = require('./lib/chromedriver');
 var http = require('http');
 var https = require('https');
 var kew = require('kew');
-var npmconf = require('npmconf');
 var mkdirp = require('mkdirp');
 var path = require('path');
 var rimraf = require('rimraf').sync;
@@ -22,6 +21,7 @@ cdnUrl = cdnUrl.replace(/\/+$/, '');
 var downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip';
 var platform = process.platform;
 
+var chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 if (platform === 'linux') {
   if (process.arch === 'x64') {
     platform += '64';
@@ -46,37 +46,33 @@ if (platform === 'linux') {
   process.exit(1);
 }
 
-downloadUrl = util.format(downloadUrl, helper.version, platform);
+var tmpPath = findSuitableTempDirectory();
+var downloadedFile = '';
+var promise = kew.resolve(true);
 
-var fileName = downloadUrl.split('/').pop();
+promise = promise.then(function () {
+  if (chromedriver_version === 'LATEST')
+    return getLatestVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
+});
 
-npmconf.load(function(err, conf) {
-  if (err) {
-    console.log('Error loading npm config');
-    console.error(err);
-    process.exit(1);
-    return;
+// Start the install.
+promise = promise.then(function () {
+  if (configuredfilePath) {
+    console.log('Using file: ', configuredfilePath);
+    downloadedFile = configuredfilePath;
+  } else {
+    downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
+    var fileName = downloadUrl.split('/').pop();
+    downloadedFile = path.join(tmpPath, fileName);
+    console.log('Downloading', downloadUrl);
+    console.log('Saving to', downloadedFile);
+    return requestBinary(getRequestOptions(downloadUrl), downloadedFile);
   }
+});
 
-  var tmpPath = findSuitableTempDirectory(conf);
-  var downloadedFile = path.join(tmpPath, fileName);
-  var promise = kew.resolve(true);
-
-  // Start the install.
-  promise = promise.then(function () {
-    if (configuredfilePath) {
-      console.log('Using file: ', configuredfilePath);
-      downloadedFile = configuredfilePath;
-    } else {
-      console.log('Downloading', downloadUrl);
-      console.log('Saving to', downloadedFile);
-      return requestBinary(getRequestOptions(conf), downloadedFile);
-    }
-  });
-
-  promise.then(function () {
-    return extractDownload(downloadedFile, tmpPath);
-  })
+promise.then(function () {
+  return extractDownload(downloadedFile, tmpPath);
+})
   .then(function () {
     return copyIntoPlace(tmpPath, libPath);
   })
@@ -90,13 +86,12 @@ npmconf.load(function(err, conf) {
     console.error('ChromeDriver installation failed', err);
     process.exit(1);
   });
-});
 
 
-function findSuitableTempDirectory(npmConf) {
+function findSuitableTempDirectory() {
   var now = Date.now();
   var candidateTmpDirs = [
-    process.env.TMPDIR || npmConf.get('tmp'),
+    process.env.TMPDIR || process.env.npm_config_tmp,
     '/tmp',
     path.join(process.cwd(), 'tmp')
   ];
@@ -120,20 +115,22 @@ function findSuitableTempDirectory(npmConf) {
 }
 
 
-function getRequestOptions(conf) {
+function getRequestOptions(downloadPath) {
   var options = url.parse(downloadUrl);
-  var proxyUrl = options.protocol === 'https:' ? conf.get('https-proxy') : conf.get('proxy');
+  var proxyUrl = options.protocol === 'https:'
+    ? process.env.npm_config_https_proxy
+    : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
   if (proxyUrl) {
     options = url.parse(proxyUrl);
-    options.path = downloadUrl;
-    options.headers = { Host: url.parse(downloadUrl).host };
+    options.path = downloadPath;
+    options.headers = { Host: url.parse(downloadPath).host };
     // Turn basic authorization into proxy-authorization.
     if (options.auth) {
       options.headers['Proxy-Authorization'] = 'Basic ' + new Buffer(options.auth).toString('base64');
       delete options.auth;
     }
   } else {
-    options = url.parse(downloadUrl);
+    options = url.parse(downloadPath);
   }
 
   options.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
@@ -142,7 +139,7 @@ function getRequestOptions(conf) {
   var ca = process.env.npm_config_ca;
   if (!ca && process.env.npm_config_cafile) {
     try {
-      ca = fs.readFileSync(process.env.npm_config_cafile, {encoding: 'utf8'})
+      ca = fs.readFileSync(process.env.npm_config_cafile, { encoding: 'utf8' })
         .split(/\n(?=-----BEGIN CERTIFICATE-----)/g);
 
       // Comments at the beginning of the file result in the first
@@ -168,6 +165,30 @@ function getRequestOptions(conf) {
   return options;
 }
 
+function getLatestVersion(requestOptions) {
+  var deferred = kew.defer();
+  var protocol = requestOptions.protocol === 'https:' ? https : http;
+  var client = protocol.get(requestOptions, function (response) {
+    var body = '';
+    if (response.statusCode === 200) {
+      response.addListener('data', function (data) {
+        body += data;
+      });
+      response.addListener('end', function () {
+        try {
+          chromedriver_version = JSON.parse(body);
+        } catch (err) {
+          deferred.reject('Unable to parse response as JSON', err);
+        }
+        deferred.resolve(true);
+      });
+    } else {
+      client.abort();
+      deferred.reject('Error with ' + requestOptions.protocol + ' request: ' + util.inspect(response.headers));
+    }
+  });
+  return deferred.promise;
+}
 
 function requestBinary(requestOptions, filePath) {
   var deferred = kew.defer();
@@ -182,7 +203,7 @@ function requestBinary(requestOptions, filePath) {
     console.log('Receiving...');
 
     if (status === 200) {
-      response.addListener('data',   function (data) {
+      response.addListener('data', function (data) {
         fs.writeSync(outFile, data, 0, data.length, null);
         count += data.length;
         if ((count - notifiedCount) > 800000) {
@@ -191,7 +212,7 @@ function requestBinary(requestOptions, filePath) {
         }
       });
 
-      response.addListener('end',   function () {
+      response.addListener('end', function () {
         console.log('Received ' + Math.floor(count / 1024) + 'K total.');
         fs.closeSync(outFile);
         deferred.resolve(true);
@@ -237,7 +258,7 @@ function copyIntoPlace(tmpPath, targetPath) {
 
     var targetFile = path.join(targetPath, name);
     var writer = fs.createWriteStream(targetFile);
-    writer.on("close", function() {
+    writer.on("close", function () {
       deferred.resolve(true);
     });
 
