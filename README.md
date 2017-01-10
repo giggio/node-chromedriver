@@ -64,7 +64,7 @@ chromedriver_filepath=/path/to/chromedriver_mac64.zip
 Another option is to use the PATH variable `CHROMEDRIVER_FILEPATH`
 
 ```shell
-CHROMEDRIVER=/path/to/chromedriver_mac64.zip
+CHROMEDRIVER_FILEPATH=/path/to/chromedriver_mac64.zip
 ```
 
 Running
