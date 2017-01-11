@@ -91,14 +91,14 @@ promise.then(function () {
 function findSuitableTempDirectory() {
   var now = Date.now();
   var candidateTmpDirs = [
-    process.env.TMPDIR || process.env.npm_config_tmp,
+    process.env.TMPDIR || process.env.TMP || process.env.npm_config_tmp,
     '/tmp',
     path.join(process.cwd(), 'tmp')
   ];
 
   for (var i = 0; i < candidateTmpDirs.length; i++) {
+    if (!candidateTmpDirs[i]) continue;
     var candidatePath = path.join(candidateTmpDirs[i], 'chromedriver');
-
     try {
       mkdirp.sync(candidatePath, '0777');
       var testFile = path.join(candidatePath, now + '.tmp');
