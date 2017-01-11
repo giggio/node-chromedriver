@@ -14,6 +14,8 @@ var util = require('util');
 
 var libPath = path.join(__dirname, 'lib', 'chromedriver');
 var cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://chromedriver.storage.googleapis.com';
+var configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
+
 // adapt http://chromedriver.storage.googleapis.com/
 cdnUrl = cdnUrl.replace(/\/+$/, '');
 var downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip';
@@ -55,12 +57,17 @@ promise = promise.then(function () {
 
 // Start the install.
 promise = promise.then(function () {
-  downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
-  var fileName = downloadUrl.split('/').pop();
-  downloadedFile = path.join(tmpPath, fileName);
-  console.log('Downloading', downloadUrl);
-  console.log('Saving to', downloadedFile);
-  return requestBinary(getRequestOptions(downloadUrl), downloadedFile);
+  if (configuredfilePath) {
+    console.log('Using file: ', configuredfilePath);
+    downloadedFile = configuredfilePath;
+  } else {
+    downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
+    var fileName = downloadUrl.split('/').pop();
+    downloadedFile = path.join(tmpPath, fileName);
+    console.log('Downloading', downloadUrl);
+    console.log('Saving to', downloadedFile);
+    return requestBinary(getRequestOptions(downloadUrl), downloadedFile);
+  }
 });
 
 promise.then(function () {
