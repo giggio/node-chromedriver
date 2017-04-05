@@ -121,7 +121,13 @@ function getRequestOptions(downloadPath) {
     ? (process.env.npm_config_https_proxy || process.env.https_proxy)
     : (process.env.npm_config_proxy || process.env.npm_config_http_proxy || process.env.http_proxy);
   if (proxyUrl) {
+    var upstreamOptions = options;
     options = url.parse(proxyUrl);
+
+    if (upstreamOptions.protocol === 'https:' && options.protocol === 'http:') {
+        // NodeJS doesn't support https tunneling over http. Falling back to http download url.
+        downloadPath = downloadPath.replace('https:', 'http:');
+    }
     options.path = downloadPath;
     options.headers = { Host: url.parse(downloadPath).host };
     // Turn basic authorization into proxy-authorization.
@@ -228,7 +234,6 @@ function get(requestOptions, callback, redirects) {
   redirects = redirects || 0;
   var protocol = requestOptions.protocol === 'https:' ? https : http;
   var client = protocol.get(requestOptions, function (response) {
-    console.log(response);
     var status = response.statusCode;
     if ((status === 302 || status === 301 || status === 307) && redirects < 5) {
       console.log('Redirect to %s', response.headers.location);
