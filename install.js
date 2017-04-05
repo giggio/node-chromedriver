@@ -118,8 +118,8 @@ function findSuitableTempDirectory() {
 function getRequestOptions(downloadPath) {
   var options = url.parse(downloadUrl);
   var proxyUrl = options.protocol === 'https:'
-    ? process.env.npm_config_https_proxy
-    : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
+    ? (process.env.npm_config_https_proxy || process.env.https_proxy)
+    : (process.env.npm_config_proxy || process.env.npm_config_http_proxy || process.env.http_proxy);
   if (proxyUrl) {
     options = url.parse(proxyUrl);
     options.path = downloadPath;
@@ -129,8 +129,6 @@ function getRequestOptions(downloadPath) {
       options.headers['Proxy-Authorization'] = 'Basic ' + new Buffer(options.auth).toString('base64');
       delete options.auth;
     }
-  } else {
-    options = url.parse(downloadPath);
   }
 
   options.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
@@ -230,6 +228,7 @@ function get(requestOptions, callback, redirects) {
   redirects = redirects || 0;
   var protocol = requestOptions.protocol === 'https:' ? https : http;
   var client = protocol.get(requestOptions, function (response) {
+    console.log(response);
     var status = response.statusCode;
     if ((status === 302 || status === 301 || status === 307) && redirects < 5) {
       console.log('Redirect to %s', response.headers.location);
