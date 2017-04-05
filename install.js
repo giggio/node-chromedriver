@@ -3,8 +3,7 @@
 var AdmZip = require('adm-zip');
 var fs = require('fs');
 var helper = require('./lib/chromedriver');
-var http = require('http');
-var https = require('https');
+var request = require('request');
 var kew = require('kew');
 var mkdirp = require('mkdirp');
 var path = require('path');
@@ -116,30 +115,21 @@ function findSuitableTempDirectory() {
 
 
 function getRequestOptions(downloadPath) {
-  var options = url.parse(downloadUrl);
+  var options = {uri: downloadPath};
   var proxyUrl = options.protocol === 'https:'
     ? process.env.npm_config_https_proxy
     : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
   if (proxyUrl) {
-    options = url.parse(proxyUrl);
-    options.path = downloadPath;
-    options.headers = { Host: url.parse(downloadPath).host };
-    // Turn basic authorization into proxy-authorization.
-    if (options.auth) {
-      options.headers['Proxy-Authorization'] = 'Basic ' + new Buffer(options.auth).toString('base64');
-      delete options.auth;
-    }
-  } else {
-    options = url.parse(downloadPath);
+    options.proxy = proxyUrl;
   }
 
-  options.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
+  options.strictSSL = !!process.env.npm_config_strict_ssl;
 
   // Use certificate authority settings from npm
   var ca = process.env.npm_config_ca;
   if (!ca && process.env.npm_config_cafile) {
     try {
-      ca = fs.readFileSync(process.env.npm_config_cafile, { encoding: 'utf8' })
+      ca = fs.readFileSync(process.env.npm_config_cafile, {encoding: 'utf8'})
         .split(/\n(?=-----BEGIN CERTIFICATE-----)/g);
 
       // Comments at the beginning of the file result in the first
@@ -167,23 +157,16 @@ function getRequestOptions(downloadPath) {
 
 function getLatestVersion(requestOptions) {
   var deferred = kew.defer();
-  var client = get(requestOptions, function (response) {
-    var body = '';
-    if (response.statusCode === 200) {
-      response.addListener('data', function (data) {
-        body += data;
-      });
-      response.addListener('end', function () {
-        try {
-          chromedriver_version = JSON.parse(body);
-        } catch (err) {
-          deferred.reject('Unable to parse response as JSON', err);
-        }
-        deferred.resolve(true);
-      });
+  request.get(requestOptions, function (err, response, data) {
+    if (err) {
+      deferred.reject('Error with ' + requestOptions.protocol + ' request: ' + err);
     } else {
-      client.abort();
-      deferred.reject('Error with ' + requestOptions.protocol + ' request: ' + util.inspect(response.headers));
+      try {
+        chromedriver_version = JSON.parse(data);
+      } catch (jsonErr) {
+        deferred.reject('Unable to parse response as JSON', jsonErr);
+      }
+      deferred.resolve(true);
     }
   });
   return deferred.promise;
@@ -196,51 +179,29 @@ function requestBinary(requestOptions, filePath) {
   var notifiedCount = 0;
   var outFile = fs.openSync(filePath, 'w');
 
-  var client = get(requestOptions, function (response) {
-    var status = response.statusCode;
-    console.log('Receiving...');
+  var client = request.get(requestOptions);
 
-    if (status === 200) {
-      response.addListener('data', function (data) {
-        fs.writeSync(outFile, data, 0, data.length, null);
-        count += data.length;
-        if ((count - notifiedCount) > 800000) {
-          console.log('Received ' + Math.floor(count / 1024) + 'K...');
-          notifiedCount = count;
-        }
-      });
+  client.on('error', function (err) {
+    deferred.reject('Error with http request: ' + err);
+  });
 
-      response.addListener('end', function () {
-        console.log('Received ' + Math.floor(count / 1024) + 'K total.');
-        fs.closeSync(outFile);
-        deferred.resolve(true);
-      });
-
-    } else {
-      client.abort();
-      deferred.reject('Error with http request: ' + util.inspect(response.headers));
+  client.on('data', function (data) {
+    fs.writeSync(outFile, data, 0, data.length, null);
+    count += data.length;
+    if ((count - notifiedCount) > 800000) {
+      console.log('Received ' + Math.floor(count / 1024) + 'K...');
+      notifiedCount = count;
     }
+  });
+
+  client.on('end', function () {
+    console.log('Received ' + Math.floor(count / 1024) + 'K total.');
+    fs.closeSync(outFile);
+    deferred.resolve(true);
   });
 
   return deferred.promise;
 }
-
-
-function get(requestOptions, callback, redirects) {
-  redirects = redirects || 0;
-  var protocol = requestOptions.protocol === 'https:' ? https : http;
-  var client = protocol.get(requestOptions, function (response) {
-    var status = response.statusCode;
-    if ((status === 302 || status === 301 || status === 307) && redirects < 5) {
-      console.log('Redirect to %s', response.headers.location);
-      redirects++;
-      return get(getRequestOptions(response.headers.location), callback, redirects);
-    }
-    callback(response);
-  });
-  return client;
-}
-
 
 function extractDownload(filePath, tmpPath) {
   var deferred = kew.defer();
@@ -282,7 +243,6 @@ function copyIntoPlace(tmpPath, targetPath) {
 
   return kew.all(promises);
 }
-
 
 
 function fixFilePermissions() {
