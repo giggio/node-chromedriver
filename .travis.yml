@@ -9,5 +9,11 @@ node_js:
 os:
   - linux
   - osx
+addons:
+  apt:
+    packages:
+      - libfontconfig1
+      - libgconf-2-4
+      - libnss3
 install: "npm install"
 script: "./test-driver.sh"
