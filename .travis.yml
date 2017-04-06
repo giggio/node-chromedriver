@@ -15,5 +15,6 @@ addons:
       - libfontconfig1
       - libgconf-2-4
       - libnss3
+      - libstdc++6
 install: "npm install"
 script: "./test-driver.sh"
