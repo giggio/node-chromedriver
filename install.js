@@ -118,10 +118,16 @@ function findSuitableTempDirectory() {
 function getRequestOptions(downloadPath) {
   var options = url.parse(downloadUrl);
   var proxyUrl = options.protocol === 'https:'
-    ? process.env.npm_config_https_proxy
-    : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
+    ? (process.env.npm_config_https_proxy || process.env.https_proxy)
+    : (process.env.npm_config_proxy || process.env.npm_config_http_proxy || process.env.http_proxy);
   if (proxyUrl) {
+    var upstreamOptions = options;
     options = url.parse(proxyUrl);
+
+    if (upstreamOptions.protocol === 'https:' && options.protocol === 'http:') {
+        // NodeJS doesn't support https tunneling over http. Falling back to http download url.
+        downloadPath = downloadPath.replace('https:', 'http:');
+    }
     options.path = downloadPath;
     options.headers = { Host: url.parse(downloadPath).host };
     // Turn basic authorization into proxy-authorization.
@@ -129,8 +135,6 @@ function getRequestOptions(downloadPath) {
       options.headers['Proxy-Authorization'] = 'Basic ' + new Buffer(options.auth).toString('base64');
       delete options.auth;
     }
-  } else {
-    options = url.parse(downloadPath);
   }
 
   options.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
