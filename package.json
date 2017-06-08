@@ -11,12 +11,7 @@
     "type": "git",
     "url": "git://github.com/giggio/node-chromedriver.git"
   },
-  "licenses": [
-    {
-      "type": "Apache 2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-    }
-  ],
+  "license": "Apache-2.0",
   "author": {
     "name": "Giovanni Bassi",
     "email": "giggio@giggio.net",
