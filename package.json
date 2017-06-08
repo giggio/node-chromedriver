@@ -30,7 +30,7 @@
     "install": "node install.js"
   },
   "dependencies": {
-    "adm-zip": "^0.4.7",
+    "extract-zip": "^1.6.5",
     "kew": "^0.7.0",
     "mkdirp": "^0.5.1",
     "request": "^2.81.0",

@@ -1,6 +1,6 @@
 'use strict';
 
-var AdmZip = require('adm-zip');
+var extractZip = require('extract-zip');
 var fs = require('fs');
 var helper = require('./lib/chromedriver');
 var request = require('request');
@@ -204,15 +204,14 @@ function requestBinary(requestOptions, filePath) {
 
 function extractDownload(filePath, tmpPath) {
   var deferred = kew.defer();
-
   console.log('Extracting zip contents');
-  try {
-    var zip = new AdmZip(filePath);
-    zip.extractAllTo(tmpPath, true);
-    deferred.resolve(true);
-  } catch (err) {
-    deferred.reject('Error extracting archive ' + err.stack);
-  }
+  extractZip(path.resolve(filePath), { dir: tmpPath }, function (err) {
+    if (err) {
+      deferred.reject('Error extracting archive: ' + err);
+    } else {
+      deferred.resolve(true);
+    }
+  });
   return deferred.promise;
 }
 
