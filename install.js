@@ -8,7 +8,6 @@ var kew = require('kew');
 var mkdirp = require('mkdirp');
 var path = require('path');
 var rimraf = require('rimraf').sync;
-var url = require('url');
 var util = require('util');
 
 var libPath = path.join(__dirname, 'lib', 'chromedriver');
