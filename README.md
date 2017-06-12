@@ -137,9 +137,15 @@ Versioning
 
 The NPM package version tracks the version of chromedriver that will be installed,
 with an additional build number that is used for revisions to the installer.
-For Latest version of Chromedriver:
+You can use the package version number to install a specific version, or use the
+setting to a specific version. To always install the latest version of Chromedriver,
+use `LATEST` as the version number:
 
-Either add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+```shell
+npm install chromedriver --chromedriver_version=LATEST
+```
+
+Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
 ```
 chromedriver_version=LATEST
