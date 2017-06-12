@@ -160,11 +160,7 @@ function getLatestVersion(requestOptions) {
     if (err) {
       deferred.reject('Error with ' + requestOptions.protocol + ' request: ' + err);
     } else {
-      try {
-        chromedriver_version = JSON.parse(data);
-      } catch (jsonErr) {
-        deferred.reject('Unable to parse response as JSON', jsonErr);
-      }
+      chromedriver_version = data.trim();
       deferred.resolve(true);
     }
   });
