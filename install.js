@@ -126,6 +126,16 @@ function getRequestOptions(downloadPath) {
 
   // Use certificate authority settings from npm
   var ca = process.env.npm_config_ca;
+
+  // Parse ca string like npm does
+  if (ca && ca.match(/^".*"$/)) {
+    try {
+      ca = JSON.parse(ca.trim());
+    } catch (e) {
+      console.error('Could not parse ca string', process.env.npm_config_ca, e);
+    }
+  }
+
   if (!ca && process.env.npm_config_cafile) {
     try {
       ca = fs.readFileSync(process.env.npm_config_cafile, {encoding: 'utf8'})
