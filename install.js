@@ -115,6 +115,7 @@ function findSuitableTempDirectory() {
 
 function getRequestOptions(downloadPath) {
   var options = {uri: downloadPath};
+  options.protocol = options.uri.substring(0, options.uri.indexOf('//'));
   var proxyUrl = options.protocol === 'https:'
     ? process.env.npm_config_https_proxy
     : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
@@ -187,7 +188,7 @@ function requestBinary(requestOptions, filePath) {
   var client = request.get(requestOptions);
 
   client.on('error', function (err) {
-    deferred.reject('Error with http request: ' + err);
+    deferred.reject('Error with ' + requestOptions.protocol + ' request: ' + err);
   });
 
   client.on('data', function (data) {
