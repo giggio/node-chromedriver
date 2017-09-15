@@ -114,9 +114,9 @@ function findSuitableTempDirectory() {
 
 
 function getRequestOptions(downloadPath) {
-  var options = {uri: downloadPath};
-  options.protocol = options.uri.substring(0, options.uri.indexOf('//'));
-  var proxyUrl = options.protocol === 'https:'
+  var options = {uri: downloadPath, method: 'GET'};
+  var protocol = options.uri.substring(0, options.uri.indexOf('//'));
+  var proxyUrl = protocol === 'https:'
     ? process.env.npm_config_https_proxy
     : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
   if (proxyUrl) {
@@ -167,9 +167,9 @@ function getRequestOptions(downloadPath) {
 
 function getLatestVersion(requestOptions) {
   var deferred = kew.defer();
-  request.get(requestOptions, function (err, response, data) {
+  request(requestOptions, function (err, response, data) {
     if (err) {
-      deferred.reject('Error with ' + requestOptions.protocol + ' request: ' + err);
+      deferred.reject('Error with http(s) request: ' + err);
     } else {
       chromedriver_version = data.trim();
       deferred.resolve(true);
@@ -185,10 +185,10 @@ function requestBinary(requestOptions, filePath) {
   var notifiedCount = 0;
   var outFile = fs.openSync(filePath, 'w');
 
-  var client = request.get(requestOptions);
+  var client = request(requestOptions);
 
   client.on('error', function (err) {
-    deferred.reject('Error with ' + requestOptions.protocol + ' request: ' + err);
+    deferred.reject('Error with http(s) request: ' + err);
   });
 
   client.on('data', function (data) {
