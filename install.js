@@ -162,6 +162,11 @@ function getRequestOptions(downloadPath) {
     options.ca = ca;
   }
 
+  // Use specific User-Agent
+  if (process.env.npm_config_user_agent) {
+    options.headers = {'User-Agent': process.env.npm_config_user_agent};
+  }
+
   return options;
 }
 

@@ -67,6 +67,20 @@ Another option is to use the PATH variable `CHROMEDRIVER_FILEPATH`
 CHROMEDRIVER_FILEPATH=/path/to/chromedriver_mac64.zip
 ```
 
+## Custom download options
+
+Install through a proxy.
+
+```shell
+npm config set proxy http://[user:pwd]@domain.tld:port
+npm config set https-proxy http://[user:pwd]@domain.tld:port
+```
+
+Use different User-Agent.
+```shell
+npm config set user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"
+```
+
 Running
 -------
 
