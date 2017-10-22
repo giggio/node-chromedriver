@@ -7,7 +7,7 @@ var request = require('request');
 var kew = require('kew');
 var mkdirp = require('mkdirp');
 var path = require('path');
-var rimraf = require('rimraf').sync;
+var del = require('del');
 var util = require('util');
 
 var libPath = path.join(__dirname, 'lib', 'chromedriver');
@@ -229,29 +229,30 @@ function extractDownload(filePath, tmpPath) {
 
 
 function copyIntoPlace(tmpPath, targetPath) {
-  rimraf(targetPath);
-  console.log("Copying to target path", targetPath);
-  fs.mkdirSync(targetPath);
+  return del(targetPath)
+    .then(function() {
+      console.log("Copying to target path", targetPath);
+      fs.mkdirSync(targetPath);
 
-  // Look for the extracted directory, so we can rename it.
-  var files = fs.readdirSync(tmpPath);
-  var promises = files.map(function (name) {
-    var deferred = kew.defer();
+      // Look for the extracted directory, so we can rename it.
+      var files = fs.readdirSync(tmpPath);
+      var promises = files.map(function(name) {
+        var deferred = kew.defer();
 
-    var file = path.join(tmpPath, name);
-    var reader = fs.createReadStream(file);
+        var file = path.join(tmpPath, name);
+        var reader = fs.createReadStream(file);
 
-    var targetFile = path.join(targetPath, name);
-    var writer = fs.createWriteStream(targetFile);
-    writer.on("close", function () {
-      deferred.resolve(true);
+        var targetFile = path.join(targetPath, name);
+        var writer = fs.createWriteStream(targetFile);
+        writer.on("close", function() {
+          deferred.resolve(true);
+        });
+
+        reader.pipe(writer);
+        return deferred.promise;
+      });
+      return kew.all(promises);
     });
-
-    reader.pipe(writer);
-    return deferred.promise;
-  });
-
-  return kew.all(promises);
 }
 
 
