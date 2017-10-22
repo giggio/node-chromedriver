@@ -1,6 +1,6 @@
 {
   "name": "chromedriver",
-  "version": "2.33.1",
+  "version": "2.33.2",
   "keywords": [
     "chromedriver",
     "selenium"
@@ -25,10 +25,10 @@
     "install": "node install.js"
   },
   "dependencies": {
+    "del": "^3.0.0",
     "extract-zip": "^1.6.5",
     "kew": "^0.7.0",
     "mkdirp": "^0.5.1",
-    "request": "^2.81.0",
-    "rimraf": "^2.5.4"
+    "request": "^2.83.0"
   }
 }
