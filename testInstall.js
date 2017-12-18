@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const spawnSync = require('child_process').spawnSync;
 
-const versions = ['0.12', '4', '6'];
+const versions = ['4', '6', '8'];
 const tmpdir = os.tmpdir();
 
 function directoryExists(file) {
@@ -90,7 +90,7 @@ function nvmUse(version) {
 }
 
 function sleep(milliseconds) {
-    const inAFewMilliseconds = new Date(new Date().getTime() + 2000);
+    const inAFewMilliseconds = new Date(new Date().getTime() + milliseconds);
     while (inAFewMilliseconds > new Date()) { }
 }
 
