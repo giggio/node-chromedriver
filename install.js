@@ -24,20 +24,15 @@ if (platform === 'linux') {
   if (process.arch === 'x64') {
     platform += '64';
   } else {
-    platform += '32';
+    console.log('Only Linux 64 bits supported.');
+    process.exit(1);
   }
-} else if (platform === 'darwin') {
+} else if (platform === 'darwin' || platform === 'freebsd') {
   if (process.arch === 'x64') {
     platform = 'mac64';
   } else {
     console.log('Only Mac 64 bits supported.');
     process.exit(1);
-  }
-} else if (platform === 'freebsd') {
-  if (process.arch === 'x64') {
-    platform = 'mac64';
-  } else {
-    platform = 'mac32';
   }
 } else if (platform !== 'win32') {
   console.log('Unexpected platform or architecture:', process.platform, process.arch);
