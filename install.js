@@ -24,7 +24,7 @@ if (platform === 'linux') {
   if (process.arch === 'x64') {
     platform += '64';
   } else {
-    console.log('Only Linux 64 bits supported.');
+    console.log('Only Linux 64 bits supported:', process.platform, process.arch);
     process.exit(1);
   }
 } else if (platform === 'darwin' || platform === 'freebsd') {
