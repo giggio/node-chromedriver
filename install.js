@@ -21,10 +21,10 @@ var platform = process.platform;
 
 var chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 if (platform === 'linux') {
-  if (process.arch === 'x64') {
+  if (process.arch === 'x64' || process.arch === 'ia32') {
     platform += '64';
   } else {
-    console.log('Only Linux 64 bits supported:', process.platform, process.arch);
+    console.log('Only Linux 64 bits supported.');
     process.exit(1);
   }
 } else if (platform === 'darwin' || platform === 'freebsd') {
