@@ -1,5 +1,6 @@
 'use strict';
 
+var arch = require('arch');
 var extractZip = require('extract-zip');
 var fs = require('fs');
 var helper = require('./lib/chromedriver');
@@ -18,24 +19,25 @@ var configuredfilePath = process.env.npm_config_chromedriver_filepath || process
 cdnUrl = cdnUrl.replace(/\/+$/, '');
 var downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip';
 var platform = process.platform;
+var is64bit = arch() === 'x64';
 
 var chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 if (platform === 'linux') {
-  if (process.arch === 'x64' || process.arch === 'ia32') {
+  if (is64bit) {
     platform += '64';
   } else {
     console.log('Only Linux 64 bits supported.');
     process.exit(1);
   }
 } else if (platform === 'darwin' || platform === 'freebsd') {
-  if (process.arch === 'x64') {
+  if (is64bit) {
     platform = 'mac64';
   } else {
     console.log('Only Mac 64 bits supported.');
     process.exit(1);
   }
 } else if (platform !== 'win32') {
-  console.log('Unexpected platform or architecture:', process.platform, process.arch);
+  console.log('Unexpected platform or architecture:', platform, process.arch);
   process.exit(1);
 }
 

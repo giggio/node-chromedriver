@@ -25,6 +25,7 @@
     "install": "node install.js"
   },
   "dependencies": {
+    "arch": "^2.1.0",
     "del": "^3.0.0",
     "extract-zip": "^1.6.5",
     "kew": "^0.7.0",
