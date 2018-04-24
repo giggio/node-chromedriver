@@ -4,14 +4,14 @@ environment:
   - nodejs_version: "6"
   - nodejs_version: "8"
   - nodejs_version: "9"
-  - nodejs_version: "10"
+#  - nodejs_version: "10" # uncomment when appveyor supports version 10
 install:
 - ps: >-
+    Install-Product node $env:nodejs_version
+
     node --version
 
     npm --version
-
-    Install-Product node $env:nodejs_version
 
     npm install
 build: off
