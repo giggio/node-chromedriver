@@ -26,9 +26,9 @@
   },
   "dependencies": {
     "del": "^3.0.0",
-    "extract-zip": "^1.6.5",
+    "extract-zip": "^1.6.6",
     "kew": "^0.7.0",
     "mkdirp": "^0.5.1",
-    "request": "^2.83.0"
+    "request": "^2.85.0"
   }
 }
