@@ -179,6 +179,18 @@ Chromedriver is not a library for NodeJS.
 This is an _NPM wrapper_ and can be used to conveniently make ChromeDriver available
 It is not a Node JS wrapper.
 
+Supported Node.js versions
+-------------------
+
+We will do our best to support every supported Node.js versions.
+See [nodejs/Release](https://github.com/nodejs/Release) for
+the current supported versions. You can also view our build
+scripts for
+[Windows](https://github.com/giggio/node-chromedriver/blob/master/appveyor.yml)
+and
+[Linux and Mac](https://github.com/giggio/node-chromedriver/blob/master/.travis.yml).
+
+
 Contributing
 ------------
 
