@@ -143,6 +143,18 @@ chromedriver.start(args);
 chromedriver.stop();
 
 ```
+
+With the latest version, you can optionally receive a Promise from the `chromedriver.start` function:
+
+```javascript
+var returnPromise = true;
+chromedriver
+  .start(args, returnPromise)
+  .then(() => {
+    console.log('chromedriver is ready');
+  });
+```
+
 Note: if your tests are ran asynchronously, chromedriver.stop() will have to be
 executed as a callback at the end of your tests
 

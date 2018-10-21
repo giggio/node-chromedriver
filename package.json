@@ -29,6 +29,7 @@
     "extract-zip": "^1.6.7",
     "kew": "^0.7.0",
     "mkdirp": "^0.5.1",
-    "request": "^2.87.0"
+    "request": "^2.87.0",
+    "tcp-port-used": "^1.0.0"
   }
 }
