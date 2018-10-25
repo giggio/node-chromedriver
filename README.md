@@ -67,6 +67,12 @@ Another option is to use the PATH variable `CHROMEDRIVER_FILEPATH`
 CHROMEDRIVER_FILEPATH=/path/to/chromedriver_mac64.zip
 ```
 
+This variable can be used to set either a `.zip` file or the binary itself, eg:
+
+```shell
+CHROMEDRIVER_FILEPATH=/bin/chromedriver
+```
+
 ## Custom download options
 
 Install through a proxy.
