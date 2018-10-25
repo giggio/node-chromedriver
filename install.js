@@ -64,6 +64,11 @@ promise = promise.then(function () {
 });
 
 promise.then(function () {
+  if (path.extname(downloadedFile) !== '.zip') {
+    fs.copyFileSync(downloadedFile, path.join(tmpPath, 'chromedriver'));
+    console.log('Skipping zip extraction - binary file found.');
+    return true;
+  }
   return extractDownload(downloadedFile, tmpPath);
 })
   .then(function () {
