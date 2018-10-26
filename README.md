@@ -87,6 +87,28 @@ Use different User-Agent.
 npm config set user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"
 ```
 
+## Skipping chromedriver download
+
+You may wish to skip the downloading of the chromedriver binary file, for example if you know for certain that it is already there or if you want to use a system binary and just use this module as an interface to interact with it.
+
+To achieve this you can use the npm config property `chromedriver_skip_download`.
+
+```shell
+npm install chromedriver --chromedriver_skip_download=true
+```
+
+Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+
+```
+chromedriver_skip_download=true
+```
+
+Another option is to use the PATH variable `CHROMEDRIVER_SKIP_DOWNLOAD`
+
+```shell
+CHROMEDRIVER_SKIP_DOWNLOAD=true
+```
+
 Running
 -------
 

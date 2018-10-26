@@ -10,6 +10,12 @@ var path = require('path');
 var del = require('del');
 var util = require('util');
 
+var skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
+if (skipDownload) {
+  console.log('Found CHROMEDRIVER_SKIP_DOWNLOAD variable, skipping installation.')
+  return;
+}
+
 var libPath = path.join(__dirname, 'lib', 'chromedriver');
 var cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://chromedriver.storage.googleapis.com';
 var configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
