@@ -9,6 +9,7 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var del = require('del');
 var util = require('util');
+var child_process = require('child_process');
 
 var skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
 if (skipDownload) {
@@ -52,6 +53,39 @@ var promise = kew.resolve(true);
 promise = promise.then(function () {
   if (chromedriver_version === 'LATEST')
     return getLatestVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
+});
+
+promise = promise.then(function () {
+  if (!fs.existsSync(helper.path)) return;
+  console.log('ChromeDriver binary exists. Validating...');
+  var deferred = kew.defer();
+  try {
+    fs.accessSync(helper.path, fs.constants.X_OK);
+    var cp = child_process.spawn(helper.path, ['--version']);
+    var str = '';
+    cp.stdout.on('data', function (data) {
+      str += data;
+    });
+    cp.on('error', function (error) {
+      deferred.resolve();
+    });
+    cp.on('close', function (code) {
+      if (code !== 0) return deferred.resolve();
+      var parts = str.split(' ');
+      if (parts.length < 3) return deferred.resolve();
+      if (parts[1].startsWith(chromedriver_version)) {
+        console.log(str);
+        console.log('ChromeDriver is already available!');
+        process.exit(0);
+      }
+      deferred.resolve();
+    });
+  } catch (error) {
+    deferred.resolve();
+  }
+  return deferred.promise;
+}).then(function () {
+  console.log('Current existing ChromeDriver binary is unavailable.');
 });
 
 // Start the install.
