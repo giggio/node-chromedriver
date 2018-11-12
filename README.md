@@ -216,7 +216,7 @@ A Note on chromedriver
 
 Chromedriver is not a library for NodeJS.
 
-This is an _NPM wrapper_ and can be used to conveniently make ChromeDriver available
+This is an _NPM wrapper_ and can be used to conveniently make ChromeDriver available.
 It is not a Node JS wrapper.
 
 Supported Node.js versions
