@@ -1,12 +1,11 @@
-ChromeDriver
------------------------
+# ChromeDriver
+
 [![Build status](https://travis-ci.org/giggio/node-chromedriver.svg)](https://travis-ci.org/giggio/node-chromedriver/) [![Build status](https://ci.appveyor.com/api/projects/status/wr4c16rs5q113vy3?svg=true)](https://ci.appveyor.com/project/giggio/node-chromedriver)
 [![npm](https://img.shields.io/npm/dt/chromedriver.svg)](https://www.npmjs.com/package/chromedriver)
 
 An NPM wrapper for Selenium [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
 
-Building and Installing
------------------------
+## Building and Installing
 
 ```shell
 npm install chromedriver
@@ -23,10 +22,33 @@ this module) version of ChromeDriver. As new versions are released
 and vetted, this module will be updated accordingly.
 
 The package has been set up to fetch and run ChromeDriver for MacOS (darwin),
-Linux based platforms (as identified by nodejs), and Windows.  If you
-spot any platform weirdnesses, let us know or send a patch.
+Linux based platforms (as identified by Node.js), and Windows.  If you
+spot any platform weirdness, let us know or send a patch.
 
-### Custom binaries url
+## Force download
+
+By default this package, when installed, will search for an existing
+Chromedriver binary in your configured temp directory. If found, and it is the
+correct version, it will simply copy it to your node_modules directory. You can
+force it always download by configuring it:
+
+```shell
+npm install chromedriver --chromedriver-force-download
+```
+
+Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+
+```
+chromedriver_force_download=true
+```
+
+Another option is to use PATH variable `CHROMEDRIVER_FORCE_DOWNLOAD`.
+
+```shell
+CHROMEDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
+```
+
+## Custom binaries url
 
 To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_cdnurl`.
 Default is `http://chromedriver.storage.googleapis.com`.
@@ -47,7 +69,7 @@ Another option is to use PATH variable `CHROMEDRIVER_CDNURL`.
 CHROMEDRIVER_CDNURL=https://npm.taobao.org/mirrors/chromedriver npm install chromedriver
 ```
 
-### Custom binaries file
+## Custom binaries file
 
 To get the chromedriver from the filesystem instead of a web request use the npm config property `chromedriver_filepath`.
 
@@ -109,8 +131,7 @@ Another option is to use the PATH variable `CHROMEDRIVER_SKIP_DOWNLOAD`
 CHROMEDRIVER_SKIP_DOWNLOAD=true
 ```
 
-Running
--------
+## Running
 
 ```shell
 bin/chromedriver [arguments]
@@ -119,8 +140,7 @@ bin/chromedriver [arguments]
 And npm will install a link to the binary in `node_modules/.bin` as
 it is wont to do.
 
-Running with Selenium WebDriver
--------------------------------
+## Running with Selenium WebDriver
 
 ```javascript
 require('chromedriver');
@@ -135,8 +155,7 @@ var driver = new webdriver.Builder()
 The path will be added to the process automatically, you don't need to configure it.
 But you can get it from `require('chromedriver').path` if you want it.
 
-Running via node
-----------------
+## Running via node
 
 The package exports a `path` string that contains the path to the
 chromdriver binary/executable.
@@ -186,8 +205,7 @@ chromedriver
 Note: if your tests are ran asynchronously, chromedriver.stop() will have to be
 executed as a callback at the end of your tests
 
-Versioning
-----------
+## Versioning
 
 The NPM package version tracks the version of chromedriver that will be installed,
 with an additional build number that is used for revisions to the installer.
@@ -211,16 +229,14 @@ Another option is to use env variable `CHROMEDRIVER_VERSION`.
 CHROMEDRIVER_VERSION=LATEST npm install chromedriver
 ```
 
-A Note on chromedriver
--------------------
+## A Note on chromedriver
 
 Chromedriver is not a library for NodeJS.
 
 This is an _NPM wrapper_ and can be used to conveniently make ChromeDriver available.
-It is not a Node JS wrapper.
+It is not a Node.js wrapper.
 
-Supported Node.js versions
--------------------
+## Supported Node.js versions
 
 We will do our best to support every supported Node.js versions.
 See [nodejs/Release](https://github.com/nodejs/Release) for
@@ -230,9 +246,7 @@ scripts for
 and
 [Linux and Mac](https://github.com/giggio/node-chromedriver/blob/master/.travis.yml).
 
-
-Contributing
-------------
+## Contributing
 
 Questions, comments, bug reports, and pull requests are all welcome.  Submit them at
 [the project on GitHub](https://github.com/giggio/node-chromedriver/).
@@ -240,14 +254,13 @@ Questions, comments, bug reports, and pull requests are all welcome.  Submit the
 Bug reports that include steps-to-reproduce (including code) are the
 best. Even better, make them in the form of pull requests.
 
-Author
-------
+## Author
 
-[Giovanni Bassi](https://github.com/giggio)
+[Giovanni Bassi](https://github.com/giggio), with collaboration from
+[lots of good people](https://github.com/giggio/node-chromedriver/graphs/contributors).
 
 Thanks for Obvious and their PhantomJS project for heavy inspiration! Check their project on [Github](https://github.com/Obvious/phantomjs/tree/master/bin).
 
-License
--------
+## License
 
 Licensed under the Apache License, Version 2.0.

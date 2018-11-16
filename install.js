@@ -9,6 +9,7 @@ const path = require('path');
 const del = require('del');
 const util = require('util');
 const child_process = require('child_process');
+const os = require('os');
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
 if (skipDownload) {
@@ -22,7 +23,7 @@ const configuredfilePath = process.env.npm_config_chromedriver_filepath || proce
 
 // adapt http://chromedriver.storage.googleapis.com/
 cdnUrl = cdnUrl.replace(/\/+$/, '');
-let downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip';
+const downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip';
 let platform = process.platform;
 
 let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
@@ -45,93 +46,87 @@ if (platform === 'linux') {
   console.log('Unexpected platform or architecture:', process.platform, process.arch);
   process.exit(1);
 }
-
+const formattedDownloadUrl = util.format(downloadUrl, chromedriver_version, platform);
 const tmpPath = findSuitableTempDirectory();
+const tempDownloadedFile = path.resolve(tmpPath, path.basename(formattedDownloadUrl));
+const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
+const chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName );
 let downloadedFile = '';
-let promise = Promise.resolve();
 
-promise = promise.then(function () {
+Promise.resolve().then(function () {
   if (chromedriver_version === 'LATEST')
     return getLatestVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
+})
+.then(verifyIfChromedriverIsAvailableAndHasCorrectVersion)
+.then(chromedriverIsAvailable => {
+  if (chromedriverIsAvailable) return;
+  console.log('Current existing ChromeDriver binary is unavailable, proceding with download and extraction.');
+  return downloadFile().then(extractDownload);
+})
+.then(() => copyIntoPlace(tmpPath, libPath))
+.then(fixFilePermissions)
+.then(() => console.log('Done. ChromeDriver binary available at', helper.path))
+.catch(function (err) {
+  console.error('ChromeDriver installation failed', err);
+  process.exit(1);
 });
 
-promise = promise.then(function () {
-  if (!fs.existsSync(helper.path)) return;
+function downloadFile() {
+  if (configuredfilePath) {
+    downloadedFile = configuredfilePath;
+    console.log('Using file: ', downloadedFile);
+  }
+  else {
+    downloadedFile = tempDownloadedFile;
+    console.log('Downloading from file: ', formattedDownloadUrl);
+    console.log('Saving to file:', downloadedFile);
+    return requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
+  }
+}
+
+function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
+  if (!fs.existsSync(chromedriverBinaryFilePath))
+    return false;
   const forceDownload = process.env.npm_config_chromedriver_force_download === 'true' || process.env.CHROMEDRIVER_FORCE_DOWNLOAD === 'true';
-  if (forceDownload) return;
+  if (forceDownload)
+    return false;
   console.log('ChromeDriver binary exists. Validating...');
   const deferred = new Deferred();
   try {
-    fs.accessSync(helper.path, fs.constants.X_OK);
-    const cp = child_process.spawn(helper.path, ['--version']);
+    fs.accessSync(chromedriverBinaryFilePath, fs.constants.X_OK);
+    const cp = child_process.spawn(chromedriverBinaryFilePath, ['--version']);
     let str = '';
     cp.stdout.on('data', function (data) {
       str += data;
     });
     cp.on('error', function () {
-      deferred.resolve();
+      deferred.resolve(false);
     });
     cp.on('close', function (code) {
-      if (code !== 0) return deferred.resolve();
+      if (code !== 0)
+        return deferred.resolve(false);
       const parts = str.split(' ');
-      if (parts.length < 3) return deferred.resolve();
+      if (parts.length < 3)
+        return deferred.resolve(false);
       if (parts[1].startsWith(chromedriver_version)) {
         console.log(str);
         console.log('ChromeDriver is already available!');
-        process.exit(0);
+        return deferred.resolve(true);
       }
-      deferred.resolve();
+      deferred.resolve(false);
     });
-  } catch (error) {
-    deferred.resolve();
+  }
+  catch (error) {
+    deferred.resolve(false);
   }
   return deferred.promise;
-}).then(function () {
-  console.log('Current existing ChromeDriver binary is unavailable.');
-});
-
-// Start the install.
-promise = promise.then(function () {
-  if (configuredfilePath) {
-    console.log('Using file: ', configuredfilePath);
-    downloadedFile = configuredfilePath;
-  } else {
-    downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
-    const fileName = downloadUrl.split('/').pop();
-    downloadedFile = path.join(tmpPath, fileName);
-    console.log('Downloading', downloadUrl);
-    console.log('Saving to', downloadedFile);
-    return requestBinary(getRequestOptions(downloadUrl), downloadedFile);
-  }
-});
-
-promise.then(function () {
-  if (path.extname(downloadedFile) !== '.zip') {
-    fs.copyFileSync(downloadedFile, path.join(tmpPath, 'chromedriver'));
-    console.log('Skipping zip extraction - binary file found.');
-    return true;
-  }
-  return extractDownload(downloadedFile, tmpPath);
-})
-  .then(function () {
-    return copyIntoPlace(tmpPath, libPath);
-  })
-  .then(function () {
-    return fixFilePermissions();
-  })
-  .then(function () {
-    console.log('Done. ChromeDriver binary available at', helper.path);
-  })
-  .catch(function (err) {
-    console.error('ChromeDriver installation failed', err);
-    process.exit(1);
-  });
-
+}
 
 function findSuitableTempDirectory() {
   const now = Date.now();
   const candidateTmpDirs = [
     process.env.TMPDIR || process.env.TMP || process.env.npm_config_tmp,
+    os.tmpdir(),
     '/tmp',
     path.join(process.cwd(), 'tmp')
   ];
@@ -256,10 +251,15 @@ function requestBinary(requestOptions, filePath) {
   return deferred.promise;
 }
 
-function extractDownload(filePath, tmpPath) {
+function extractDownload() {
+  if (path.extname(downloadedFile) !== '.zip') {
+    fs.copyFileSync(downloadedFile, path.resolve(tmpPath, 'chromedriver'));
+    console.log('Skipping zip extraction - binary file found.');
+    return Promise.resolve();
+  }
   const deferred = new Deferred();
   console.log('Extracting zip contents');
-  extractZip(path.resolve(filePath), { dir: tmpPath }, function (err) {
+  extractZip(path.resolve(downloadedFile), { dir: tmpPath }, function (err) {
     if (err) {
       deferred.reject('Error extracting archive: ' + err);
     } else {
@@ -270,18 +270,18 @@ function extractDownload(filePath, tmpPath) {
 }
 
 
-function copyIntoPlace(tmpPath, targetPath) {
+function copyIntoPlace(originPath, targetPath) {
   return del(targetPath)
     .then(function() {
       console.log("Copying to target path", targetPath);
       fs.mkdirSync(targetPath);
 
       // Look for the extracted directory, so we can rename it.
-      const files = fs.readdirSync(tmpPath);
+      const files = fs.readdirSync(originPath);
       const promises = files.map(function(name) {
         const deferred = new Deferred();
 
-        const file = path.join(tmpPath, name);
+        const file = path.join(originPath, name);
         const reader = fs.createReadStream(file);
 
         const targetFile = path.join(targetPath, name);
