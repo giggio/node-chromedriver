@@ -123,14 +123,14 @@ for (const version of versions) {
     sleep(2000); // wait 2 seconds until everything is in place
     checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --chromedriver-force-download --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
     checkFile(tempInstallPathForVersion, version);
-    del(tempInstallPathForVersion);
+    del(tempInstallPathForVersion, { force: true });
     fs.mkdirSync(tempInstallPathForVersion);
     checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
     checkFile(tempInstallPathForVersion, version);
   } else {
     checkSpawn(spawnSync('npm', ['i', '--no-progress', '--chromedriver-force-download', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
     checkFile(tempInstallPathForVersion, version);
-    del(tempInstallPathForVersion);
+    del(tempInstallPathForVersion, { force: true });
     fs.mkdirSync(tempInstallPathForVersion);
     checkSpawn(spawnSync('npm', ['i', '--no-progress', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
     checkFile(tempInstallPathForVersion, version);
