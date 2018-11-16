@@ -1,6 +1,6 @@
 {
   "name": "chromedriver",
-  "version": "2.43.2",
+  "version": "2.43.3",
   "keywords": [
     "chromedriver",
     "selenium"
@@ -27,9 +27,8 @@
   "dependencies": {
     "del": "^3.0.0",
     "extract-zip": "^1.6.7",
-    "kew": "^0.7.0",
     "mkdirp": "^0.5.1",
-    "request": "^2.87.0",
-    "tcp-port-used": "^1.0.0"
+    "request": "^2.88.0",
+    "tcp-port-used": "^1.0.1"
   }
 }

@@ -1,8 +1,9 @@
 {
+    "extends": "eslint:recommended",
     "env": {
         "browser": false,
         "commonjs": true,
-        "es6": false,
+        "es6": true,
         "node": true
     },
     "parserOptions": {
@@ -20,6 +21,9 @@
         "no-unused-vars": "warn",
         "constructor-super": "warn",
         "valid-typeof": "warn",
-        "semi": "error"
+        "semi": "error",
+        "no-console": "off",
+        "no-var": "error",
+        "prefer-const": "error"
     }
 }

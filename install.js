@@ -1,32 +1,31 @@
 'use strict';
 
-var extractZip = require('extract-zip');
-var fs = require('fs');
-var helper = require('./lib/chromedriver');
-var request = require('request');
-var kew = require('kew');
-var mkdirp = require('mkdirp');
-var path = require('path');
-var del = require('del');
-var util = require('util');
-var child_process = require('child_process');
+const extractZip = require('extract-zip');
+const fs = require('fs');
+const helper = require('./lib/chromedriver');
+const request = require('request');
+const mkdirp = require('mkdirp');
+const path = require('path');
+const del = require('del');
+const util = require('util');
+const child_process = require('child_process');
 
-var skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
+const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
 if (skipDownload) {
-  console.log('Found CHROMEDRIVER_SKIP_DOWNLOAD variable, skipping installation.')
-  return;
+  console.log('Found CHROMEDRIVER_SKIP_DOWNLOAD variable, skipping installation.');
+  process.exit(0);
 }
 
-var libPath = path.join(__dirname, 'lib', 'chromedriver');
-var cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://chromedriver.storage.googleapis.com';
-var configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
+const libPath = path.join(__dirname, 'lib', 'chromedriver');
+let cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://chromedriver.storage.googleapis.com';
+const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
 
 // adapt http://chromedriver.storage.googleapis.com/
 cdnUrl = cdnUrl.replace(/\/+$/, '');
-var downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip';
-var platform = process.platform;
+let downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip';
+let platform = process.platform;
 
-var chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
+let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 if (platform === 'linux') {
   if (process.arch === 'arm64' || process.arch === 'x64') {
     platform += '64';
@@ -36,6 +35,7 @@ if (platform === 'linux') {
   }
 } else if (platform === 'darwin' || platform === 'freebsd') {
   if (process.arch === 'x64') {
+    // @ts-ignore
     platform = 'mac64';
   } else {
     console.log('Only Mac 64 bits supported.');
@@ -46,9 +46,9 @@ if (platform === 'linux') {
   process.exit(1);
 }
 
-var tmpPath = findSuitableTempDirectory();
-var downloadedFile = '';
-var promise = kew.resolve(true);
+const tmpPath = findSuitableTempDirectory();
+let downloadedFile = '';
+let promise = Promise.resolve();
 
 promise = promise.then(function () {
   if (chromedriver_version === 'LATEST')
@@ -57,21 +57,23 @@ promise = promise.then(function () {
 
 promise = promise.then(function () {
   if (!fs.existsSync(helper.path)) return;
+  const forceDownload = process.env.npm_config_chromedriver_force_download === 'true' || process.env.CHROMEDRIVER_FORCE_DOWNLOAD === 'true';
+  if (forceDownload) return;
   console.log('ChromeDriver binary exists. Validating...');
-  var deferred = kew.defer();
+  const deferred = new Deferred();
   try {
     fs.accessSync(helper.path, fs.constants.X_OK);
-    var cp = child_process.spawn(helper.path, ['--version']);
-    var str = '';
+    const cp = child_process.spawn(helper.path, ['--version']);
+    let str = '';
     cp.stdout.on('data', function (data) {
       str += data;
     });
-    cp.on('error', function (error) {
+    cp.on('error', function () {
       deferred.resolve();
     });
     cp.on('close', function (code) {
       if (code !== 0) return deferred.resolve();
-      var parts = str.split(' ');
+      const parts = str.split(' ');
       if (parts.length < 3) return deferred.resolve();
       if (parts[1].startsWith(chromedriver_version)) {
         console.log(str);
@@ -95,7 +97,7 @@ promise = promise.then(function () {
     downloadedFile = configuredfilePath;
   } else {
     downloadUrl = util.format(downloadUrl, chromedriver_version, platform);
-    var fileName = downloadUrl.split('/').pop();
+    const fileName = downloadUrl.split('/').pop();
     downloadedFile = path.join(tmpPath, fileName);
     console.log('Downloading', downloadUrl);
     console.log('Saving to', downloadedFile);
@@ -120,26 +122,26 @@ promise.then(function () {
   .then(function () {
     console.log('Done. ChromeDriver binary available at', helper.path);
   })
-  .fail(function (err) {
+  .catch(function (err) {
     console.error('ChromeDriver installation failed', err);
     process.exit(1);
   });
 
 
 function findSuitableTempDirectory() {
-  var now = Date.now();
-  var candidateTmpDirs = [
+  const now = Date.now();
+  const candidateTmpDirs = [
     process.env.TMPDIR || process.env.TMP || process.env.npm_config_tmp,
     '/tmp',
     path.join(process.cwd(), 'tmp')
   ];
 
-  for (var i = 0; i < candidateTmpDirs.length; i++) {
+  for (let i = 0; i < candidateTmpDirs.length; i++) {
     if (!candidateTmpDirs[i]) continue;
-    var candidatePath = path.join(candidateTmpDirs[i], 'chromedriver');
+    const candidatePath = path.join(candidateTmpDirs[i], 'chromedriver');
     try {
       mkdirp.sync(candidatePath, '0777');
-      var testFile = path.join(candidatePath, now + '.tmp');
+      const testFile = path.join(candidatePath, now + '.tmp');
       fs.writeFileSync(testFile, 'test');
       fs.unlinkSync(testFile);
       return candidatePath;
@@ -154,9 +156,9 @@ function findSuitableTempDirectory() {
 
 
 function getRequestOptions(downloadPath) {
-  var options = {uri: downloadPath, method: 'GET'};
-  var protocol = options.uri.substring(0, options.uri.indexOf('//'));
-  var proxyUrl = protocol === 'https:'
+  const options = {uri: downloadPath, method: 'GET'};
+  const protocol = options.uri.substring(0, options.uri.indexOf('//'));
+  const proxyUrl = protocol === 'https:'
     ? process.env.npm_config_https_proxy
     : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
   if (proxyUrl) {
@@ -166,7 +168,7 @@ function getRequestOptions(downloadPath) {
   options.strictSSL = !!process.env.npm_config_strict_ssl;
 
   // Use certificate authority settings from npm
-  var ca = process.env.npm_config_ca;
+  let ca = process.env.npm_config_ca;
 
   // Parse ca string like npm does
   if (ca && ca.match(/^".*"$/)) {
@@ -211,7 +213,7 @@ function getRequestOptions(downloadPath) {
 }
 
 function getLatestVersion(requestOptions) {
-  var deferred = kew.defer();
+  const deferred = new Deferred();
   request(requestOptions, function (err, response, data) {
     if (err) {
       deferred.reject('Error with http(s) request: ' + err);
@@ -224,13 +226,13 @@ function getLatestVersion(requestOptions) {
 }
 
 function requestBinary(requestOptions, filePath) {
-  var deferred = kew.defer();
+  const deferred = new Deferred();
 
-  var count = 0;
-  var notifiedCount = 0;
-  var outFile = fs.openSync(filePath, 'w');
+  let count = 0;
+  let notifiedCount = 0;
+  const outFile = fs.openSync(filePath, 'w');
 
-  var client = request(requestOptions);
+  const client = request(requestOptions);
 
   client.on('error', function (err) {
     deferred.reject('Error with http(s) request: ' + err);
@@ -255,7 +257,7 @@ function requestBinary(requestOptions, filePath) {
 }
 
 function extractDownload(filePath, tmpPath) {
-  var deferred = kew.defer();
+  const deferred = new Deferred();
   console.log('Extracting zip contents');
   extractZip(path.resolve(filePath), { dir: tmpPath }, function (err) {
     if (err) {
@@ -275,15 +277,15 @@ function copyIntoPlace(tmpPath, targetPath) {
       fs.mkdirSync(targetPath);
 
       // Look for the extracted directory, so we can rename it.
-      var files = fs.readdirSync(tmpPath);
-      var promises = files.map(function(name) {
-        var deferred = kew.defer();
+      const files = fs.readdirSync(tmpPath);
+      const promises = files.map(function(name) {
+        const deferred = new Deferred();
 
-        var file = path.join(tmpPath, name);
-        var reader = fs.createReadStream(file);
+        const file = path.join(tmpPath, name);
+        const reader = fs.createReadStream(file);
 
-        var targetFile = path.join(targetPath, name);
-        var writer = fs.createWriteStream(targetFile);
+        const targetFile = path.join(targetPath, name);
+        const writer = fs.createWriteStream(targetFile);
         writer.on("close", function() {
           deferred.resolve(true);
         });
@@ -291,7 +293,7 @@ function copyIntoPlace(tmpPath, targetPath) {
         reader.pipe(writer);
         return deferred.promise;
       });
-      return kew.all(promises);
+      return Promise.all(promises);
     });
 }
 
@@ -299,11 +301,21 @@ function copyIntoPlace(tmpPath, targetPath) {
 function fixFilePermissions() {
   // Check that the binary is user-executable and fix it if it isn't (problems with unzip library)
   if (process.platform != 'win32') {
-    var stat = fs.statSync(helper.path);
+    const stat = fs.statSync(helper.path);
     // 64 == 0100 (no octal literal in strict mode)
     if (!(stat.mode & 64)) {
       console.log('Fixing file permissions');
       fs.chmodSync(helper.path, '755');
     }
   }
+}
+
+function Deferred() {
+  this.resolve = null;
+  this.reject = null;
+  this.promise = new Promise(function (resolve, reject) {
+    this.resolve = resolve;
+    this.reject = reject;
+  }.bind(this));
+  Object.freeze(this);
 }

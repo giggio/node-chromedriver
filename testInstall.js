@@ -6,13 +6,14 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const spawnSync = require('child_process').spawnSync;
+const del = require('del').sync;
 
-const versions = ['4', '6', '8'];
+const versions = ['6', '8', '10', '11'];
 const tmpdir = os.tmpdir();
 
 function directoryExists(file) {
     try {
-        var stat = fs.lstatSync(file);
+        const stat = fs.lstatSync(file);
         return stat.isDirectory();
     } catch (err) {
         return false;
@@ -21,7 +22,7 @@ function directoryExists(file) {
 
 function fileExists(file) {
     try {
-        var stat = fs.lstatSync(file);
+        const stat = fs.lstatSync(file);
         return stat.isFile();
     } catch (err) {
         return false;
@@ -31,7 +32,7 @@ function fileExists(file) {
 function removeFolder(dir) {
     if (!fs.existsSync(dir)) return;
     fs.readdirSync(dir).forEach((file) => {
-        let curPath = dir + path.sep + file;
+        const curPath = dir + path.sep + file;
         if (fs.lstatSync(curPath).isDirectory())
             removeFolder(curPath);
         else
@@ -40,7 +41,7 @@ function removeFolder(dir) {
     fs.rmdirSync(dir);
 }
 
-let tempInstallPath = path.resolve(tmpdir, 'chromedriver-test');
+const tempInstallPath = path.resolve(tmpdir, 'chromedriver-test');
 if (directoryExists(tempInstallPath)) {
     console.log(`Deleting directory '${tempInstallPath}'.`);
     removeFolder(tempInstallPath);
@@ -71,17 +72,16 @@ function checkSpawn(spawnInfo) {
 }
 
 function nvmUse(version) {
-    if (os.platform() === 'win32')
-        var versionsText = checkSpawn(spawnSync('nvm', ['list']));
-    else
-        var versionsText = checkSpawn(spawnSync('/bin/bash', ['-c', 'source $HOME/.nvm/nvm.sh && nvm list']));
+    const versionsText = os.platform() === 'win32'
+        ? checkSpawn(spawnSync('nvm', ['list']))
+        : checkSpawn(spawnSync('/bin/bash', ['-c', `source $HOME/.nvm/nvm.sh && nvm version ${version}`]));
     const versionsAvailable = versionsText.split('\n').map(v => v.match(/\d+\.\d+\.\d+/)).filter(v => v).map(v => v[0]);
-    var largestMatch = versionsAvailable.filter(v => v.match(`^${version}\.`)).map(v => v.match(/\d+\.(\d+)\.\d+/)).reduce(((max, v) => max[1] > v[1] ? max : v), [null, 0]);
+    const largestMatch = versionsAvailable.filter(v => v.match(`^${version}\\.`)).map(v => v.match(/\d+\.(\d+)\.\d+/)).reduce(((max, v) => max[1] > v[1] ? max : v), [null, 0]);
     if (largestMatch.length === 0) {
         console.error(`Version '${version}' not found.`);
         process.exit(3);
     }
-    var largestMatchingVersion = largestMatch.input;
+    const largestMatchingVersion = largestMatch.input;
     console.log(`Found version '${largestMatchingVersion}'.`);
     if (os.platform() === 'win32')
         checkSpawn(spawnSync('nvm', ['use', largestMatchingVersion]));
@@ -91,22 +91,43 @@ function nvmUse(version) {
 
 function sleep(milliseconds) {
     const inAFewMilliseconds = new Date(new Date().getTime() + milliseconds);
+    // eslint-disable-next-line no-empty
     while (inAFewMilliseconds > new Date()) { }
 }
 
-for (let version of versions) {
+const packedFile = path.resolve(tempInstallPath, 'chromedriver.tgz');
+
+function pack() {
+    del(path.resolve(__dirname, '*.tgz'));
+    if (os.platform() === 'win32') {
+        checkSpawn(spawnSync('cmd.exe', ['/c', `npm pack`], { cwd: __dirname }));
+    } else {
+        checkSpawn(spawnSync('npm', ['pack'], { cwd: __dirname }));
+    }
+    const fileNames = fs.readdirSync(__dirname).filter(f => f.endsWith(".tgz"));
+    if (fileNames.length !== 1) {
+        console.error("Could not find packed file.");
+        process.exit(3);
+    }
+    fs.renameSync(fileNames[0], packedFile);
+}
+
+pack();
+
+for (const version of versions) {
     console.log(`Testing version ${version}...`);
-    let tempInstallPathForVersion = path.resolve(tmpdir, 'chromedriver-test', version);
+    const tempInstallPathForVersion = path.resolve(tempInstallPath, version);
     fs.mkdirSync(tempInstallPathForVersion);
     nvmUse(version);
     if (os.platform() === 'win32') {
         sleep(2000); // wait 2 seconds until everything is in place
-        checkSpawn(spawnSync('cmd.exe', ['/c', `npm i ${__dirname}`], { cwd: tempInstallPathForVersion }));
-
+        checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --chromedriver-force-download --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
+        checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
     } else {
-        checkSpawn(spawnSync('npm', ['i', `${__dirname}`], { cwd: tempInstallPathForVersion }));
+        checkSpawn(spawnSync('npm', ['i', '--no-progress', '--chromedriver-force-download', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
+        checkSpawn(spawnSync('npm', ['i', '--no-progress', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
     }
-    let executable = path.resolve(tempInstallPathForVersion, 'node_modules', 'chromedriver', 'lib', 'chromedriver', `chromedriver${os.platform() === 'win32' ? '.exe' : ''}`);
+    const executable = path.resolve(tempInstallPathForVersion, 'node_modules', 'chromedriver', 'lib', 'chromedriver', `chromedriver${os.platform() === 'win32' ? '.exe' : ''}`);
     if (fileExists(executable)) {
         console.log(`Version ${version} installed fine.`);
     }
