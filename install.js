@@ -7,7 +7,6 @@ const request = require('request');
 const mkdirp = require('mkdirp');
 const path = require('path');
 const del = require('del');
-const util = require('util');
 const child_process = require('child_process');
 const os = require('os');
 
@@ -23,7 +22,6 @@ const configuredfilePath = process.env.npm_config_chromedriver_filepath || proce
 
 // adapt http://chromedriver.storage.googleapis.com/
 cdnUrl = cdnUrl.replace(/\/+$/, '');
-const downloadUrl = cdnUrl + '/%s/chromedriver_%s.zip';
 let platform = process.platform;
 
 let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
@@ -46,9 +44,7 @@ if (platform === 'linux') {
   console.log('Unexpected platform or architecture:', process.platform, process.arch);
   process.exit(1);
 }
-const formattedDownloadUrl = util.format(downloadUrl, chromedriver_version, platform);
 const tmpPath = findSuitableTempDirectory();
-const tempDownloadedFile = path.resolve(tmpPath, path.basename(formattedDownloadUrl));
 const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
 const chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName );
 let downloadedFile = '';
@@ -75,9 +71,11 @@ function downloadFile() {
   if (configuredfilePath) {
     downloadedFile = configuredfilePath;
     console.log('Using file: ', downloadedFile);
-  }
-  else {
+  } else {
+    const fileName = `chromedriver_${platform}.zip`;
+    const tempDownloadedFile = path.resolve(tmpPath, fileName);
     downloadedFile = tempDownloadedFile;
+    const formattedDownloadUrl = `${cdnUrl}/${chromedriver_version}/${fileName}`;
     console.log('Downloading from file: ', formattedDownloadUrl);
     console.log('Saving to file:', downloadedFile);
     return requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
