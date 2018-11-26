@@ -12,4 +12,5 @@ notifications:
     - pruthvi.reddy@puresoftware.com
 build:
   ci:
+    - npm install extract-zip --save
     - node install.js
