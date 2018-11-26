@@ -12,5 +12,4 @@ notifications:
     - pruthvi.reddy@puresoftware.com
 build:
   ci:
-    - npm install
-    - npm test
+    - node install.js
