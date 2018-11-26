@@ -1,0 +1,16 @@
+language: node_js
+
+node_js:
+  - 10.8
+
+runtime:
+  nodePool: shippable_shared_aarch64
+  
+notifications:
+  email:
+    recipients:
+    - pruthvi.reddy@puresoftware.com
+build:
+  ci:
+    - npm install extract-zip --save
+    - node install.js
