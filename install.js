@@ -71,6 +71,7 @@ function downloadFile() {
   if (configuredfilePath) {
     downloadedFile = configuredfilePath;
     console.log('Using file: ', downloadedFile);
+    return Promise.resolve();
   } else {
     const fileName = `chromedriver_${platform}.zip`;
     const tempDownloadedFile = path.resolve(tmpPath, fileName);
@@ -108,7 +109,7 @@ function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
         return deferred.resolve(false);
       if (parts[1].startsWith(chromedriver_version)) {
         console.log(str);
-        console.log('ChromeDriver is already available!');
+        console.log(`ChromeDriver is already available at '${chromedriverBinaryFilePath}'.`);
         return deferred.resolve(true);
       }
       deferred.resolve(false);
