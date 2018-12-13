@@ -1,11 +1,13 @@
 language: node_js
 
 node_js:
-  - 10.8
+  - '8'
+  - '10'
+  - '11'
 
 runtime:
   nodePool: shippable_shared_aarch64
-  
+
 notifications:
   email:
     recipients:
