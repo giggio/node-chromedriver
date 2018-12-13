@@ -10,3 +10,4 @@ testInstall.js
 *.tgz
 .vscode
 .editorconfig
+shippable.yml
