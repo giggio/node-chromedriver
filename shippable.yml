@@ -8,10 +8,6 @@ node_js:
 runtime:
   nodePool: shippable_shared_aarch64
 
-notifications:
-  email:
-    recipients:
-    - pruthvi.reddy@puresoftware.com
 build:
   ci:
     - npm install extract-zip --save
