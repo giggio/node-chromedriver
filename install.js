@@ -44,14 +44,18 @@ if (platform === 'linux') {
   console.log('Unexpected platform or architecture:', process.platform, process.arch);
   process.exit(1);
 }
-const tmpPath = findSuitableTempDirectory();
+let tmpPath;
 const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
-const chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName );
+let chromedriverBinaryFilePath;
 let downloadedFile = '';
 
 Promise.resolve().then(function () {
   if (chromedriver_version === 'LATEST')
     return getLatestVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
+})
+.then(() => {
+  tmpPath = findSuitableTempDirectory();
+  chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName );
 })
 .then(verifyIfChromedriverIsAvailableAndHasCorrectVersion)
 .then(chromedriverIsAvailable => {
@@ -132,7 +136,9 @@ function findSuitableTempDirectory() {
 
   for (let i = 0; i < candidateTmpDirs.length; i++) {
     if (!candidateTmpDirs[i]) continue;
-    const candidatePath = path.join(candidateTmpDirs[i], 'chromedriver');
+    // Prevent collision with other versions in the dependency tree
+    const namespace = chromedriver_version;
+    const candidatePath = path.join(candidateTmpDirs[i], namespace, 'chromedriver');
     try {
       mkdirp.sync(candidatePath, '0777');
       const testFile = path.join(candidatePath, now + '.tmp');
