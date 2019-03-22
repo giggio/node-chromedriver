@@ -158,7 +158,7 @@ But you can get it from `require('chromedriver').path` if you want it.
 ## Running via node
 
 The package exports a `path` string that contains the path to the
-chromdriver binary/executable.
+chromedriver binary/executable.
 
 Below is an example of using this package via node.
 
