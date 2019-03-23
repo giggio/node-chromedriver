@@ -11,7 +11,7 @@ const child_process = require('child_process');
 const os = require('os');
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
-if (skipDownload) {
+if (skipDownload === 'true') {
   console.log('Found CHROMEDRIVER_SKIP_DOWNLOAD variable, skipping installation.');
   process.exit(0);
 }
