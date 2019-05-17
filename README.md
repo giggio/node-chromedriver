@@ -1,6 +1,6 @@
 # ChromeDriver
 
-[![Build status](https://travis-ci.org/giggio/node-chromedriver.svg)](https://travis-ci.org/giggio/node-chromedriver/) [![Build status](https://ci.appveyor.com/api/projects/status/wr4c16rs5q113vy3?svg=true)](https://ci.appveyor.com/project/giggio/node-chromedriver) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=master)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=master)
+[![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=master)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=master) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=master)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=master)
 [![npm](https://img.shields.io/npm/dt/chromedriver.svg)](https://www.npmjs.com/package/chromedriver)
 
 An NPM wrapper for Selenium [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
@@ -240,11 +240,8 @@ It is not a Node.js wrapper.
 
 We will do our best to support every supported Node.js versions.
 See [nodejs/Release](https://github.com/nodejs/Release) for
-the current supported versions. You can also view our build
-scripts for
-[Windows](https://github.com/giggio/node-chromedriver/blob/master/appveyor.yml)
-and
-[Linux and Mac](https://github.com/giggio/node-chromedriver/blob/master/.travis.yml).
+the current supported versions. You can also view our
+[build scripts](https://github.com/giggio/node-chromedriver/blob/master/azure-pipelines.yml) and check the versions there.
 
 ## Contributing
 

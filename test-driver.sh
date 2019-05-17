@@ -6,7 +6,7 @@ TASK_PID=$!
 
 # Wait for 10 seconds to give the ChromeDriver a chance to fail if there is an
 # issue.
-sleep 10
+sleep 5
 
 # ps -p Checks if the process is still running. If it is it returns 0,
 # otherwise it returns 1

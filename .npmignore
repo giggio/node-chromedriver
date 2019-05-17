@@ -2,8 +2,6 @@ lib/chromedriver/**
 tmp
 .eslintrc.json
 .gitignore
-.travis.yml
-appveyor.yml
 Dockerfile
 test-driver.sh
 testInstall.js
