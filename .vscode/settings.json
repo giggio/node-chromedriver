@@ -1,6 +1,5 @@
 {
     "vsicons.presets.angular": false,
     "editor.formatOnSave": true,
-    "eslint.autoFixOnSave": true,
-    "tslint.enable": false
+    "eslint.autoFixOnSave": true
 }

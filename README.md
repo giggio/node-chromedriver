@@ -254,6 +254,10 @@ Questions, comments, bug reports, and pull requests are all welcome.  Submit the
 Bug reports that include steps-to-reproduce (including code) are the
 best. Even better, make them in the form of pull requests.
 
+We have added
+[VS Code Remote support with containers](https://code.visualstudio.com/docs/remote/containers).
+If you are on Windows, set `git config core.autocrlf input` so you don't get git errors.
+
 ## Author
 
 [Giovanni Bassi](https://github.com/giggio), with collaboration from

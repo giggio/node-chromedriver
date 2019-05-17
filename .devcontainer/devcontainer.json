@@ -1,0 +1,9 @@
+{
+  "name": "Node Chromedriver",
+  "dockerFile": "Dockerfile",
+  "appPort": 9000,
+  "extensions": [
+    "dbaeumer.vscode-eslint"
+  ],
+  "postCreateCommand": "/bin/bash -c 'source $HOME/.nvm/nvm.sh && npm install'"
+}
