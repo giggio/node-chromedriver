@@ -25,7 +25,7 @@
     "install": "node install.js"
   },
   "dependencies": {
-    "del": "^3.0.0",
+    "del": "^4.1.1",
     "extract-zip": "^1.6.7",
     "mkdirp": "^0.5.1",
     "request": "^2.88.0",
