@@ -9,3 +9,5 @@ testInstall.js
 .vscode
 .editorconfig
 shippable.yml
+.devcontainer/**/*
+azure-pipelines.yml
