@@ -51,7 +51,7 @@ CHROMEDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
 ## Custom binaries url
 
 To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_cdnurl`.
-Default is `http://chromedriver.storage.googleapis.com`.
+Default is `https://chromedriver.storage.googleapis.com`.
 
 ```shell
 npm install chromedriver --chromedriver_cdnurl=https://npm.taobao.org/mirrors/chromedriver
