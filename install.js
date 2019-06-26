@@ -258,7 +258,7 @@ function requestBinary(requestOptions, filePath) {
 
 function extractDownload() {
   if (path.extname(downloadedFile) !== '.zip') {
-    fs.copyFileSync(downloadedFile, path.resolve(tmpPath, 'chromedriver'));
+    fs.copyFileSync(downloadedFile, chromedriverBinaryFilePath);
     console.log('Skipping zip extraction - binary file found.');
     return Promise.resolve();
   }
