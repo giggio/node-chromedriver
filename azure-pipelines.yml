@@ -11,14 +11,12 @@ jobs:
         nodeversion: '8.x'
       node_10:
         nodeversion: '10.x'
-      node_11:
-        nodeversion: '11.x'
       node_12:
         nodeversion: '12.x'
   steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: '$(nodeversion)' 
+      versionSpec: '$(nodeversion)'
     displayName: 'Install'
   - task: Npm@1
     displayName: 'Npm install'
@@ -34,14 +32,12 @@ jobs:
         nodeversion: '8.x'
       node_10:
         nodeversion: '10.x'
-      node_11:
-        nodeversion: '11.x'
       node_12:
         nodeversion: '12.x'
   steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: '$(nodeversion)' 
+      versionSpec: '$(nodeversion)'
   - task: Npm@1
     displayName: 'Npm install'
   - script: ./test-driver.sh
@@ -56,14 +52,12 @@ jobs:
         nodeversion: '8.x'
       node_10:
         nodeversion: '10.x'
-      node_11:
-        nodeversion: '11.x'
       node_12:
         nodeversion: '12.x'
   steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: '$(nodeversion)' 
+      versionSpec: '$(nodeversion)'
   - task: Npm@1
     displayName: 'Npm install'
     inputs:
