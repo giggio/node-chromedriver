@@ -9,6 +9,7 @@ const path = require('path');
 const del = require('del');
 const child_process = require('child_process');
 const os = require('os');
+const findChromeVersion = require('find-chrome-version');
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
 if (skipDownload === 'true') {
@@ -24,6 +25,7 @@ const configuredfilePath = process.env.npm_config_chromedriver_filepath || proce
 cdnUrl = cdnUrl.replace(/\/+$/, '');
 let platform = process.platform;
 
+const detect_chromedriver_version = process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION;
 let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 if (platform === 'linux') {
   if (process.arch === 'arm64' || process.arch === 'x64') {
@@ -50,8 +52,18 @@ let chromedriverBinaryFilePath;
 let downloadedFile = '';
 
 Promise.resolve().then(function () {
+  if (detect_chromedriver_version === 'true') {
+    // Refer http://chromedriver.chromium.org/downloads/version-selection
+    return findChromeVersion().then(function (chromeVersion) {
+      console.log("Your Chrome version is " + chromeVersion);
+      const chromeVersionWithoutPatch = /^(.*?)\.\d+$/.exec(chromeVersion)[1];
+      return getCromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
+    }).then(function () {
+      console.log("Compatible ChromeDriver version is " + chromedriver_version);
+    });
+  }
   if (chromedriver_version === 'LATEST')
-    return getLatestVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
+    return getCromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
 })
 .then(() => {
   tmpPath = findSuitableTempDirectory();
@@ -72,7 +84,7 @@ Promise.resolve().then(function () {
 });
 
 function downloadFile() {
-  if (configuredfilePath) {
+  if (detect_chromedriver_version !== 'true' && configuredfilePath) {
     downloadedFile = configuredfilePath;
     console.log('Using file: ', downloadedFile);
     return Promise.resolve();
@@ -213,7 +225,7 @@ function getRequestOptions(downloadPath) {
   return options;
 }
 
-function getLatestVersion(requestOptions) {
+function getCromeDriverVersion(requestOptions) {
   const deferred = new Deferred();
   request(requestOptions, function (err, response, data) {
     if (err) {

@@ -235,6 +235,31 @@ You can also force a different version of chromedriver by replacing `LATEST` wit
 CHROMEDRIVER_VERSION=75.0.3770.140 npm install chromedriver
 ```
 
+## Detect ChromeDriver Version
+
+The NPM package version may not be always compatible to your Chrome version.
+To get the chromedriver that corresponds to the version of Chrome installed,
+you can use the npm config property `detect_chromedriver_version`.
+
+```shell
+npm install chromedriver --detect_chromedriver_version=true
+```
+
+Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+
+```
+detect_chromedriver_version=true
+```
+
+Another option is to use environment variable `DETECT_CHROMEDRIVER_VERSION`.
+
+```shell
+DETECT_CHROMEDRIVER_VERSION=true npm install chromedriver
+```
+
+**Note:** When the property `detect_chromedriver_version=true` is provided,
+`chromedriver_version` and `chromedriver_filepath` properties are ignored.
+
 ## A Note on chromedriver
 
 Chromedriver is not a library for NodeJS.
