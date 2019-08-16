@@ -26,6 +26,7 @@
     "update-chromedriver": "node update.js"
   },
   "dependencies": {
+    "@testim/chrome-version": "^1.0.3",
     "del": "^4.1.1",
     "extract-zip": "^1.6.7",
     "mkdirp": "^0.5.1",
