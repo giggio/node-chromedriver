@@ -57,13 +57,13 @@ Promise.resolve().then(function () {
     return findChromeVersion().then(function (chromeVersion) {
       console.log("Your Chrome version is " + chromeVersion);
       const chromeVersionWithoutPatch = /^(.*?)\.\d+$/.exec(chromeVersion)[1];
-      return getCromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
+      return getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
     }).then(function () {
       console.log("Compatible ChromeDriver version is " + chromedriver_version);
     });
   }
   if (chromedriver_version === 'LATEST')
-    return getCromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
+    return getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
 })
 .then(() => {
   tmpPath = findSuitableTempDirectory();
@@ -225,7 +225,7 @@ function getRequestOptions(downloadPath) {
   return options;
 }
 
-function getCromeDriverVersion(requestOptions) {
+function getChromeDriverVersion(requestOptions) {
   const deferred = new Deferred();
   request(requestOptions, function (err, response, data) {
     if (err) {
