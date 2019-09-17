@@ -22,7 +22,8 @@
     "chromedriver": "./bin/chromedriver"
   },
   "scripts": {
-    "install": "node install.js"
+    "install": "node install.js",
+    "update": "node update.js"
   },
   "dependencies": {
     "del": "^4.1.1",
