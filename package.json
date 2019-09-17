@@ -23,7 +23,7 @@
   },
   "scripts": {
     "install": "node install.js",
-    "update": "node update.js"
+    "update-chromedriver": "node update.js"
   },
   "dependencies": {
     "del": "^4.1.1",
