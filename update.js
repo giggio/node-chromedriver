@@ -5,7 +5,7 @@ const CURRENT_VERSION = require('./lib/chromedriver').version;
 
 // fetch the latest chromedriver version
 const getLatest = (cb) => {
-  request('https://chromedriver.storage.googleapis.com/LATEST_RELEASE', function (err, response, body) {
+  request('https://chromedriver.storage.googleapis.com/LATEST_RELEASE', (err, response, body) => {
     if (err) {
       process.exit(1);
     }
@@ -27,7 +27,7 @@ const writeUpdate = (version) => {
   execSync(`git add . && git commit -m "Bump version to ${version.slice(0, 2)}.0.0" && npm version ${version.slice(0, 2)}.0.0`);
 };
 
-getLatest(function (version) {
+getLatest((version) => {
   if (CURRENT_VERSION === version) {
     console.log('Chromedriver version is up to date.');
   } else {
