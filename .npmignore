@@ -5,6 +5,7 @@ tmp
 Dockerfile
 test-driver.sh
 testInstall.js
+update.js
 *.tgz
 .vscode
 .editorconfig
