@@ -210,7 +210,7 @@ executed as a callback at the end of your tests
 The NPM package version tracks the version of chromedriver that will be installed,
 with an additional build number that is used for revisions to the installer.
 You can use the package version number to install a specific version, or use the
-setting to a specific version. To always install the latest version of Chromedriver,
+setting to a specific version. If there is a new Chromedriver version available which is not yet available as a version of `node-chromedriver`, the npm command `npm run update-chromedriver` in this repository can be used to make the required updates to this module, please submit the change as a PR. To always install the latest version of Chromedriver,
 use `LATEST` as the version number:
 
 ```shell
