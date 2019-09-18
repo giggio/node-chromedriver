@@ -15,8 +15,9 @@ const getLatest = (cb) => {
 
 /* Provided a new Chromedriver version such as 77.0.3865.40:
    - update the version inside the ./lib/chromedriver helper file e.g. exports.version = '77.0.3865.40';
-   - add a git commit and tag of npm version, e.g. Bump version to 77.0.0
-   - bumps npm package version
+   - bumps package.json version number
+   - add a git tag using the new node-chromedriver version
+   - add a git commit, e.g. Bump version to 77.0.0
 */
 const writeUpdate = (version) => {
   const helper = fs.readFileSync('./lib/chromedriver.js', 'utf8');
@@ -24,7 +25,8 @@ const writeUpdate = (version) => {
   const regex = new RegExp(`^.*${versionExport}.*$`, 'gm');
   const updated = helper.replace(regex, `${versionExport} = '${version}';`);
   fs.writeFileSync('./lib/chromedriver.js', updated, 'utf8');
-  execSync(`git add . && git commit -m "Bump version to ${version.slice(0, 2)}.0.0" && npm version ${version.slice(0, 2)}.0.0`);
+  const packageVersion = `${version.slice(0, 2)}.0.0`;
+  execSync(`npm version ${packageVersion} git-tag-version=false && git add . && git tag ${packageVersion} && git commit -m "Bump version to ${packageVersion}"`);
 };
 
 getLatest((version) => {
