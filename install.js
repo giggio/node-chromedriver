@@ -21,7 +21,7 @@ const libPath = path.join(__dirname, "lib", "msedgedriver");
 let cdnUrl =
 	process.env.npm_config_chromedriver_cdnurl ||
 	process.env.CHROMEDRIVER_CDNURL ||
-	"https://chromedriver.storage.googleapis.com";
+	"https://msedgedriver.azureedge.net/";
 const configuredfilePath =
 	process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
 
@@ -61,7 +61,7 @@ let downloadedFile = "";
 Promise.resolve()
 	.then(function() {
 		if (chromedriver_version === "LATEST")
-			return getLatestVersion(getRequestOptions(cdnUrl + "/LATEST_RELEASE"));
+			return getLatestVersion(getRequestOptions(cdnUrl + "/LATEST_RELEASE_77"));
 	})
 	.then(() => {
 		tmpPath = findSuitableTempDirectory();
@@ -89,7 +89,7 @@ function downloadFile() {
 		console.log("Using file: ", downloadedFile);
 		return Promise.resolve();
 	} else {
-		const fileName = `chromedriver_${platform}.zip`;
+		const fileName = `edgedriver_${platform}.zip`;
 		const tempDownloadedFile = path.resolve(tmpPath, fileName);
 		downloadedFile = tempDownloadedFile;
 		const formattedDownloadUrl = `${cdnUrl}/${chromedriver_version}/${fileName}`;
