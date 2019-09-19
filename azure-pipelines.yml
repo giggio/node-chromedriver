@@ -1,72 +1,72 @@
 trigger:
-- master
+    - master
 
 jobs:
-- job: Linux
-  pool:
-    vmImage: 'ubuntu-16.04'
-  strategy:
-    matrix:
-      node_8:
-        nodeversion: '8.x'
-      node_10:
-        nodeversion: '10.x'
-      node_12:
-        nodeversion: '12.x'
-  steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '$(nodeversion)'
-    displayName: 'Install'
-  - task: Npm@1
-    displayName: 'Npm install'
-  - script: ./test-driver.sh
-    displayName: 'Verify install'
+    - job: Linux
+      pool:
+          vmImage: "ubuntu-16.04"
+      strategy:
+          matrix:
+              node_8:
+                  nodeversion: "8.x"
+              node_10:
+                  nodeversion: "10.x"
+              node_12:
+                  nodeversion: "12.x"
+      steps:
+          - task: NodeTool@0
+            inputs:
+                versionSpec: "$(nodeversion)"
+            displayName: "Install"
+          - task: Npm@1
+            displayName: "Npm install"
+          - script: ./test-driver.sh
+            displayName: "Verify install"
 
-- job: macOS
-  pool:
-    vmImage: 'macOS-10.14'
-  strategy:
-    matrix:
-      node_8:
-        nodeversion: '8.x'
-      node_10:
-        nodeversion: '10.x'
-      node_12:
-        nodeversion: '12.x'
-  steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '$(nodeversion)'
-  - task: Npm@1
-    displayName: 'Npm install'
-  - script: ./test-driver.sh
-    displayName: 'Verify install'
+    - job: macOS
+      pool:
+          vmImage: "macOS-10.14"
+      strategy:
+          matrix:
+              node_8:
+                  nodeversion: "8.x"
+              node_10:
+                  nodeversion: "10.x"
+              node_12:
+                  nodeversion: "12.x"
+      steps:
+          - task: NodeTool@0
+            inputs:
+                versionSpec: "$(nodeversion)"
+          - task: Npm@1
+            displayName: "Npm install"
+          - script: ./test-driver.sh
+            displayName: "Verify install"
 
-- job: Windows
-  pool:
-    vmImage: 'windows-2019'
-  strategy:
-    matrix:
-      node_8:
-        nodeversion: '8.x'
-      node_10:
-        nodeversion: '10.x'
-      node_12:
-        nodeversion: '12.x'
-  steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '$(nodeversion)'
-  - task: Npm@1
-    displayName: 'Npm install'
-    inputs:
-      verbose: false
-  - powershell: |
-      node --version
-      npm --version
-      $nodeProcess = start node bin\chromedriver -PassThru
-      sleep 5
-      if ($nodeProcess.HasExited) { exit 1 }
-      Stop-Process -Id $nodeProcess.Id -Force
-    displayName: 'Verify install'
+    - job: Windows
+      pool:
+          vmImage: "windows-2019"
+      strategy:
+          matrix:
+              node_8:
+                  nodeversion: "8.x"
+              node_10:
+                  nodeversion: "10.x"
+              node_12:
+                  nodeversion: "12.x"
+      steps:
+          - task: NodeTool@0
+            inputs:
+                versionSpec: "$(nodeversion)"
+          - task: Npm@1
+            displayName: "Npm install"
+            inputs:
+                verbose: false
+          - powershell: |
+                node --version
+                npm --version
+                $nodeProcess = start node bin\msedgedriver -PassThru
+                sleep 5
+                if ($nodeProcess.HasExited) { exit 1 }
+                Stop-Process -Id $nodeProcess.Id -Force
+            displayName: "Verify install"

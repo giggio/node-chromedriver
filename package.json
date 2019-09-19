@@ -1,15 +1,15 @@
 {
-  "name": "chromedriver",
+  "name": "msedgedriver",
   "version": "77.0.0",
   "keywords": [
-    "chromedriver",
+    "msedgedriver",
     "selenium"
   ],
-  "description": "ChromeDriver for Selenium",
-  "homepage": "https://github.com/giggio/node-chromedriver",
+  "description": "Microsoft Edge Driver for Selenium",
+  "homepage": "https://github.com/uex-io/node-msedgedriver",
   "repository": {
     "type": "git",
-    "url": "git://github.com/giggio/node-chromedriver.git"
+    "url": "git://github.com/uex-io/node-msedgedriver.git"
   },
   "license": "Apache-2.0",
   "author": {
@@ -17,13 +17,13 @@
     "email": "giggio@giggio.net",
     "url": "http://www.lambda3.com.br"
   },
-  "main": "lib/chromedriver",
+  "main": "lib/msedgedriver",
   "bin": {
-    "chromedriver": "./bin/chromedriver"
+    "msedgedriver": "./bin/msedgedriver"
   },
   "scripts": {
     "install": "node install.js",
-    "update-chromedriver": "node update.js"
+    "update-msedgedriver": "node update.js"
   },
   "dependencies": {
     "del": "^4.1.1",
