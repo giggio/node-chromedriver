@@ -299,11 +299,11 @@ function copyIntoPlace(originPath, targetPath) {
 		let justFiles = [];
 		files.map(function(name) {
 			var stat = fs.statSync(path.join(originPath, name));
-			if (!stat.isDirectory()) {
+			if (!stat.isDirectory() && name.startsWith("msedgedriver")) {
 				console.log("handling file ", name);
-				justFiles.add(name);
+				justFiles.push(name);
 			} else {
-				console.log("Ignoring directory ", name);
+				console.log("Ignoring ", name);
 			}
 		});
 
