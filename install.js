@@ -296,16 +296,27 @@ function copyIntoPlace(originPath, targetPath) {
 		// Look for the extracted directory, so we can rename it.
 		console.log("reading orig folder ", originPath);
 		const files = fs.readdirSync(originPath);
-		const promises = files.map(function(name) {
+		let justFiles = [];
+		files.map(function(name) {
+			var stat = fs.statSync(path.join(originPath, name));
+			if (!stat.isDirectory()) {
+				console.log("handling file ", name);
+				justFiles.add(name);
+			} else {
+				console.log("Ignoring directory ", name);
+			}
+		});
+
+		const promises = justFiles.map(function(name) {
 			const deferred = new Deferred();
 
 			const file = path.join(originPath, name);
 			console.log("handling file ", file);
 			const reader = fs.createReadStream(file);
-
 			const targetFile = path.join(targetPath, name);
 			console.log("writing file ", targetFile);
 			const writer = fs.createWriteStream(targetFile);
+
 			writer.on("close", function() {
 				deferred.resolve(true);
 			});
