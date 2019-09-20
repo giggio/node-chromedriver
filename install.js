@@ -290,7 +290,8 @@ function extractDownload() {
 function copyIntoPlace(originPath, targetPath) {
 	return del(targetPath).then(function() {
 		console.log("Copying to target path", targetPath);
-		fs.mkdirSync(targetPath);
+
+		mkdirp.sync(targetPath, "0777");
 
 		// Look for the extracted directory, so we can rename it.
 		console.log("reading orig folder ", originPath);
