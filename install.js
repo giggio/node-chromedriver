@@ -128,9 +128,10 @@ function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
 function findSuitableTempDirectory() {
   const now = Date.now();
   const candidateTmpDirs = [
-    process.env.TMPDIR || process.env.TMP || process.env.npm_config_tmp,
+    process.env.npm_config_tmp,
+    process.env.XDG_CACHE_HOME,
+    // Platform specific default, including TMPDIR/TMP/TEMP env
     os.tmpdir(),
-    '/tmp',
     path.join(process.cwd(), 'tmp')
   ];
 
