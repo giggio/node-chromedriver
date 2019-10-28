@@ -12,3 +12,4 @@ update.js
 shippable.yml
 .devcontainer/**/*
 azure-pipelines.yml
+.github
