@@ -9,7 +9,7 @@ const path = require('path');
 const del = require('del');
 const child_process = require('child_process');
 const os = require('os');
-const findChromeVersion = require('find-chrome-version');
+const { getChromeVersion } = require('@testim/chrome-version');
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
 if (skipDownload === 'true') {
@@ -54,7 +54,7 @@ let downloadedFile = '';
 Promise.resolve().then(function () {
   if (detect_chromedriver_version === 'true') {
     // Refer http://chromedriver.chromium.org/downloads/version-selection
-    return findChromeVersion().then(function (chromeVersion) {
+    return getChromeVersion().then(function (chromeVersion) {
       console.log("Your Chrome version is " + chromeVersion);
       const chromeVersionWithoutPatch = /^(.*?)\.\d+$/.exec(chromeVersion)[1];
       return getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
