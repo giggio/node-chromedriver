@@ -60,7 +60,7 @@ Promise.resolve().then(function () {
 .then(verifyIfChromedriverIsAvailableAndHasCorrectVersion)
 .then(chromedriverIsAvailable => {
   if (chromedriverIsAvailable) return;
-  console.log('Current existing ChromeDriver binary is unavailable, proceding with download and extraction.');
+  console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
   return downloadFile().then(extractDownload);
 })
 .then(() => copyIntoPlace(tmpPath, libPath))
