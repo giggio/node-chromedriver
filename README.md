@@ -63,36 +63,36 @@ Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 chromedriver_cdnurl=https://npm.taobao.org/mirrors/chromedriver
 ```
 
-Another option is to use PATH variable `CHROMEDRIVER_CDNURL`.
+Another option is to use PATH variable `EDGECHROMIUMDRIVER_CDNURL`.
 
 ```shell
-CHROMEDRIVER_CDNURL=https://npm.taobao.org/mirrors/chromedriver npm install chromedriver
+EDGECHROMIUMDRIVER_CDNURL=https://npm.taobao.org/mirrors/chromedriver npm install chromedriver
 ```
 
 ## Custom binaries file
 
-To get the chromedriver from the filesystem instead of a web request use the npm config property `chromedriver_filepath`.
+To get the chromedriver from the filesystem instead of a web request use the npm config property `EDGECHROMIUMDRIVER_FILEPATH`.
 
 ```shell
-npm install chromedriver --chromedriver_filepath=/path/to/chromedriver_mac64.zip
+npm install chromedriver --EDGECHROMIUMDRIVER_FILEPATH=/path/to/chromedriver_mac64.zip
 ```
 
 Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
 ```
-chromedriver_filepath=/path/to/chromedriver_mac64.zip
+EDGECHROMIUMDRIVER_FILEPATH=/path/to/chromedriver_mac64.zip
 ```
 
-Another option is to use the PATH variable `CHROMEDRIVER_FILEPATH`
+Another option is to use the PATH variable `EDGECHROMIUMDRIVER_FILEPATH`
 
 ```shell
-CHROMEDRIVER_FILEPATH=/path/to/chromedriver_mac64.zip
+EDGECHROMIUMDRIVER_FILEPATH=/path/to/chromedriver_mac64.zip
 ```
 
 This variable can be used to set either a `.zip` file or the binary itself, eg:
 
 ```shell
-CHROMEDRIVER_FILEPATH=/bin/chromedriver
+EDGECHROMIUMDRIVER_FILEPATH=/bin/chromedriver
 ```
 
 ## Custom download options
@@ -125,10 +125,10 @@ Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 chromedriver_skip_download=true
 ```
 
-Another option is to use the PATH variable `CHROMEDRIVER_SKIP_DOWNLOAD`
+Another option is to use the PATH variable `EDGECHROMIUMDRIVER_SKIP_DOWNLOAD`
 
 ```shell
-CHROMEDRIVER_SKIP_DOWNLOAD=true
+EDGECHROMIUMDRIVER_SKIP_DOWNLOAD=true
 ```
 
 ## Running

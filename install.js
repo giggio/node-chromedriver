@@ -11,19 +11,19 @@ const child_process = require("child_process");
 const os = require("os");
 
 const skipDownload =
-	process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
+	process.env.npm_config_chromedriver_skip_download || process.env.EDGECHROMIUMDRIVER_SKIP_DOWNLOAD;
 if (skipDownload === "true") {
-	console.log("Found CHROMEDRIVER_SKIP_DOWNLOAD variable, skipping installation.");
+	console.log("Found EDGECHROMIUMDRIVER_SKIP_DOWNLOAD variable, skipping installation.");
 	process.exit(0);
 }
 
 const libPath = path.join(__dirname, "lib", "msedgedriver");
 let cdnUrl =
 	process.env.npm_config_chromedriver_cdnurl ||
-	process.env.CHROMEDRIVER_CDNURL ||
+	process.env.EDGECHROMIUMDRIVER_CDNURL ||
 	"https://msedgedriver.azureedge.net/";
 const configuredfilePath =
-	process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
+	process.env.npm_config_EDGECHROMIUMDRIVER_FILEPATH || process.env.EDGECHROMIUMDRIVER_FILEPATH;
 
 // adapt http://chromedriver.storage.googleapis.com/
 cdnUrl = cdnUrl.replace(/\/+$/, "");
