@@ -50,17 +50,17 @@ EDGECHROMIUMDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
 
 ## Custom binaries url
 
-To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_cdnurl`.
+To use a mirror of the ChromeDriver binaries use npm config property `edgechromiumdriver_cdnurl`.
 Default is `https://msedgedriver.azureedge.net/`.
 
 ```shell
-npm install node-msedgedriver --chromiumedgedriver_cdnurl=https://msedgedriver.azureedge.net/
+npm install node-msedgedriver --edgechromiumdriver_cdnurl=https://msedgedriver.azureedge.net/
 ```
 
 Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
 ```
-chromiumedgedriver_cdnurl=https://msedgedriver.azureedge.net/
+edgechromiumdriver_cdnurl=https://msedgedriver.azureedge.net/
 ```
 
 Another option is to use PATH variable `EDGECHROMIUMDRIVER_CDNURL`.
