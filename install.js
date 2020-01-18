@@ -60,7 +60,7 @@ let downloadedFile = "";
 Promise.resolve()
 	.then(function () {
 		if (edgechromiumdriver_version === "LATEST")
-			return getLatestVersion(getRequestOptions(cdnUrl + "/LATEST_RELEASE_79"));
+			return getLatestVersion(getRequestOptions(cdnUrl + "/LATEST_STABLE"));
 	})
 	.then(() => {
 		tmpPath = findSuitableTempDirectory();
