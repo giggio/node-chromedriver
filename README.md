@@ -33,7 +33,7 @@ correct version, it will simply copy it to your node_modules directory. You can
 force it always download by configuring it:
 
 ```shell
-npm install node-msedgedriver --chromiumedgedriver-force-download
+npm install node-msedgedriver --edgechromiumdriver-force-download
 ```
 
 Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
@@ -42,10 +42,10 @@ Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 edgechromiumdriver_force_download=true
 ```
 
-Another option is to use PATH variable `CHROMIUMEDGEDRIVER_FORCE_DOWNLOAD`.
+Another option is to use PATH variable `EDGECHROMIUMDRIVER_FORCE_DOWNLOAD`.
 
 ```shell
-CHROMIUMEDGEDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
+EDGECHROMIUMDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
 ```
 
 ## Custom binaries url

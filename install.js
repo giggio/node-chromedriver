@@ -103,7 +103,7 @@ function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
 	if (!fs.existsSync(edgechromiumdriverBinaryFilePath)) return false;
 	const forceDownload =
 		process.env.npm_config_edgechromiumdriver_force_download === "true" ||
-		process.env.CHROMEDRIVER_FORCE_DOWNLOAD === "true";
+		process.env.EDGECHROMIUMDRIVER_FORCE_DOWNLOAD === "true";
 	if (forceDownload) return false;
 	console.log("msedgedriver binary exists. Validating...");
 	const deferred = new Deferred();
