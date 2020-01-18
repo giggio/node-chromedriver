@@ -30,7 +30,7 @@ let platform = process.platform;
 
 let edgechromiumdriver_version =
 	process.env.npm_config_edgechromiumdriver_version ||
-	process.env.CHROMEDRIVER_VERSION ||
+	process.env.EDGECHROMIUMDRIVER_VERSION ||
 	helper.version;
 if (platform === "linux") {
 	if (process.arch === "arm64" || process.arch === "x64") {
