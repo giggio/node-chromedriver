@@ -11,7 +11,7 @@ const child_process = require("child_process");
 const os = require("os");
 
 const skipDownload =
-	process.env.npm_config_chromedriver_skip_download || process.env.EDGECHROMIUMDRIVER_SKIP_DOWNLOAD;
+	process.env.npm_config_edgechromiumdriver_skip_download || process.env.EDGECHROMIUMDRIVER_SKIP_DOWNLOAD;
 if (skipDownload === "true") {
 	console.log("Found EDGECHROMIUMDRIVER_SKIP_DOWNLOAD variable, skipping installation.");
 	process.exit(0);
@@ -19,7 +19,7 @@ if (skipDownload === "true") {
 
 const libPath = path.join(__dirname, "lib", "msedgedriver");
 let cdnUrl =
-	process.env.npm_config_chromedriver_cdnurl ||
+	process.env.npm_config_edgechromiumdriver_cdnurl ||
 	process.env.EDGECHROMIUMDRIVER_CDNURL ||
 	"https://msedgedriver.azureedge.net/";
 const configuredfilePath =
@@ -29,8 +29,8 @@ const configuredfilePath =
 cdnUrl = cdnUrl.replace(/\/+$/, "");
 let platform = process.platform;
 
-let chromedriver_version =
-	process.env.npm_config_chromedriver_version ||
+let edgechromiumdriver_version =
+	process.env.npm_config_edgechromiumdriver_version ||
 	process.env.CHROMEDRIVER_VERSION ||
 	helper.version;
 if (platform === "linux") {
@@ -53,23 +53,23 @@ if (platform === "linux") {
 	process.exit(1);
 }
 let tmpPath;
-const chromedriverBinaryFileName =
+const edgechromiumdriverBinaryFileName =
 	process.platform === "win32" ? "msedgedriver.exe" : "msedgedriver";
-let chromedriverBinaryFilePath;
+let edgechromiumdriverBinaryFilePath;
 let downloadedFile = "";
 
 Promise.resolve()
 	.then(function () {
-		if (chromedriver_version === "LATEST")
+		if (edgechromiumdriver_version === "LATEST")
 			return getLatestVersion(getRequestOptions(cdnUrl + "/LATEST_RELEASE_79"));
 	})
 	.then(() => {
 		tmpPath = findSuitableTempDirectory();
-		chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
+		edgechromiumdriverBinaryFilePath = path.resolve(tmpPath, edgechromiumdriverBinaryFileName);
 	})
 	.then(verifyIfChromedriverIsAvailableAndHasCorrectVersion)
-	.then(chromedriverIsAvailable => {
-		if (chromedriverIsAvailable) return;
+	.then(edgechromiumdriverIsAvailable => {
+		if (edgechromiumdriverIsAvailable) return;
 		console.log(
 			"Current existing msedgedriver binary is unavailable, proceding with download and extraction."
 		);
@@ -92,7 +92,7 @@ function downloadFile() {
 		const fileName = `edgedriver_${platform}.zip`;
 		const tempDownloadedFile = path.resolve(tmpPath, fileName);
 		downloadedFile = tempDownloadedFile;
-		const formattedDownloadUrl = `${cdnUrl}/${chromedriver_version}/${fileName}`;
+		const formattedDownloadUrl = `${cdnUrl}/${edgechromiumdriver_version}/${fileName}`;
 		console.log("Downloading from file: ", formattedDownloadUrl);
 		console.log("Saving to file:", downloadedFile);
 		return requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
@@ -100,16 +100,16 @@ function downloadFile() {
 }
 
 function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
-	if (!fs.existsSync(chromedriverBinaryFilePath)) return false;
+	if (!fs.existsSync(edgechromiumdriverBinaryFilePath)) return false;
 	const forceDownload =
-		process.env.npm_config_chromedriver_force_download === "true" ||
+		process.env.npm_config_edgechromiumdriver_force_download === "true" ||
 		process.env.CHROMEDRIVER_FORCE_DOWNLOAD === "true";
 	if (forceDownload) return false;
 	console.log("msedgedriver binary exists. Validating...");
 	const deferred = new Deferred();
 	try {
-		fs.accessSync(chromedriverBinaryFilePath, fs.constants.X_OK);
-		const cp = child_process.spawn(chromedriverBinaryFilePath, ["--version"]);
+		fs.accessSync(edgechromiumdriverBinaryFilePath, fs.constants.X_OK);
+		const cp = child_process.spawn(edgechromiumdriverBinaryFilePath, ["--version"]);
 		let str = "";
 		cp.stdout.on("data", function (data) {
 			str += data;
@@ -121,10 +121,10 @@ function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
 			if (code !== 0) return deferred.resolve(false);
 			const parts = str.split(" ");
 			if (parts.length < 3) return deferred.resolve(false);
-			if (parts[1].startsWith(chromedriver_version)) {
+			if (parts[1].startsWith(edgechromiumdriver_version)) {
 				console.log(str);
 				console.log(
-					`msedgedriver is already available at '${chromedriverBinaryFilePath}'.`
+					`msedgedriver is already available at '${edgechromiumdriverBinaryFilePath}'.`
 				);
 				return deferred.resolve(true);
 			}
@@ -148,7 +148,7 @@ function findSuitableTempDirectory() {
 	for (let i = 0; i < candidateTmpDirs.length; i++) {
 		if (!candidateTmpDirs[i]) continue;
 		// Prevent collision with other versions in the dependency tree
-		const namespace = chromedriver_version;
+		const namespace = edgechromiumdriver_version;
 		const candidatePath = path.join(candidateTmpDirs[i], namespace, "msedgedriver");
 		try {
 			mkdirp.sync(candidatePath, "0777");
@@ -231,7 +231,7 @@ function getLatestVersion(requestOptions) {
 		if (err) {
 			deferred.reject("Error with http(s) request: " + err);
 		} else {
-			chromedriver_version = data.trim();
+			edgechromiumdriver_version = data.trim();
 			deferred.resolve(true);
 		}
 	});
@@ -271,7 +271,7 @@ function requestBinary(requestOptions, filePath) {
 
 function extractDownload() {
 	if (path.extname(downloadedFile) !== ".zip") {
-		fs.copyFileSync(downloadedFile, chromedriverBinaryFilePath);
+		fs.copyFileSync(downloadedFile, edgechromiumdriverBinaryFilePath);
 		console.log("Skipping zip extraction - binary file found.");
 		return Promise.resolve();
 	}

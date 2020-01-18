@@ -27,7 +27,7 @@
             ],
             "env": {
                 "NODE_ENV": "development",
-                "CHROMEDRIVER_VERSION": "LATEST"
+                "EDGECHROMIUMDRIVER_VERSION": "LATEST"
             }
         },
         {

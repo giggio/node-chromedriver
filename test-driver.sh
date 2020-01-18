@@ -1,10 +1,10 @@
-# Start ChromeDriver and make it non-blocking with ampersand
-./bin/chromedriver &
+# Start MSEdgeDriver and make it non-blocking with ampersand
+./bin/msedgedriver &
 
-# Keep track of the ChromeDrivers Process ID
+# Keep track of the MSEdgeDrivers Process ID
 TASK_PID=$!
 
-# Wait for 10 seconds to give the ChromeDriver a chance to fail if there is an
+# Wait for 10 seconds to give the MSEdgeDriver a chance to fail if there is an
 # issue.
 sleep 5
 

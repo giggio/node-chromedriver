@@ -41,7 +41,7 @@ function removeFolder(dir) {
   fs.rmdirSync(dir);
 }
 
-const tempInstallPath = path.resolve(tmpdir, 'chromedriver-test');
+const tempInstallPath = path.resolve(tmpdir, 'edgechromiumdriver-test');
 if (directoryExists(tempInstallPath)) {
   console.log(`Deleting directory '${tempInstallPath}'.`);
   removeFolder(tempInstallPath);
@@ -95,7 +95,7 @@ function sleep(milliseconds) {
   while (inAFewMilliseconds > new Date()) { }
 }
 
-const packedFile = path.resolve(tempInstallPath, 'chromedriver.tgz');
+const packedFile = path.resolve(tempInstallPath, 'edgechromiumdriver.tgz');
 
 function pack() {
   del(path.resolve(__dirname, '*.tgz'));
@@ -121,14 +121,14 @@ for (const version of versions) {
   nvmUse(version);
   if (os.platform() === 'win32') {
     sleep(2000); // wait 2 seconds until everything is in place
-    checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --chromedriver-force-download --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
+    checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --edgechromiumdriver-force-download --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
     checkFile(tempInstallPathForVersion, version);
     del(tempInstallPathForVersion, { force: true });
     fs.mkdirSync(tempInstallPathForVersion);
     checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
     checkFile(tempInstallPathForVersion, version);
   } else {
-    checkSpawn(spawnSync('npm', ['i', '--no-progress', '--chromedriver-force-download', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
+    checkSpawn(spawnSync('npm', ['i', '--no-progress', '--edgechromiumdriver-force-download', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
     checkFile(tempInstallPathForVersion, version);
     del(tempInstallPathForVersion, { force: true });
     fs.mkdirSync(tempInstallPathForVersion);
@@ -138,7 +138,7 @@ for (const version of versions) {
 }
 
 function checkFile(tempInstallPathForVersion, version) {
-  const executable = path.resolve(tempInstallPathForVersion, 'node_modules', 'chromedriver', 'lib', 'chromedriver', `chromedriver${os.platform() === 'win32' ? '.exe' : ''}`);
+  const executable = path.resolve(tempInstallPathForVersion, 'node_modules', 'msedgedriver', 'lib', 'msedgedriver', `msedgedriver${os.platform() === 'win32' ? '.exe' : ''}`);
   if (fileExists(executable)) {
     console.log(`Version ${version} installed fine.`);
   }

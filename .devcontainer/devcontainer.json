@@ -1,5 +1,5 @@
 {
-  "name": "Node Chromedriver",
+  "name": "Node EdgeDriver",
   "dockerFile": "Dockerfile",
   "appPort": 9000,
   "extensions": [

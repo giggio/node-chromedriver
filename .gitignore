@@ -1,5 +1,5 @@
 node_modules
-lib/chromedriver
+lib/msedgedriver
 tmp
 npm-debug.log
 *.tgz
