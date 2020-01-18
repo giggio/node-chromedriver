@@ -25,7 +25,6 @@ let cdnUrl =
 const configuredfilePath =
 	process.env.npm_config_EDGECHROMIUMDRIVER_FILEPATH || process.env.EDGECHROMIUMDRIVER_FILEPATH;
 
-// adapt http://chromedriver.storage.googleapis.com/
 cdnUrl = cdnUrl.replace(/\/+$/, "");
 let platform = process.platform;
 
