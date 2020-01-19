@@ -1,7 +1,6 @@
 # Node MS Edge Driver
 
-<!-- [![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=master)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=master) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=master)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=master)
-[![npm](https://img.shields.io/npm/dt/chromedriver.svg)](https://www.npmjs.com/package/chromedriver) -->
+[![npm](https://img.shields.io/npm/dt/msedgedriver.svg)](https://www.npmjs.com/package/msedgedriver)
 
 An NPM wrapper for Selenium [MSEdgeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
 
