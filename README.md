@@ -1,14 +1,14 @@
 # Node MS Edge Driver
 
-[![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=master)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=master) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=master)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=master)
-[![npm](https://img.shields.io/npm/dt/chromedriver.svg)](https://www.npmjs.com/package/chromedriver)
+<!-- [![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=master)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=master) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=master)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=master)
+[![npm](https://img.shields.io/npm/dt/chromedriver.svg)](https://www.npmjs.com/package/chromedriver) -->
 
 An NPM wrapper for Selenium [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
 
 ## Building and Installing
 
 ```shell
-npm install node-msedgedriver
+npm install msedgedriver
 ```
 
 Or grab the source and
@@ -33,7 +33,7 @@ correct version, it will simply copy it to your node_modules directory. You can
 force it always download by configuring it:
 
 ```shell
-npm install node-msedgedriver --edgechromiumdriver-force-download
+npm install msedgedriver --edgechromiumdriver-force-download
 ```
 
 Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
@@ -54,7 +54,7 @@ To use a mirror of the ChromeDriver binaries use npm config property `edgechromi
 Default is `https://msedgedriver.azureedge.net/`.
 
 ```shell
-npm install node-msedgedriver --edgechromiumdriver_cdnurl=https://msedgedriver.azureedge.net/
+npm install msedgedriver --edgechromiumdriver_cdnurl=https://msedgedriver.azureedge.net/
 ```
 
 Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
@@ -66,7 +66,7 @@ edgechromiumdriver_cdnurl=https://msedgedriver.azureedge.net/
 Another option is to use PATH variable `EDGECHROMIUMDRIVER_CDNURL`.
 
 ```shell
-EDGECHROMIUMDRIVER_CDNURL=https://msedgedriver.azureedge.net/ npm install node-msedgedriver
+EDGECHROMIUMDRIVER_CDNURL=https://msedgedriver.azureedge.net/ npm install msedgedriver
 ```
 
 ## Custom binaries file
@@ -74,7 +74,7 @@ EDGECHROMIUMDRIVER_CDNURL=https://msedgedriver.azureedge.net/ npm install node-m
 To get the msedgedriver from the filesystem instead of a web request use the npm config property `EDGECHROMIUMDRIVER_FILEPATH`.
 
 ```shell
-npm install node-msedgedriver --EDGECHROMIUMDRIVER_FILEPATH=/path/to/msedgedriver_mac64.zip
+npm install msedgedriver --EDGECHROMIUMDRIVER_FILEPATH=/path/to/msedgedriver_mac64.zip
 ```
 
 Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
@@ -116,7 +116,7 @@ You may wish to skip the downloading of the msedgedriver binary file, for exampl
 To achieve this you can use the npm config property `edgechromiumdriver_skip_download`.
 
 ```shell
-npm install node-msedgedriver --edgechromiumdriver_skip_download=true
+npm install msedgedriver --edgechromiumdriver_skip_download=true
 ```
 
 Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
@@ -143,7 +143,7 @@ it is wont to do.
 ## Running with Selenium WebDriver
 
 ```javascript
-require('node-msedgedriver');
+require('msedgedriver');
 var webdriver = require('selenium-webdriver');
 var driver = new webdriver.Builder()
   .forBrowser('chrome')
@@ -153,7 +153,7 @@ var driver = new webdriver.Builder()
 (Tested for selenium-webdriver version `2.48.2`)
 
 The path will be added to the process automatically, you don't need to configure it.
-But you can get it from `require('node-msedgedriver').path` if you want it.
+But you can get it from `require('msedgedriver').path` if you want it.
 
 ## Running via node
 
@@ -164,7 +164,7 @@ Below is an example of using this package via node.
 
 ```javascript
 var childProcess = require('child_process');
-var chromiumedgedriver = require('node-msedgedriver');
+var chromiumedgedriver = require('msedgedriver');
 var binPath = chromiumedgedriver.path;
 
 var childArgs = [
@@ -180,7 +180,7 @@ childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
 You can also use the start and stop methods:
 
 ```javascript
-var chromiumedgedriver = require('node-msedgedriver');
+var chromiumedgedriver = require('msedgedriver');
 
 args = [
 	// optional arguments
@@ -210,11 +210,11 @@ executed as a callback at the end of your tests
 The NPM package version tracks the version of msedgedriver that will be installed,
 with an additional build number that is used for revisions to the installer.
 You can use the package version number to install a specific version, or use the
-setting to a specific version. If there is a new Edge Driver version available which is not yet available as a version of `node-msedgedriver`, the npm command `npm run update-msedgedriver` in this repository can be used to make the required updates to this module, please submit the change as a PR. To always install the latest version of MSEdgedriver,
+setting to a specific version. If there is a new Edge Driver version available which is not yet available as a version of `msedgedriver`, the npm command `npm run update-msedgedriver` in this repository can be used to make the required updates to this module, please submit the change as a PR. To always install the latest version of MSEdgedriver,
 use `LATEST` as the version number:
 
 ```shell
-npm install node-msedgedriver --edgechromiumdriver_version=LATEST
+npm install msedgedriver --edgechromiumdriver_version=LATEST
 ```
 
 Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
@@ -226,10 +226,10 @@ edgechromiumdriver_version=LATEST
 Another option is to use env variable `EDGECHROMIUMDRIVER_VERSION`.
 
 ```shell
-EDGECHROMIUMDRIVER_VERSION=LATEST npm install node-msedgedriver
+EDGECHROMIUMDRIVER_VERSION=LATEST npm install msedgedriver
 ```
 
-## A Note on node-msedgedriver
+## A Note on msedgedriver
 
 MSEdgedriver is not a library for NodeJS.
 
