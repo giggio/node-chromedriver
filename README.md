@@ -3,7 +3,7 @@
 <!-- [![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=master)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=master) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=master)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=master)
 [![npm](https://img.shields.io/npm/dt/chromedriver.svg)](https://www.npmjs.com/package/chromedriver) -->
 
-An NPM wrapper for Selenium [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
+An NPM wrapper for Selenium [MSEdgeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
 
 ## Building and Installing
 
@@ -18,17 +18,17 @@ node ./install.js
 ```
 
 What this is really doing is just grabbing a particular "blessed" (by
-this module) version of ChromeDriver. As new versions are released
+this module) version of MSEdgeDriver. As new versions are released
 and vetted, this module will be updated accordingly.
 
-The package has been set up to fetch and run ChromeDriver for MacOS (darwin),
+The package has been set up to fetch and run MSEdgeDriver for MacOS (darwin),
 Linux based platforms (as identified by Node.js), and Windows.  If you
 spot any platform weirdness, let us know or send a patch.
 
 ## Force download
 
 By default this package, when installed, will search for an existing
-Chromedriver binary in your configured temp directory. If found, and it is the
+MSEdgeDriver binary in your configured temp directory. If found, and it is the
 correct version, it will simply copy it to your node_modules directory. You can
 force it always download by configuring it:
 
@@ -45,12 +45,12 @@ edgechromiumdriver_force_download=true
 Another option is to use PATH variable `EDGECHROMIUMDRIVER_FORCE_DOWNLOAD`.
 
 ```shell
-EDGECHROMIUMDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
+EDGECHROMIUMDRIVER_FORCE_DOWNLOAD=true npm install msedgedriver
 ```
 
 ## Custom binaries url
 
-To use a mirror of the ChromeDriver binaries use npm config property `edgechromiumdriver_cdnurl`.
+To use a mirror of the MSEdgeDriver binaries use npm config property `edgechromiumdriver_cdnurl`.
 Default is `https://msedgedriver.azureedge.net/`.
 
 ```shell
