@@ -50,8 +50,15 @@ let chromedriverBinaryFilePath;
 let downloadedFile = '';
 
 Promise.resolve().then(function () {
-  if (chromedriver_version === 'LATEST')
-    return getLatestVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE'));
+  if (chromedriver_version === 'LATEST') {
+    return getLatestVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE`));
+  } else {
+    const latestReleaseForVersionMatch = chromedriver_version.match(/LATEST_(\d+)/);
+    if (latestReleaseForVersionMatch) {
+      const majorVersion = latestReleaseForVersionMatch[1];
+      return getLatestVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`));
+    }
+  }
 })
 .then(() => {
   tmpPath = findSuitableTempDirectory();

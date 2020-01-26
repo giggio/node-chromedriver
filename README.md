@@ -229,6 +229,12 @@ Another option is to use env variable `CHROMEDRIVER_VERSION`.
 CHROMEDRIVER_VERSION=LATEST npm install chromedriver
 ```
 
+You can force the latest release for a specific major version by specifying `LATEST_{VERSION_NUMBER}`:
+
+```shell
+CHROMEDRIVER_VERSION=LATEST_80 npm install chromedriver
+```
+
 You can also force a different version of chromedriver by replacing `LATEST` with a version number:
 
 ```shell
