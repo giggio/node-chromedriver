@@ -105,6 +105,7 @@ npm config set https-proxy http://[user:pwd]@domain.tld:port
 ```
 
 Use different User-Agent.
+
 ```shell
 npm config set user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"
 ```
@@ -183,7 +184,7 @@ You can also use the start and stop methods:
 var chromedriver = require('chromedriver');
 
 args = [
-	// optional arguments
+ // optional arguments
 ];
 chromedriver.start(args);
 // run your tests

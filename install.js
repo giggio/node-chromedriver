@@ -72,23 +72,23 @@ Promise.resolve().then(function () {
     }
   }
 })
-.then(() => {
-  tmpPath = findSuitableTempDirectory();
-  chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName );
-})
-.then(verifyIfChromedriverIsAvailableAndHasCorrectVersion)
-.then(chromedriverIsAvailable => {
-  if (chromedriverIsAvailable) return;
-  console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
-  return downloadFile().then(extractDownload);
-})
-.then(() => copyIntoPlace(tmpPath, libPath))
-.then(fixFilePermissions)
-.then(() => console.log('Done. ChromeDriver binary available at', helper.path))
-.catch(function (err) {
-  console.error('ChromeDriver installation failed', err);
-  process.exit(1);
-});
+  .then(() => {
+    tmpPath = findSuitableTempDirectory();
+    chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
+  })
+  .then(verifyIfChromedriverIsAvailableAndHasCorrectVersion)
+  .then(chromedriverIsAvailable => {
+    if (chromedriverIsAvailable) return;
+    console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
+    return downloadFile().then(extractDownload);
+  })
+  .then(() => copyIntoPlace(tmpPath, libPath))
+  .then(fixFilePermissions)
+  .then(() => console.log('Done. ChromeDriver binary available at', helper.path))
+  .catch(function (err) {
+    console.error('ChromeDriver installation failed', err);
+    process.exit(1);
+  });
 
 function downloadFile() {
   if (detect_chromedriver_version !== 'true' && configuredfilePath) {
@@ -176,7 +176,7 @@ function findSuitableTempDirectory() {
 
 
 function getRequestOptions(downloadPath) {
-  const options = {uri: downloadPath, method: 'GET'};
+  const options = { uri: downloadPath, method: 'GET' };
   const protocol = options.uri.substring(0, options.uri.indexOf('//'));
   const proxyUrl = protocol === 'https:'
     ? process.env.npm_config_https_proxy
@@ -201,7 +201,7 @@ function getRequestOptions(downloadPath) {
 
   if (!ca && process.env.npm_config_cafile) {
     try {
-      ca = fs.readFileSync(process.env.npm_config_cafile, {encoding: 'utf8'})
+      ca = fs.readFileSync(process.env.npm_config_cafile, { encoding: 'utf8' })
         .split(/\n(?=-----BEGIN CERTIFICATE-----)/g);
 
       // Comments at the beginning of the file result in the first
@@ -226,7 +226,7 @@ function getRequestOptions(downloadPath) {
 
   // Use specific User-Agent
   if (process.env.npm_config_user_agent) {
-    options.headers = {'User-Agent': process.env.npm_config_user_agent};
+    options.headers = { 'User-Agent': process.env.npm_config_user_agent };
   }
 
   return options;
@@ -297,13 +297,13 @@ function extractDownload() {
 
 function copyIntoPlace(originPath, targetPath) {
   return del(targetPath)
-    .then(function() {
+    .then(function () {
       console.log("Copying to target path", targetPath);
       fs.mkdirSync(targetPath);
 
       // Look for the extracted directory, so we can rename it.
       const files = fs.readdirSync(originPath);
-      const promises = files.map(function(name) {
+      const promises = files.map(function (name) {
         const deferred = new Deferred();
 
         const file = path.join(originPath, name);
@@ -311,7 +311,7 @@ function copyIntoPlace(originPath, targetPath) {
 
         const targetFile = path.join(targetPath, name);
         const writer = fs.createWriteStream(targetFile);
-        writer.on("close", function() {
+        writer.on("close", function () {
           deferred.resolve(true);
         });
 
