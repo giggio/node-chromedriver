@@ -1,9 +1,9 @@
 language: node_js
 
 node_js:
-  - '8'
-  - '10'
-  - '12'
+  - "10"
+  - "12"
+  - "13"
 
 runtime:
   nodePool: shippable_shared_aarch64
