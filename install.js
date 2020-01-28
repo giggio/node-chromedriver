@@ -55,8 +55,11 @@ Promise.resolve().then(function () {
   if (detect_chromedriver_version === 'true') {
     // Refer http://chromedriver.chromium.org/downloads/version-selection
     return getChromeVersion().then(function (chromeVersion) {
-      console.log("Your Chrome version is " + chromeVersion);
-      const chromeVersionWithoutPatch = /^(.*?)\.\d+$/.exec(chromeVersion)[1];
+      const cleanChromeDriverVersion = chromeVersion.trim();
+
+      console.log("Your Chrome version is " + cleanChromeDriverVersion);
+
+      const chromeVersionWithoutPatch = /^(.*?)\.\d+$/.exec(cleanChromeDriverVersion)[1];
       return getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
     }).then(function () {
       console.log("Compatible ChromeDriver version is " + chromedriver_version);
