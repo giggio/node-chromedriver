@@ -35,7 +35,7 @@ let edgechromiumdriver_version =
   helper.version;
 if (platform === "linux") {
   console.log("Linux not supported.");
-  process.exit(1);
+  process.exit(0);
 } else if (platform === "darwin" || platform === "freebsd") {
   if (process.arch === "x64") {
     // @ts-ignore
