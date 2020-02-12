@@ -1,14 +1,18 @@
 'use strict';
+// @ts-check
 
-const extractZip = require('extract-zip');
 const fs = require('fs');
 const helper = require('./lib/chromedriver');
-const request = require('request');
+const axios = require('axios').default;
 const mkdirp = require('mkdirp');
 const path = require('path');
 const del = require('del');
 const child_process = require('child_process');
 const os = require('os');
+const url = require('url');
+const https = require('https');
+const { promisify } = require('util');
+const extractZip = promisify(require('extract-zip'));
 const { getChromeVersion } = require('@testim/chrome-version');
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
@@ -23,115 +27,110 @@ const configuredfilePath = process.env.npm_config_chromedriver_filepath || proce
 
 // adapt http://chromedriver.storage.googleapis.com/
 cdnUrl = cdnUrl.replace(/\/+$/, '');
-let platform = process.platform;
-
+const platform = validatePlatform();
 const detect_chromedriver_version = process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION;
 let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
-if (platform === 'linux') {
-  if (process.arch === 'arm64' || process.arch === 'x64') {
-    platform += '64';
-  } else {
-    console.log('Only Linux 64 bits supported.');
-    process.exit(1);
-  }
-} else if (platform === 'darwin' || platform === 'freebsd') {
-  if (process.arch === 'x64') {
-    // @ts-ignore
-    platform = 'mac64';
-  } else {
-    console.log('Only Mac 64 bits supported.');
-    process.exit(1);
-  }
-} else if (platform !== 'win32') {
-  console.log('Unexpected platform or architecture:', process.platform, process.arch);
-  process.exit(1);
-}
-let tmpPath;
-const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
 let chromedriverBinaryFilePath;
 let downloadedFile = '';
 
-Promise.resolve().then(function () {
-  if (detect_chromedriver_version === 'true') {
-    // Refer http://chromedriver.chromium.org/downloads/version-selection
-    return getChromeVersion().then(function (chromeVersion) {
+(async function install() {
+  try {
+    if (detect_chromedriver_version === 'true') {
+      // Refer http://chromedriver.chromium.org/downloads/version-selection
+      const chromeVersion = await getChromeVersion();
       console.log("Your Chrome version is " + chromeVersion);
       const chromeVersionWithoutPatch = /^(.*?)\.\d+$/.exec(chromeVersion)[1];
-      return getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
-    }).then(function () {
+      await getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
       console.log("Compatible ChromeDriver version is " + chromedriver_version);
-    });
-  }
-  if (chromedriver_version === 'LATEST') {
-    return getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE`));
-  } else {
-    const latestReleaseForVersionMatch = chromedriver_version.match(/LATEST_(\d+)/);
-    if (latestReleaseForVersionMatch) {
-      const majorVersion = latestReleaseForVersionMatch[1];
-      return getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`));
     }
-  }
-})
-  .then(() => {
-    tmpPath = findSuitableTempDirectory();
+    if (chromedriver_version === 'LATEST') {
+      await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE`));
+    } else {
+      const latestReleaseForVersionMatch = chromedriver_version.match(/LATEST_(\d+)/);
+      if (latestReleaseForVersionMatch) {
+        const majorVersion = latestReleaseForVersionMatch[1];
+        await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`));
+      }
+    }
+    const tmpPath = findSuitableTempDirectory();
+    const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
     chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
-  })
-  .then(verifyIfChromedriverIsAvailableAndHasCorrectVersion)
-  .then(chromedriverIsAvailable => {
-    if (chromedriverIsAvailable) return;
-    console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
-    return downloadFile().then(extractDownload);
-  })
-  .then(() => copyIntoPlace(tmpPath, libPath))
-  .then(fixFilePermissions)
-  .then(() => console.log('Done. ChromeDriver binary available at', helper.path))
-  .catch(function (err) {
+    const chromedriverIsAvailable = await verifyIfChromedriverIsAvailableAndHasCorrectVersion();
+    if (!chromedriverIsAvailable) {
+      console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
+      await downloadFile(tmpPath);
+      await extractDownload(tmpPath);
+    }
+    await copyIntoPlace(tmpPath, libPath);
+    fixFilePermissions();
+    console.log('Done. ChromeDriver binary available at', helper.path);
+  } catch (err) {
     console.error('ChromeDriver installation failed', err);
     process.exit(1);
-  });
+  }
+})();
 
-function downloadFile() {
+function validatePlatform() {
+  /** @type string */
+  let thePlatform = process.platform;
+  if (thePlatform === 'linux') {
+    if (process.arch === 'arm64' || process.arch === 'x64') {
+      thePlatform += '64';
+    } else {
+      console.log('Only Linux 64 bits supported.');
+      process.exit(1);
+    }
+  } else if (thePlatform === 'darwin' || thePlatform === 'freebsd') {
+    if (process.arch === 'x64') {
+      thePlatform = 'mac64';
+    } else {
+      console.log('Only Mac 64 bits supported.');
+      process.exit(1);
+    }
+  } else if (thePlatform !== 'win32') {
+    console.log('Unexpected platform or architecture:', process.platform, process.arch);
+    process.exit(1);
+  }
+  return thePlatform;
+}
+
+async function downloadFile(dirToLoadTo) {
   if (detect_chromedriver_version !== 'true' && configuredfilePath) {
     downloadedFile = configuredfilePath;
     console.log('Using file: ', downloadedFile);
-    return Promise.resolve();
+    return;
   } else {
     const fileName = `chromedriver_${platform}.zip`;
-    const tempDownloadedFile = path.resolve(tmpPath, fileName);
+    const tempDownloadedFile = path.resolve(dirToLoadTo, fileName);
     downloadedFile = tempDownloadedFile;
     const formattedDownloadUrl = `${cdnUrl}/${chromedriver_version}/${fileName}`;
     console.log('Downloading from file: ', formattedDownloadUrl);
     console.log('Saving to file:', downloadedFile);
-    return requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
+    await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
   }
 }
 
 function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
   if (!fs.existsSync(chromedriverBinaryFilePath))
-    return false;
+    return Promise.resolve(false);
   const forceDownload = process.env.npm_config_chromedriver_force_download === 'true' || process.env.CHROMEDRIVER_FORCE_DOWNLOAD === 'true';
   if (forceDownload)
-    return false;
+    return Promise.resolve(false);
   console.log('ChromeDriver binary exists. Validating...');
   const deferred = new Deferred();
   try {
     fs.accessSync(chromedriverBinaryFilePath, fs.constants.X_OK);
     const cp = child_process.spawn(chromedriverBinaryFilePath, ['--version']);
     let str = '';
-    cp.stdout.on('data', function (data) {
-      str += data;
-    });
-    cp.on('error', function () {
-      deferred.resolve(false);
-    });
-    cp.on('close', function (code) {
+    cp.stdout.on('data', data => str += data);
+    cp.on('error', () => deferred.resolve(false));
+    cp.on('close', code => {
       if (code !== 0)
         return deferred.resolve(false);
       const parts = str.split(' ');
       if (parts.length < 3)
         return deferred.resolve(false);
       if (parts[1].startsWith(chromedriver_version)) {
-        console.log(str);
         console.log(`ChromeDriver is already available at '${chromedriverBinaryFilePath}'.`);
         return deferred.resolve(true);
       }
@@ -169,59 +168,46 @@ function findSuitableTempDirectory() {
       console.log(candidatePath, 'is not writable:', e.message);
     }
   }
-
   console.error('Can not find a writable tmp directory, please report issue on https://github.com/giggio/chromedriver/issues/ with as much information as possible.');
   process.exit(1);
 }
 
-
 function getRequestOptions(downloadPath) {
-  const options = { uri: downloadPath, method: 'GET' };
-  const protocol = options.uri.substring(0, options.uri.indexOf('//'));
-  const proxyUrl = protocol === 'https:'
+  /** @type import('axios').AxiosRequestConfig */
+  const options = { url: downloadPath, method: "GET" };
+  const urlParts = url.parse(downloadPath);
+  const isHttps = urlParts.protocol === 'https:';
+  const proxyUrl = isHttps
     ? process.env.npm_config_https_proxy
     : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
   if (proxyUrl) {
-    options.proxy = proxyUrl;
-  }
-
-  options.strictSSL = !!process.env.npm_config_strict_ssl;
-
-  // Use certificate authority settings from npm
-  let ca = process.env.npm_config_ca;
-
-  // Parse ca string like npm does
-  if (ca && ca.match(/^".*"$/)) {
-    try {
-      ca = JSON.parse(ca.trim());
-    } catch (e) {
-      console.error('Could not parse ca string', process.env.npm_config_ca, e);
-    }
-  }
-
-  if (!ca && process.env.npm_config_cafile) {
-    try {
-      ca = fs.readFileSync(process.env.npm_config_cafile, { encoding: 'utf8' })
-        .split(/\n(?=-----BEGIN CERTIFICATE-----)/g);
-
-      // Comments at the beginning of the file result in the first
-      // item not containing a certificate - in this case the
-      // download will fail
-      if (ca.length > 0 && !/-----BEGIN CERTIFICATE-----/.test(ca[0])) {
-        ca.shift();
-      }
-
-    } catch (e) {
-      console.error('Could not read cafile', process.env.npm_config_cafile, e);
-    }
-  }
-
-  if (ca) {
-    console.log('Using npmconf ca');
-    options.agentOptions = {
-      ca: ca
+    const proxyUrlParts = url.parse(proxyUrl);
+    options.proxy = {
+      host: proxyUrlParts.hostname,
+      port: proxyUrlParts.port ? parseInt(proxyUrlParts.port) : 80,
+      protocol: proxyUrlParts.protocol
     };
-    options.ca = ca;
+  }
+
+  if (isHttps) {
+    // Use certificate authority settings from npm
+    let ca = process.env.npm_config_ca;
+    if (ca)
+      console.log('Using npmconf ca.');
+
+    if (!ca && process.env.npm_config_cafile) {
+      try {
+        ca = fs.readFileSync(process.env.npm_config_cafile, { encoding: 'utf8' });
+      } catch (e) {
+        console.error('Could not read cafile', process.env.npm_config_cafile, e);
+      }
+      console.log('Using npmconf cafile.');
+    }
+
+    options.httpsAgent = new https.Agent({
+      rejectUnauthorized: !!process.env.npm_config_strict_ssl,
+      ca: ca
+    });
   }
 
   // Use specific User-Agent
@@ -232,94 +218,90 @@ function getRequestOptions(downloadPath) {
   return options;
 }
 
-function getChromeDriverVersion(requestOptions) {
-  const deferred = new Deferred();
-  request(requestOptions, function (err, response, data) {
-    if (err) {
-      deferred.reject('Error with http(s) request: ' + err);
-    } else {
-      chromedriver_version = data.trim();
-      deferred.resolve(true);
-    }
-  });
-  return deferred.promise;
+/**
+ *
+ * @param {import('axios').AxiosRequestConfig} requestOptions
+ */
+async function getChromeDriverVersion(requestOptions) {
+  console.log('Finding Chromedriver version.');
+  const response = await axios(requestOptions);
+  chromedriver_version = response.data.trim();
+  console.log(`Chromedriver version is ${chromedriver_version}.`);
 }
 
-function requestBinary(requestOptions, filePath) {
-  const deferred = new Deferred();
-
+/**
+ *
+ * @param {import('axios').AxiosRequestConfig} requestOptions
+ * @param {string} filePath
+ */
+async function requestBinary(requestOptions, filePath) {
+  const outFile = fs.createWriteStream(filePath);
+  let response;
+  try {
+    response = await axios.create(requestOptions)({ responseType: 'stream' });
+  } catch (error) {
+    if (error && error.response) {
+      if (error.response.status)
+        console.error('Error status code:', error.response.status);
+      if (error.response.data) {
+        error.response.data.on('data', data => console.error(data.toString('utf8')));
+        await new Promise((resolve) => {
+          error.response.data.on('finish', resolve);
+          error.response.data.on('error', resolve);
+        });
+      }
+    }
+    throw new Error('Error with http(s) request: ' + error);
+  }
   let count = 0;
   let notifiedCount = 0;
-  const outFile = fs.openSync(filePath, 'w');
-
-  const client = request(requestOptions);
-
-  client.on('error', function (err) {
-    deferred.reject('Error with http(s) request: ' + err);
-  });
-
-  client.on('data', function (data) {
-    fs.writeSync(outFile, data, 0, data.length, null);
+  response.data.on('data', data => {
     count += data.length;
-    if ((count - notifiedCount) > 800000) {
+    if ((count - notifiedCount) > 1024 * 1024) {
       console.log('Received ' + Math.floor(count / 1024) + 'K...');
       notifiedCount = count;
     }
   });
-
-  client.on('end', function () {
-    console.log('Received ' + Math.floor(count / 1024) + 'K total.');
-    fs.closeSync(outFile);
-    deferred.resolve(true);
+  response.data.on('end', () => console.log('Received ' + Math.floor(count / 1024) + 'K total.'));
+  const pipe = response.data.pipe(outFile);
+  await new Promise((resolve, reject) => {
+    pipe.on('finish', resolve);
+    pipe.on('error', reject);
   });
-
-  return deferred.promise;
 }
 
-function extractDownload() {
+async function extractDownload(dirToExtractTo) {
   if (path.extname(downloadedFile) !== '.zip') {
     fs.copyFileSync(downloadedFile, chromedriverBinaryFilePath);
     console.log('Skipping zip extraction - binary file found.');
-    return Promise.resolve();
+    return;
   }
-  const deferred = new Deferred();
   console.log('Extracting zip contents');
-  extractZip(path.resolve(downloadedFile), { dir: tmpPath }, function (err) {
-    if (err) {
-      deferred.reject('Error extracting archive: ' + err);
-    } else {
-      deferred.resolve(true);
-    }
-  });
-  return deferred.promise;
+  try {
+    await extractZip(path.resolve(downloadedFile), { dir: dirToExtractTo });
+  } catch (error) {
+    throw new Error('Error extracting archive: ' + error);
+  }
 }
 
+async function copyIntoPlace(originPath, targetPath) {
+  await del(targetPath);
+  console.log("Copying to target path", targetPath);
+  fs.mkdirSync(targetPath);
 
-function copyIntoPlace(originPath, targetPath) {
-  return del(targetPath)
-    .then(function () {
-      console.log("Copying to target path", targetPath);
-      fs.mkdirSync(targetPath);
-
-      // Look for the extracted directory, so we can rename it.
-      const files = fs.readdirSync(originPath);
-      const promises = files.map(function (name) {
-        const deferred = new Deferred();
-
-        const file = path.join(originPath, name);
-        const reader = fs.createReadStream(file);
-
-        const targetFile = path.join(targetPath, name);
-        const writer = fs.createWriteStream(targetFile);
-        writer.on("close", function () {
-          deferred.resolve(true);
-        });
-
-        reader.pipe(writer);
-        return deferred.promise;
-      });
-      return Promise.all(promises);
+  // Look for the extracted directory, so we can rename it.
+  const files = fs.readdirSync(originPath);
+  const promises = files.map(name => {
+    return new Promise((resolve) => {
+      const file = path.join(originPath, name);
+      const reader = fs.createReadStream(file);
+      const targetFile = path.join(targetPath, name);
+      const writer = fs.createWriteStream(targetFile);
+      writer.on("close", () => resolve());
+      reader.pipe(writer);
     });
+  });
+  await Promise.all(promises);
 }
 
 
