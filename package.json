@@ -29,7 +29,7 @@
     "@testim/chrome-version": "^1.0.7",
     "axios": "^0.19.2",
     "del": "^5.1.0",
-    "extract-zip": "^1.6.7",
+    "extract-zip": "^1.7.0",
     "mkdirp": "^1.0.3",
     "tcp-port-used": "^1.0.1"
   }
