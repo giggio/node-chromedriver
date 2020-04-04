@@ -11,8 +11,7 @@ const child_process = require('child_process');
 const os = require('os');
 const url = require('url');
 const https = require('https');
-const { promisify } = require('util');
-const extractZip = promisify(require('extract-zip'));
+const extractZip = require('extract-zip');
 const { getChromeVersion } = require('@testim/chrome-version');
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
@@ -276,7 +275,7 @@ async function extractDownload(dirToExtractTo) {
     console.log('Skipping zip extraction - binary file found.');
     return;
   }
-  console.log('Extracting zip contents');
+  console.log('Extracting zip contents.');
   try {
     await extractZip(path.resolve(downloadedFile), { dir: dirToExtractTo });
   } catch (error) {
@@ -311,7 +310,7 @@ function fixFilePermissions() {
     const stat = fs.statSync(helper.path);
     // 64 == 0100 (no octal literal in strict mode)
     if (!(stat.mode & 64)) {
-      console.log('Fixing file permissions');
+      console.log('Fixing file permissions.');
       fs.chmodSync(helper.path, '755');
     }
   }
