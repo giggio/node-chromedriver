@@ -275,7 +275,7 @@ async function extractDownload(dirToExtractTo) {
     console.log('Skipping zip extraction - binary file found.');
     return;
   }
-  console.log('Extracting zip contents.');
+  console.log(`Extracting zip contents to ${dirToExtractTo}.`);
   try {
     await extractZip(path.resolve(downloadedFile), { dir: dirToExtractTo });
   } catch (error) {

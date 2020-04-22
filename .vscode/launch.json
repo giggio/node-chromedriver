@@ -6,6 +6,19 @@
             "type": "node",
             "request": "launch",
             "program": "${workspaceRoot}/install.js",
+            "cwd": "${workspaceRoot}",
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            }
+        },
+        {
+            "name": "Launch (nvm)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/install.js",
             "runtimeVersion": "14.0.0",
             "cwd": "${workspaceRoot}",
             "runtimeArgs": [
