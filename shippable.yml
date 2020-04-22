@@ -4,6 +4,7 @@ node_js:
   - "10"
   - "12"
   - "13"
+  - "14"
 
 runtime:
   nodePool: shippable_shared_aarch64
