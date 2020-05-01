@@ -13,9 +13,8 @@ jobs:
           nodeversion: "12.x"
         node_13:
           nodeversion: "13.x"
-        # reenable node.js 14 when https://github.com/giggio/node-chromedriver/issues/265 is fixed
-        # node_14:
-        #   nodeversion: '14.x'
+        node_14:
+          nodeversion: "14.x"
     steps:
       - task: NodeTool@0
         inputs:
@@ -37,9 +36,8 @@ jobs:
           nodeversion: "12.x"
         node_13:
           nodeversion: "13.x"
-        # reenable node.js 14 when https://github.com/giggio/node-chromedriver/issues/265 is fixed
-        # node_14:
-        #   nodeversion: '14.x'
+        node_14:
+          nodeversion: "14.x"
     steps:
       - task: NodeTool@0
         inputs:
@@ -60,9 +58,8 @@ jobs:
           nodeversion: "12.x"
         node_13:
           nodeversion: "13.x"
-        # reenable node.js 14 when https://github.com/giggio/node-chromedriver/issues/265 is fixed
-        # node_14:
-        #   nodeversion: '14.x'
+        node_14:
+          nodeversion: "14.x"
     steps:
       - task: NodeTool@0
         inputs:
