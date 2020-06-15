@@ -1,6 +1,6 @@
 # ChromeDriver
 
-[![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=master)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=master) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=master)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=master)
+[![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=main)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=main) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=main)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=main)
 [![npm](https://img.shields.io/npm/dt/chromedriver.svg)](https://www.npmjs.com/package/chromedriver)
 
 An NPM wrapper for Selenium [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
@@ -279,7 +279,7 @@ It is not a Node.js wrapper.
 We will do our best to support every supported Node.js versions.
 See [nodejs/Release](https://github.com/nodejs/Release) for
 the current supported versions. You can also view our
-[build scripts](https://github.com/giggio/node-chromedriver/blob/master/azure-pipelines.yml) and check the versions there.
+[build scripts](https://github.com/giggio/node-chromedriver/blob/main/azure-pipelines.yml) and check the versions there.
 
 ## Contributing
 
@@ -298,7 +298,7 @@ If you are on Windows, set `git config core.autocrlf input` so you don't get git
 [Giovanni Bassi](https://github.com/giggio), with collaboration from
 [lots of good people](https://github.com/giggio/node-chromedriver/graphs/contributors).
 
-Thanks for Obvious and their PhantomJS project for heavy inspiration! Check their project on [Github](https://github.com/Obvious/phantomjs/tree/master/bin).
+Thanks for Obvious and their PhantomJS project for heavy inspiration! Check their project on [Github](https://github.com/Obvious/phantomjs/).
 
 ## License
 
