@@ -1,0 +1,12 @@
+dist: bionic
+language: node_js
+node_js:
+  - "10"
+  - "12"
+  - "13"
+  - "14"
+os:
+  - linux
+arch:
+  - arm64
+script: "npm install"

@@ -1,6 +1,6 @@
 # ChromeDriver
 
-[![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=main)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=main) [![Build Status](https://api.shippable.com/projects/5c01ad17718ee50700de68bc/badge?branch=main)](https://app.shippable.com/github/giggio/node-chromedriver/runs?branchName=main)
+[![Build Status](https://dev.azure.com/giggio/node-chromedriver/_apis/build/status/giggio.node-chromedriver?branchName=main)](https://dev.azure.com/giggio/node-chromedriver/_build/latest?definitionId=27&branchName=main) [![Build Status](https://travis-ci.org/giggio/node-chromedriver.svg?branch=main)](https://travis-ci.org/giggio/node-chromedriver)
 [![npm](https://img.shields.io/npm/dt/chromedriver.svg)](https://www.npmjs.com/package/chromedriver)
 
 An NPM wrapper for Selenium [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
