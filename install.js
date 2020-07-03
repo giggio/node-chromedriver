@@ -13,6 +13,7 @@ const url = require('url');
 const https = require('https');
 const extractZip = require('extract-zip');
 const { getChromeVersion } = require('@testim/chrome-version');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
 if (skipDownload === 'true') {
@@ -203,10 +204,19 @@ function getRequestOptions(downloadPath) {
       console.log('Using npmconf cafile.');
     }
 
-    options.httpsAgent = new https.Agent({
-      rejectUnauthorized: !!process.env.npm_config_strict_ssl,
-      ca: ca
-    });
+    if (proxyUrl) {
+      console.log('Using workaround for https-url combined with a proxy.');
+      const httpsProxyAgentOptions = url.parse(proxyUrl);
+      httpsProxyAgentOptions.ca = ca;
+      httpsProxyAgentOptions.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
+      options.httpsAgent = new HttpsProxyAgent(httpsProxyAgentOptions);
+      options.proxy = false;
+    } else {
+      options.httpsAgent = new https.Agent({
+        rejectUnauthorized: !!process.env.npm_config_strict_ssl,
+        ca: ca
+      });
+    }
   }
 
   // Use specific User-Agent
