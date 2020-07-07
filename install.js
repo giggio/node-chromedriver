@@ -207,7 +207,9 @@ function getRequestOptions(downloadPath) {
     if (proxyUrl) {
       console.log('Using workaround for https-url combined with a proxy.');
       const httpsProxyAgentOptions = url.parse(proxyUrl);
+      // @ts-ignore
       httpsProxyAgentOptions.ca = ca;
+      // @ts-ignore
       httpsProxyAgentOptions.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
       options.httpsAgent = new HttpsProxyAgent(httpsProxyAgentOptions);
       options.proxy = false;
