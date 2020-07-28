@@ -19,7 +19,6 @@ let cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRI
 cdnUrl = cdnUrl.replace(/\/+$/, '');
 const detect_chromedriver_version = process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION;
 let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
-let chromedriverBinaryFilePath;
 
 (async function install() {
   try {
@@ -41,8 +40,6 @@ let chromedriverBinaryFilePath;
       }
     }
     const tmpPath = utils.findSuitableTempDirectory(chromedriver_version);
-    const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
-    chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
     const chromedriverIsAvailable = await utils.verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriver_version);
     if (!chromedriverIsAvailable) {
       console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
