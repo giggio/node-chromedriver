@@ -28,12 +28,12 @@ let force_download = process.env.npm_config_chromedriver_force_download === 'tru
 
   if (detect_chromedriver_version !== 'true') {
     if (chromedriver_version === 'LATEST') {
-      chromedriver_version = await utils.getChromeDriverVersion(utils.getRequestOptions(`${cdnUrl}/LATEST_RELEASE`));
+      chromedriver_version = await utils.getChromeDriverVersionFromUrl(`${cdnUrl}/LATEST_RELEASE`);
     } else {
       let latestReleaseForVersionMatch = chromedriver_version.match(/LATEST_(\d+)/);
       if (latestReleaseForVersionMatch) {
         let majorVersion = latestReleaseForVersionMatch[1];
-        chromedriver_version = await utils.getChromeDriverVersion(utils.getRequestOptions(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`));
+        chromedriver_version = await utils.getChromeDriverVersionFromUrl(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`);
       }
     }
     options.download_version = chromedriver_version;
