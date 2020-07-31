@@ -211,6 +211,7 @@ function getRequestOptions(downloadPath) {
       httpsProxyAgentOptions.ca = ca;
       // @ts-ignore
       httpsProxyAgentOptions.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
+      // @ts-ignore
       options.httpsAgent = new HttpsProxyAgent(httpsProxyAgentOptions);
       options.proxy = false;
     } else {
