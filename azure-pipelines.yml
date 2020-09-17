@@ -11,8 +11,6 @@ jobs:
           nodeversion: "10.x"
         node_12:
           nodeversion: "12.x"
-        node_13:
-          nodeversion: "13.x"
         node_14:
           nodeversion: "14.x"
     steps:
@@ -34,8 +32,6 @@ jobs:
           nodeversion: "10.x"
         node_12:
           nodeversion: "12.x"
-        node_13:
-          nodeversion: "13.x"
         node_14:
           nodeversion: "14.x"
     steps:
@@ -56,8 +52,6 @@ jobs:
           nodeversion: "10.x"
         node_12:
           nodeversion: "12.x"
-        node_13:
-          nodeversion: "13.x"
         node_14:
           nodeversion: "14.x"
     steps:
