@@ -13,3 +13,5 @@ shippable.yml
 .devcontainer/**/*
 azure-pipelines.yml
 .github
+.travis.yml
+
