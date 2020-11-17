@@ -1,6 +1,6 @@
 {
   "name": "chromedriver",
-  "version": "86.0.0",
+  "version": "87.0.0",
   "keywords": [
     "chromedriver",
     "selenium"
@@ -19,7 +19,7 @@
   },
   "main": "lib/chromedriver",
   "bin": {
-    "chromedriver": "./bin/chromedriver"
+    "chromedriver": "bin/chromedriver"
   },
   "scripts": {
     "install": "node install.js",
