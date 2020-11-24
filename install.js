@@ -14,6 +14,7 @@ const https = require('https');
 const extractZip = require('extract-zip');
 const { getChromeVersion } = require('@testim/chrome-version');
 const HttpsProxyAgent = require('https-proxy-agent');
+const getProxyForUrl = require("proxy-from-env").getProxyForUrl;
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
 if (skipDownload === 'true') {
@@ -177,9 +178,8 @@ function getRequestOptions(downloadPath) {
   const options = { url: downloadPath, method: "GET" };
   const urlParts = url.parse(downloadPath);
   const isHttps = urlParts.protocol === 'https:';
-  const proxyUrl = isHttps
-    ? process.env.npm_config_https_proxy
-    : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
+  const proxyUrl = getProxyForUrl(downloadPath);
+  
   if (proxyUrl) {
     const proxyUrlParts = url.parse(proxyUrl);
     options.proxy = {
