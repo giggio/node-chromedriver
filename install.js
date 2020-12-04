@@ -180,45 +180,63 @@ function getRequestOptions(downloadPath) {
   const proxyUrl = isHttps
     ? process.env.npm_config_https_proxy
     : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
-  if (proxyUrl) {
-    const proxyUrlParts = url.parse(proxyUrl);
-    options.proxy = {
-      host: proxyUrlParts.hostname,
-      port: proxyUrlParts.port ? parseInt(proxyUrlParts.port) : 80,
-      protocol: proxyUrlParts.protocol
-    };
+
+  const noProxy = process.env.npm_config_noproxy;
+  const proxyUrlParts = url.parse(proxyUrl);
+
+  let useProxy = true;
+
+  if (noProxy) {
+    noProxyParts = noProxy.split(',');
+    noProxyParts.forEach((part) => {
+      part = part.trim();
+      if ((part.length > 1 && part.startsWith('*') && urlParts.hostname.endsWith(part.substr(1))) ||
+        urlParts.hostname === part) {
+        useProxy = false;
+      }
+    });
   }
 
-  if (isHttps) {
-    // Use certificate authority settings from npm
-    let ca = process.env.npm_config_ca;
-    if (ca)
-      console.log('Using npmconf ca.');
-
-    if (!ca && process.env.npm_config_cafile) {
-      try {
-        ca = fs.readFileSync(process.env.npm_config_cafile, { encoding: 'utf8' });
-      } catch (e) {
-        console.error('Could not read cafile', process.env.npm_config_cafile, e);
-      }
-      console.log('Using npmconf cafile.');
+  if (useProxy) {
+    if (proxyUrl) {
+      options.proxy = {
+        host: proxyUrlParts.hostname,
+        port: proxyUrlParts.port ? parseInt(proxyUrlParts.port) : 80,
+        protocol: proxyUrlParts.protocol
+      };
     }
 
-    if (proxyUrl) {
-      console.log('Using workaround for https-url combined with a proxy.');
-      const httpsProxyAgentOptions = url.parse(proxyUrl);
-      // @ts-ignore
-      httpsProxyAgentOptions.ca = ca;
-      // @ts-ignore
-      httpsProxyAgentOptions.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
-      // @ts-ignore
-      options.httpsAgent = new HttpsProxyAgent(httpsProxyAgentOptions);
-      options.proxy = false;
-    } else {
-      options.httpsAgent = new https.Agent({
-        rejectUnauthorized: !!process.env.npm_config_strict_ssl,
-        ca: ca
-      });
+    if (isHttps) {
+      // Use certificate authority settings from npm
+      let ca = process.env.npm_config_ca;
+      if (ca)
+        console.log('Using npmconf ca.');
+
+      if (!ca && process.env.npm_config_cafile) {
+        try {
+          ca = fs.readFileSync(process.env.npm_config_cafile, { encoding: 'utf8' });
+        } catch (e) {
+          console.error('Could not read cafile', process.env.npm_config_cafile, e);
+        }
+        console.log('Using npmconf cafile.');
+      }
+
+      if (proxyUrl) {
+        console.log('Using workaround for https-url combined with a proxy.');
+        const httpsProxyAgentOptions = url.parse(proxyUrl);
+        // @ts-ignore
+        httpsProxyAgentOptions.ca = ca;
+        // @ts-ignore
+        httpsProxyAgentOptions.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
+        // @ts-ignore
+        options.httpsAgent = new HttpsProxyAgent(httpsProxyAgentOptions);
+        options.proxy = false;
+      } else {
+        options.httpsAgent = new https.Agent({
+          rejectUnauthorized: !!process.env.npm_config_strict_ssl,
+          ca: ca
+        });
+      }
     }
   }
 
