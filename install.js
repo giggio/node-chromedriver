@@ -180,9 +180,7 @@ function getRequestOptions(downloadPath) {
   const proxyUrl = isHttps
     ? process.env.npm_config_https_proxy
     : (process.env.npm_config_proxy || process.env.npm_config_http_proxy);
-
   const noProxy = process.env.npm_config_noproxy;
-  const proxyUrlParts = url.parse(proxyUrl);
 
   let useProxy = true;
 
@@ -199,6 +197,7 @@ function getRequestOptions(downloadPath) {
 
   if (useProxy) {
     if (proxyUrl) {
+      const proxyUrlParts = url.parse(proxyUrl);
       options.proxy = {
         host: proxyUrlParts.hostname,
         port: proxyUrlParts.port ? parseInt(proxyUrlParts.port) : 80,
