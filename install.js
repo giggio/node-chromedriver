@@ -179,7 +179,7 @@ function getRequestOptions(downloadPath) {
   const urlParts = url.parse(downloadPath);
   const isHttps = urlParts.protocol === 'https:';
   const proxyUrl = getProxyForUrl(downloadPath);
-  
+
   if (proxyUrl) {
     const proxyUrlParts = url.parse(proxyUrl);
     options.proxy = {
