@@ -1,6 +1,6 @@
 {
   "name": "chromedriver",
-  "version": "87.0.2",
+  "version": "87.0.3",
   "keywords": [
     "chromedriver",
     "selenium"
@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@testim/chrome-version": "^1.0.7",
-    "axios": "^0.19.2",
-    "del": "^5.1.0",
+    "axios": "^0.21.0",
+    "del": "^6.0.0",
     "extract-zip": "^2.0.1",
     "https-proxy-agent": "^5.0.0",
     "mkdirp": "^1.0.4",

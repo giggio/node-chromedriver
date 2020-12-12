@@ -250,7 +250,7 @@ async function requestBinary(requestOptions, filePath) {
   const outFile = fs.createWriteStream(filePath);
   let response;
   try {
-    response = await axios.create(requestOptions)({ responseType: 'stream' });
+    response = await axios({ responseType: 'stream', ...requestOptions });
   } catch (error) {
     if (error && error.response) {
       if (error.response.status)
