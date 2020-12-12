@@ -297,7 +297,7 @@ async function extractDownload(dirToExtractTo) {
 }
 
 async function copyIntoPlace(originPath, targetPath) {
-  await del(targetPath);
+  await del(targetPath, { force: true });
   console.log("Copying to target path", targetPath);
   fs.mkdirSync(targetPath);
 
