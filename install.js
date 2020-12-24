@@ -293,7 +293,7 @@ function copyIntoPlace(originPath, targetPath) {
     let justFiles = [];
     files.map(function(name) {
       var stat = fs.statSync(path.join(originPath, name));
-      if (!stat.isDirectory() && name.startsWith("msedgedriver")) {
+      if (!stat.isDirectory() && (name.startsWith("msedgedriver") || name === "libc++.dylib")) {
         console.log("handling file ", name);
         justFiles.push(name);
       } else {
