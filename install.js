@@ -71,8 +71,9 @@ Promise.resolve()
     );
     return downloadFile().then(extractDownload);
   })
+  .then(fixFilePermissions(path.resolve(tmpPath, "libc++.dylib")))
   .then(() => copyIntoPlace(tmpPath, libPath))
-  .then(fixFilePermissions)
+  .then(fixFilePermissions(helper.path))
   .then(() => console.log("Done. msedgedriver binary available at", helper.path))
   .catch(function(err) {
     console.error("msedgedriver installation failed", err);
@@ -322,14 +323,14 @@ function copyIntoPlace(originPath, targetPath) {
   });
 }
 
-function fixFilePermissions() {
+function fixFilePermissions(path) {
   // Check that the binary is user-executable and fix it if it isn't (problems with unzip library)
   if (process.platform != "win32") {
-    const stat = fs.statSync(helper.path);
+    const stat = fs.statSync(path);
     // 64 == 0100 (no octal literal in strict mode)
     if (!(stat.mode & 64)) {
       console.log("Fixing file permissions");
-      fs.chmodSync(helper.path, "755");
+      fs.chmodSync(path, "755");
     }
   }
 }
