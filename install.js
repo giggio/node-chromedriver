@@ -10,6 +10,8 @@ const del = require("del");
 const child_process = require("child_process");
 const os = require("os");
 
+const libFileName = "libc++.dylib";
+
 const skipDownload =
   process.env.npm_config_edgechromiumdriver_skip_download ||
   process.env.EDGECHROMIUMDRIVER_SKIP_DOWNLOAD;
@@ -71,7 +73,7 @@ Promise.resolve()
     );
     return downloadFile().then(extractDownload);
   })
-  .then(() => fixFilePermissions(tmpPath + "/libc++.dylib"))
+  .then(() => fixFilePermissions(tmpPath + "/" + libFileName))
   .then(() => copyIntoPlace(tmpPath, libPath))
   .then(() => fixFilePermissions(helper.path))
   .then(() => console.log("Done. msedgedriver binary available at", helper.path))
@@ -101,7 +103,10 @@ function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
   const forceDownload =
     process.env.npm_config_edgechromiumdriver_force_download === "true" ||
     process.env.EDGECHROMIUMDRIVER_FORCE_DOWNLOAD === "true";
-  if (forceDownload) return false;
+  if (forceDownload) {
+    fixFilePermissions(tmpPath + "/" + libFileName);
+    return false;
+  }
   console.log("msedgedriver binary exists. Validating...");
   const deferred = new Deferred();
   try {
@@ -274,7 +279,12 @@ function extractDownload() {
   console.log("Extracting zip contents");
   extractZip(path.resolve(downloadedFile), { dir: tmpPath }, function(err) {
     if (err) {
-      deferred.reject("Error extracting archive: " + err);
+      if (err.message.includes(libFileName)) {
+        console.log("Ignoring complaint: " + err);
+        deferred.resolve(true);
+      } else {
+        deferred.reject("Error extracting archive: " + err);
+      }
     } else {
       deferred.resolve(true);
     }
@@ -294,7 +304,7 @@ function copyIntoPlace(originPath, targetPath) {
     let justFiles = [];
     files.map(function(name) {
       var stat = fs.statSync(path.join(originPath, name));
-      if (!stat.isDirectory() && (name.startsWith("msedgedriver") || name === "libc++.dylib")) {
+      if (!stat.isDirectory() && (name.startsWith("msedgedriver") || name === libFileName)) {
         console.log("handling file ", name);
         justFiles.push(name);
       } else {
@@ -326,11 +336,15 @@ function copyIntoPlace(originPath, targetPath) {
 function fixFilePermissions(path) {
   // Check that the binary is user-executable and fix it if it isn't (problems with unzip library)
   if (process.platform != "win32") {
-    const stat = fs.statSync(path);
-    // 64 == 0100 (no octal literal in strict mode)
-    if (!(stat.mode & 64)) {
-      console.log("Fixing file permissions");
-      fs.chmodSync(path, "755");
+    try {
+      const stat = fs.statSync(path);
+      // 64 == 0100 (no octal literal in strict mode)
+      if (!(stat.mode & 64)) {
+        console.log("Fixing file permissions for ", path);
+        fs.chmodSync(path, "755");
+      }
+    } catch (e) {
+      console.log(path, "Ignoring chmod failure", e.message);
     }
   }
 }
