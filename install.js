@@ -71,7 +71,7 @@ Promise.resolve()
     );
     return downloadFile().then(extractDownload);
   })
-  .then(() => fixFilePermissions(tmpPath + "libc++.dylib"))
+  .then(() => fixFilePermissions(tmpPath + "/libc++.dylib"))
   .then(() => copyIntoPlace(tmpPath, libPath))
   .then(() => fixFilePermissions(helper.path))
   .then(() => console.log("Done. msedgedriver binary available at", helper.path))
