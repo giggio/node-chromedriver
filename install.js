@@ -82,7 +82,7 @@ function validatePlatform() {
       process.exit(1);
     }
   } else if (thePlatform === 'darwin' || thePlatform === 'freebsd') {
-    if (process.arch === 'x64' || process.arch == 'arm64') {
+    if (process.arch === 'x64' || process.arch === 'arm64') {
       thePlatform = 'mac64';
     } else {
       console.log('Only Mac 64 bits supported.');
