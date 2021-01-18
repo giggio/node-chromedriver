@@ -1,16 +1,20 @@
-const request = require('request');
+#!/usr/bin/env node
+
+const axios = require('axios');
 const fs = require('fs');
 const execSync = require('child_process').execSync;
 const CURRENT_VERSION = require('./lib/chromedriver').version;
 
 // fetch the latest chromedriver version
-const getLatest = (cb) => {
-  request('https://chromedriver.storage.googleapis.com/LATEST_RELEASE', (err, response, body) => {
-    if (err) {
-      process.exit(1);
-    }
-    return cb(body);
-  });
+async function getLatest() {
+  const requestOptions = { url: 'https://chromedriver.storage.googleapis.com/LATEST_RELEASE', method: "GET" };
+  try {
+    const response = await axios(requestOptions);
+    return response.data.trim();
+  } catch (err) {
+    console.log(err)
+    process.exit(1);
+  }
 };
 
 /* Provided a new Chromedriver version such as 77.0.3865.40:
@@ -29,11 +33,13 @@ const writeUpdate = (version) => {
   execSync(`npm version ${packageVersion} --git-tag-version=false && git add . && git commit -m "Bump version to ${packageVersion}" && git tag -s ${packageVersion} -m ${packageVersion}`);
 };
 
-getLatest((version) => {
+getLatest().then(version => {
   if (CURRENT_VERSION === version) {
     console.log('Chromedriver version is up to date.');
   } else {
     writeUpdate(version);
     console.log(`Chromedriver version updated to ${version}`);
   }
+}, err => {
+  console.log(err)
 });
