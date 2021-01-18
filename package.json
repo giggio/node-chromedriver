@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@testim/chrome-version": "^1.0.7",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "del": "^6.0.0",
     "extract-zip": "^2.0.1",
     "https-proxy-agent": "^5.0.0",
