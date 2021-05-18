@@ -160,7 +160,7 @@ function findSuitableTempDirectory() {
     const namespace = chromedriver_version;
     const candidatePath = path.join(candidateTmpDirs[i], namespace, 'chromedriver');
     try {
-      mkdirp.sync(candidatePath, '0777');
+      fs.mkdir(candidatePath, { recursive: true });
       const testFile = path.join(candidatePath, now + '.tmp');
       fs.writeFileSync(testFile, 'test');
       fs.unlinkSync(testFile);
