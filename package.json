@@ -1,6 +1,6 @@
 {
   "name": "chromedriver",
-  "version": "90.0.0",
+  "version": "90.0.1",
   "keywords": [
     "chromedriver",
     "selenium"
@@ -31,7 +31,6 @@
     "del": "^6.0.0",
     "extract-zip": "^2.0.1",
     "https-proxy-agent": "^5.0.0",
-    "mkdirp": "^1.0.4",
     "proxy-from-env": "^1.1.0",
     "tcp-port-used": "^1.0.1"
   },

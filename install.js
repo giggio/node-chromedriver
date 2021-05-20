@@ -4,7 +4,6 @@
 const fs = require('fs');
 const helper = require('./lib/chromedriver');
 const axios = require('axios').default;
-const mkdirp = require('mkdirp');
 const path = require('path');
 const del = require('del');
 const child_process = require('child_process');
@@ -160,7 +159,7 @@ function findSuitableTempDirectory() {
     const namespace = chromedriver_version;
     const candidatePath = path.join(candidateTmpDirs[i], namespace, 'chromedriver');
     try {
-      mkdirp.sync(candidatePath, '0777');
+      fs.mkdirSync(candidatePath, { recursive: true });
       const testFile = path.join(candidatePath, now + '.tmp');
       fs.writeFileSync(testFile, 'test');
       fs.unlinkSync(testFile);
