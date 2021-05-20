@@ -4,11 +4,9 @@ trigger:
 jobs:
   - job: Linux
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "ubuntu-20.04"
     strategy:
       matrix:
-        node_10:
-          nodeversion: "10.x"
         node_12:
           nodeversion: "12.x"
         node_14:
@@ -29,11 +27,9 @@ jobs:
 
   - job: macOS
     pool:
-      vmImage: "macOS-10.14"
+      vmImage: "macOS-10.15"
     strategy:
       matrix:
-        node_10:
-          nodeversion: "10.x"
         node_12:
           nodeversion: "12.x"
         node_14:
@@ -56,8 +52,6 @@ jobs:
       vmImage: "windows-2019"
     strategy:
       matrix:
-        node_10:
-          nodeversion: "10.x"
         node_12:
           nodeversion: "12.x"
         node_14:
