@@ -110,6 +110,11 @@ Use different User-Agent.
 npm config set user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"
 ```
 
+## Custom Target download location
+You may want to download and place the chromedriver binary to a custom target location. This can be achieved by setting the below flag
+
+    npm install chromedriver --chromedriver_download_to_target_folder="C:\Users\output" --chromedriver-force-download
+
 ## Skipping chromedriver download
 
 You may wish to skip the downloading of the chromedriver binary file, for example if you know for certain that it is already there or if you want to use a system binary and just use this module as an interface to interact with it.
@@ -155,6 +160,21 @@ var driver = new webdriver.Builder()
 
 The path will be added to the process automatically, you don't need to configure it.
 But you can get it from `require('chromedriver').path` if you want it.
+
+## Download chromedriver via node
+
+    var chromedriver =  require('chromedriver');
+    chromedriver.download()
+
+you can pass all the commandline flags as:
+
+    var chromedriver =  require('chromedriver');
+    process.env.detect_chromedriver_version = true
+    process.env.chromedriver_force_download = true    
+    process.env.chromedriver_download_to_target_folder="C:/Users/output" 
+    chromedriver.download()
+
+chromedriver.download() returns a **promise**
 
 ## Running via node
 

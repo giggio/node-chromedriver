@@ -33,7 +33,7 @@ let chromedriver_version = process.env.npm_config_chromedriver_version || proces
 let chromedriverBinaryFilePath;
 let downloadedFile = '';
 
-(async function install() {
+let install =(async function install() {
   try {
     if (detect_chromedriver_version === 'true') {
       // Refer http://chromedriver.chromium.org/downloads/version-selection
@@ -68,7 +68,7 @@ let downloadedFile = '';
     console.error('ChromeDriver installation failed', err);
     process.exit(1);
   }
-})();
+});
 
 function validatePlatform() {
   /** @type string */
@@ -337,3 +337,9 @@ function Deferred() {
   }.bind(this));
   Object.freeze(this);
 }
+
+if (!module.parent) {
+  install();
+} 
+
+module.exports = {install};
