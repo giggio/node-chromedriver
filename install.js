@@ -21,7 +21,10 @@ if (skipDownload === 'true') {
   process.exit(0);
 }
 
+const customPath = process.env.npm_config_chromedriver_download_to_target_folder || process.env.chromedriver_download_to_target_folder
+const customTarget = customPath ? path.resolve(process.env.INIT_CWD || process.cwd(), customPath) : undefined;
 const libPath = path.join(__dirname, 'lib', 'chromedriver');
+
 let cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://chromedriver.storage.googleapis.com';
 const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
 
@@ -61,9 +64,9 @@ let downloadedFile = '';
       await downloadFile(tmpPath);
       await extractDownload(tmpPath);
     }
-    await copyIntoPlace(tmpPath, libPath);
+    await copyIntoPlace(tmpPath, libPath, customTarget);
     fixFilePermissions();
-    console.log('Done. ChromeDriver binary available at', helper.path);
+    console.log('Done. ChromeDriver binary available at', customTarget || helper.path);
   } catch (err) {
     console.error('ChromeDriver installation failed', err);
     process.exit(1);
@@ -295,7 +298,8 @@ async function extractDownload(dirToExtractTo) {
   }
 }
 
-async function copyIntoPlace(originPath, targetPath) {
+async function copyIntoPlace(originPath, targetPath, customPath = undefined) {
+
   await del(targetPath, { force: true });
   console.log("Copying to target path", targetPath);
   fs.mkdirSync(targetPath);
@@ -310,6 +314,14 @@ async function copyIntoPlace(originPath, targetPath) {
       const writer = fs.createWriteStream(targetFile);
       writer.on("close", () => resolve());
       reader.pipe(writer);
+      if (customPath) {
+        fs.existsSync(customPath) ? null : fs.mkdirSync(customPath, { recursive: true });
+        const readerCustom = fs.createReadStream(file);
+        const targetFileCustom = path.join(customPath, name);
+        const writerCustom = fs.createWriteStream(targetFileCustom);
+        writerCustom.on("close", () => resolve());
+        readerCustom.pipe(writerCustom);
+      }
     });
   });
   await Promise.all(promises);
