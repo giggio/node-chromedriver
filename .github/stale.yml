@@ -5,6 +5,7 @@ exemptLabels:
   - question
   - enhancement
   - dependencies
+  - stale-exemption
 staleLabel: wontfix
 markComment: >
   This issue has been automatically marked as stale because it has not had
