@@ -297,11 +297,13 @@ async function extractDownload(dirToExtractTo) {
 
 async function copyIntoPlace(originPath, targetPath) {
   await del(targetPath, { force: true });
-  console.log("Copying to target path", targetPath);
+  console.log(`Copying from ${originPath} to target path ${targetPath}`);
   fs.mkdirSync(targetPath);
 
   // Look for the extracted directory, so we can rename it.
-  const files = fs.readdirSync(originPath);
+  const files = fs.readdirSync(originPath, { withFileTypes: true })
+    .filter(dirent => dirent.isFile() && dirent.name.startsWith('chromedriver') && !dirent.name.endsWith(".debug") && !dirent.name.endsWith(".zip"))
+    .map(dirent => dirent.name);
   const promises = files.map(name => {
     return new Promise((resolve) => {
       const file = path.join(originPath, name);
