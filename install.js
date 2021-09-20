@@ -81,16 +81,19 @@ function validatePlatform() {
       process.exit(1);
     }
   } else if (thePlatform === 'darwin' || thePlatform === 'freebsd') {
-    if (process.arch === 'x64' || process.arch === 'arm64') {
-      thePlatform = 'mac64';
-    } else {
+    const osxPlatform = getMacOsRealArch();
+
+    if (!osxPlatform) {
       console.log('Only Mac 64 bits supported.');
       process.exit(1);
     }
+
+    thePlatform = osxPlatform;
   } else if (thePlatform !== 'win32') {
     console.log('Unexpected platform or architecture:', process.platform, process.arch);
     process.exit(1);
   }
+
   return thePlatform;
 }
 
@@ -328,6 +331,32 @@ function fixFilePermissions() {
       fs.chmodSync(helper.path, '755');
     }
   }
+}
+
+function getMacOsRealArch() {
+  if (process.arch === 'arm64' || isEmulatedRosettaEnvironment()) {
+    return 'mac64_m1';
+  }
+
+  if (process.arch === 'x64') {
+    return 'mac64';
+  }
+
+  return null;
+}
+
+function isEmulatedRosettaEnvironment() {
+  const archName = child_process.spawnSync('uname', ['-m']).stdout.toString().trim();
+
+  if (archName === 'x86_64') {
+    const processTranslated = child_process.spawnSync('sysctl', ['-in', 'sysctl.proc_translated'])
+      .stdout.toString()
+      .trim();
+
+    return processTranslated === '1';
+  }
+
+  return false;
 }
 
 function Deferred() {
