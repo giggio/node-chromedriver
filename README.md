@@ -48,6 +48,20 @@ Another option is to use PATH variable `CHROMEDRIVER_FORCE_DOWNLOAD`.
 CHROMEDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
 ```
 
+Additionally, you can force a chromedriver executable to be downloaded at runtime.
+
+```js
+await chromedriver.download();
+```
+
+The `download` function also supports taking an options dictionary that can be used
+to specify `cdn_url` and/or `download_version` (which can be the full version of chrome
+("84.0.4147.105") or just the major version ("84")).
+
+```js
+await chromedriver.download({cdn_url: "http://localhost", download_version: "84"});
+```
+
 ## Custom binaries url
 
 To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_cdnurl`.
