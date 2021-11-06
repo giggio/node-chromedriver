@@ -4,6 +4,7 @@ node_js:
   - "12"
   - "14"
   - "16"
+  - "17"
 os:
   - linux
 arch:

@@ -1,10 +1,14 @@
 {
   "name": "Node Chromedriver",
   "dockerFile": "Dockerfile",
+  "containerUser": "user",
   "appPort": 9000,
   "extensions": [
     "dbaeumer.vscode-eslint",
     "github.vscode-pull-request-github"
   ],
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
   "postCreateCommand": "/bin/bash -c 'source $HOME/.nvm/nvm.sh && npm install'"
 }

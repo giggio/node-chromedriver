@@ -19,7 +19,7 @@
             "type": "node",
             "request": "launch",
             "program": "${workspaceRoot}/install.js",
-            "runtimeVersion": "14.0.0",
+            "runtimeVersion": "17.0.1",
             "cwd": "${workspaceRoot}",
             "runtimeArgs": [
                 "--nolazy"
@@ -33,7 +33,7 @@
             "type": "node",
             "request": "launch",
             "program": "${workspaceRoot}/install.js",
-            "runtimeVersion": "14.0.0",
+            "runtimeVersion": "17.0.1",
             "cwd": "${workspaceRoot}",
             "runtimeArgs": [
                 "--nolazy"
@@ -48,7 +48,7 @@
             "type": "node",
             "request": "launch",
             "program": "${workspaceRoot}/install.js",
-            "runtimeVersion": "14.0.0",
+            "runtimeVersion": "17.0.1",
             "cwd": "${workspaceRoot}",
             "runtimeArgs": [
                 "--nolazy"

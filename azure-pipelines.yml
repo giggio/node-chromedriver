@@ -13,6 +13,8 @@ jobs:
           nodeversion: "14.x"
         node_16:
           nodeversion: "16.x"
+        node_17:
+          nodeversion: "17.x"
     steps:
       - task: NodeTool@0
         inputs:
@@ -34,6 +36,8 @@ jobs:
           nodeversion: "14.x"
         node_16:
           nodeversion: "16.x"
+        node_17:
+          nodeversion: "17.x"
     steps:
       - task: NodeTool@0
         inputs:
@@ -54,6 +58,8 @@ jobs:
           nodeversion: "14.x"
         node_16:
           nodeversion: "16.x"
+        node_17:
+          nodeversion: "17.x"
     steps:
       - task: NodeTool@0
         inputs:
