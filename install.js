@@ -10,10 +10,14 @@ const child_process = require('child_process');
 const os = require('os');
 const url = require('url');
 const https = require('https');
+const { promisify } = require('util');
+const { finished } = require('stream');
 const extractZip = require('extract-zip');
 const { getChromeVersion } = require('@testim/chrome-version');
 const HttpsProxyAgent = require('https-proxy-agent');
 const getProxyForUrl = require("proxy-from-env").getProxyForUrl;
+
+const finishedAsync = promisify(finished);
 
 const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
 if (skipDownload === 'true') {
@@ -256,10 +260,11 @@ async function requestBinary(requestOptions, filePath) {
         console.error('Error status code:', error.response.status);
       if (error.response.data) {
         error.response.data.on('data', data => console.error(data.toString('utf8')));
-        await new Promise((resolve) => {
-          error.response.data.on('finish', resolve);
-          error.response.data.on('error', resolve);
-        });
+        try {
+          await finishedAsync(error.response.data)
+        } catch (error) {
+          console.error('Error downloading entire response:', error);
+        }
       }
     }
     throw new Error('Error with http(s) request: ' + error);
