@@ -33,7 +33,7 @@ const configuredfilePath = process.env.npm_config_chromedriver_filepath || proce
 cdnUrl = cdnUrl.replace(/\/+$/, '');
 const platform = validatePlatform();
 const detect_chromedriver_version = process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION;
-const include_chromium = ['yes', 'true'].includes((process.env.npm_config_include_chromium || process.env.INCLUDE_CHROMIUM || 'false').toLowerCase());
+const include_chromium = (process.env.npm_config_include_chromium || process.env.INCLUDE_CHROMIUM) === 'true';
 let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 let chromedriverBinaryFilePath;
 let downloadedFile = '';
