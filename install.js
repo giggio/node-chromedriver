@@ -33,6 +33,7 @@ const configuredfilePath = process.env.npm_config_chromedriver_filepath || proce
 cdnUrl = cdnUrl.replace(/\/+$/, '');
 const platform = validatePlatform();
 const detect_chromedriver_version = process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION;
+const include_chromium = ['yes', 'true'].includes((process.env.npm_config_include_chromium || process.env.INCLUDE_CHROMIUM || 'false').toLowerCase());
 let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 let chromedriverBinaryFilePath;
 let downloadedFile = '';
@@ -41,7 +42,7 @@ let downloadedFile = '';
   try {
     if (detect_chromedriver_version === 'true') {
       // Refer http://chromedriver.chromium.org/downloads/version-selection
-      const chromeVersion = await getChromeVersion();
+      const chromeVersion = await getChromeVersion(include_chromium);
       console.log("Your Chrome version is " + chromeVersion);
       const chromeVersionWithoutPatch = /^(.*?)\.\d+$/.exec(chromeVersion)[1];
       await getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
