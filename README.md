@@ -22,7 +22,7 @@ this module) version of ChromeDriver. As new versions are released
 and vetted, this module will be updated accordingly.
 
 The package has been set up to fetch and run ChromeDriver for MacOS (darwin),
-Linux based platforms (as identified by Node.js), and Windows. If you
+Linux based platforms (as identified by Node.js), and Windows.  If you
 spot any platform weirdness, let us know or send a patch.
 
 ## Force download
@@ -144,9 +144,11 @@ it is wont to do.
 ## Running with Selenium WebDriver
 
 ```javascript
-require("chromedriver");
-var webdriver = require("selenium-webdriver");
-var driver = new webdriver.Builder().forBrowser("chrome").build();
+require('chromedriver');
+var webdriver = require('selenium-webdriver');
+var driver = new webdriver.Builder()
+  .forBrowser('chrome')
+  .build();
 ```
 
 (Tested for selenium-webdriver version `2.48.2`)
@@ -162,37 +164,43 @@ chromedriver binary/executable.
 Below is an example of using this package via node.
 
 ```javascript
-var childProcess = require("child_process");
-var chromedriver = require("chromedriver");
+var childProcess = require('child_process');
+var chromedriver = require('chromedriver');
 var binPath = chromedriver.path;
 
-var childArgs = ["some argument"];
+var childArgs = [
+  'some argument'
+];
 
-childProcess.execFile(binPath, childArgs, function (err, stdout, stderr) {
+childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
   // handle results
 });
+
 ```
 
 You can also use the start and stop methods:
 
 ```javascript
-var chromedriver = require("chromedriver");
+var chromedriver = require('chromedriver');
 
 args = [
-  // optional arguments
+ // optional arguments
 ];
 chromedriver.start(args);
 // run your tests
 chromedriver.stop();
+
 ```
 
 With the latest version, you can optionally receive a Promise from the `chromedriver.start` function:
 
 ```javascript
 var returnPromise = true;
-chromedriver.start(args, returnPromise).then(() => {
-  console.log("chromedriver is ready");
-});
+chromedriver
+  .start(args, returnPromise)
+  .then(() => {
+    console.log('chromedriver is ready');
+  });
 ```
 
 Note: if your tests are ran asynchronously, chromedriver.stop() will have to be
@@ -297,7 +305,7 @@ the current supported versions. You can also view our
 
 ## Contributing
 
-Questions, comments, bug reports, and pull requests are all welcome. Submit them at
+Questions, comments, bug reports, and pull requests are all welcome.  Submit them at
 [the project on GitHub](https://github.com/giggio/node-chromedriver/).
 
 Bug reports that include steps-to-reproduce (including code) are the
