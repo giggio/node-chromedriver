@@ -267,6 +267,28 @@ DETECT_CHROMEDRIVER_VERSION=true npm install chromedriver
 **Note:** When the property `detect_chromedriver_version` is provided,
 `chromedriver_version` and `chromedriver_filepath` properties are ignored.
 
+## Include Chromium
+
+If you don't have Chrome installed, you can check for Chromium version instead by setting the argument `include_chromium` to `true`.
+
+```shell
+npm install chromedriver --include_chromium
+```
+
+Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+
+```
+include_chromium=true
+```
+
+Another option is to use environment variable `INCLUDE_CHROMIUM`.
+
+```shell
+INCLUDE_CHROMIUM=true npm install chromedriver
+```
+
+**Note:** The property `INCLUDE_CHROMIUM` is ignored if the property `DETECT_CHROMEDRIVER_VERSION` is not used.
+
 ## A Note on chromedriver
 
 Chromedriver is not a library for NodeJS.
