@@ -2,8 +2,14 @@
 
 set -xeuo pipefail
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BIN="$DIR/lib/chromedriver/chromedriver"
+if ! [ -e $BIN ]; then
+  echo "Binary not found at $BIN"
+  exit 1
+fi
 # Start ChromeDriver and make it non-blocking
-./bin/chromedriver &
+$DIR/bin/chromedriver &
 
 TASK_PID=$!
 
