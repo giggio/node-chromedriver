@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Build app
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - test_actions
+    tags:
+      - "*"
+    paths-ignore:
+      - "*.md"
+      - "*.txt"
+      - "*.yml"
+      - "*.json"
+      - .editorconfig
+      - ".github/**"
+      - .gitignore
+      - .npmignore
+
+jobs:
+  build:
+    name: Build Windows, Linux and Mac
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          echo dummy
