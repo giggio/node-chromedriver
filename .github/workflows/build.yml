@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - test_actions
     tags:
       - "*"
     paths-ignore:
