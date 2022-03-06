@@ -1,6 +1,8 @@
 'use strict';
 // @ts-check
 
+console.log("testing pr");
+
 const fs = require('fs');
 const helper = require('./lib/chromedriver');
 const axios = require('axios').default;
