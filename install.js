@@ -355,9 +355,20 @@ function isEmulatedRosettaEnvironment() {
   const archName = child_process.spawnSync('uname', ['-m']).stdout.toString().trim();
 
   if (archName === 'x86_64') {
-    const processTranslated = child_process.spawnSync('sysctl', ['-in', 'sysctl.proc_translated'])
-      .stdout.toString()
-      .trim();
+    const proc = child_process.spawnSync('sysctl', ['-in', 'sysctl.proc_translated']);
+
+    // When run with `-in`, the return code is 0 even if there is no `sysctl.proc_translated`
+    if(proc.status) {
+        throw new Error('Unexpected return code from sysctl: ' + proc.status);
+    }
+
+    // If there is no `sysctl.proc_translated` (i.e. not rosetta) then nothing is printed to
+    // stdout
+    if(!proc.stdout) {
+        return false
+    }
+
+    const processTranslated = proc.stdout.toString().trim();
 
     return processTranslated === '1';
   }
