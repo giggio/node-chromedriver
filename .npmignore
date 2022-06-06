@@ -3,7 +3,7 @@ tmp
 .eslintrc.json
 .gitignore
 Dockerfile
-test-driver.sh
+*.sh
 testInstall.js
 update.js
 *.tgz
