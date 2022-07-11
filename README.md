@@ -301,7 +301,7 @@ It is not a Node.js wrapper.
 We will do our best to support every supported Node.js versions.
 See [nodejs/Release](https://github.com/nodejs/Release) for
 the current supported versions. You can also view our
-[build scripts](https://github.com/giggio/node-chromedriver/blob/main/azure-pipelines.yml) and check the versions there.
+[build scripts](https://github.com/giggio/node-chromedriver/blob/main/.github/workflows/build.yml#L41) and check the versions there.
 
 ## Contributing
 
