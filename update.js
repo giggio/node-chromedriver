@@ -29,7 +29,7 @@ const writeUpdate = (version) => {
   const regex = new RegExp(`^.*${versionExport}.*$`, 'gm');
   const updated = helper.replace(regex, `${versionExport} = '${version}';`);
   fs.writeFileSync('./lib/chromedriver.js', updated, 'utf8');
-  const packageVersion = `${version.slice(0, 2)}.0.0`;
+  const packageVersion = `${version.slice(0, version.indexOf('.'))}.0.0`;
   execSync(`npm version ${packageVersion} --git-tag-version=false && git add . && git commit -m "Bump version to ${packageVersion}" && git tag -s ${packageVersion} -m ${packageVersion}`);
 };
 
