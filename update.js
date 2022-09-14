@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
-const axios = require('axios');
 const fs = require('fs');
 const execSync = require('child_process').execSync;
 const CURRENT_VERSION = require('./lib/chromedriver').version;
 
 // fetch the latest chromedriver version
-async function getLatest() {
-  const requestOptions = { url: 'https://chromedriver.storage.googleapis.com/LATEST_RELEASE', method: "GET" };
+async function getLatest () {
   try {
-    const response = await axios(requestOptions);
-    return response.data.trim();
+    const url = 'https://chromedriver.storage.googleapis.com/LATEST_RELEASE';
+    const res = await fetch(url);
+    const text = await res.text();
+    return text.trim();
   } catch (err) {
     console.log(err)
     process.exit(1);
