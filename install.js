@@ -16,6 +16,7 @@ const extractZip = require('extract-zip');
 const { getChromeVersion } = require('@testim/chrome-version');
 const HttpsProxyAgent = require('https-proxy-agent');
 const getProxyForUrl = require("proxy-from-env").getProxyForUrl;
+const { compareVersions } = require('compare-versions');
 
 const finishedAsync = promisify(finished);
 
@@ -31,12 +32,12 @@ const configuredfilePath = process.env.npm_config_chromedriver_filepath || proce
 
 // adapt http://chromedriver.storage.googleapis.com/
 cdnUrl = cdnUrl.replace(/\/+$/, '');
-const platform = validatePlatform();
 const detect_chromedriver_version = process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION;
 const include_chromium = (process.env.npm_config_include_chromium || process.env.INCLUDE_CHROMIUM) === 'true';
 let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
 let chromedriverBinaryFilePath;
 let downloadedFile = '';
+let platform = '';
 
 (async function install() {
   try {
@@ -57,6 +58,7 @@ let downloadedFile = '';
         await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`));
       }
     }
+    platform = validatePlatform();
     const tmpPath = findSuitableTempDirectory();
     const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
     chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
@@ -341,7 +343,11 @@ function fixFilePermissions() {
 
 function getMacOsRealArch() {
   if (process.arch === 'arm64' || isEmulatedRosettaEnvironment()) {
-    return 'mac64_m1';
+    if (compareVersions(chromedriver_version, '106.0.5249.61') < 0) {
+      return 'mac64_m1';
+    }
+
+    return 'mac_arm64'
   }
 
   if (process.arch === 'x64') {
