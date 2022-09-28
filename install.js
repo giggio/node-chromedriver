@@ -341,7 +341,7 @@ function fixFilePermissions() {
 
 function getMacOsRealArch() {
   if (process.arch === 'arm64' || isEmulatedRosettaEnvironment()) {
-    return 'mac64_m1';
+    return 'mac_arm64';
   }
 
   if (process.arch === 'x64') {
