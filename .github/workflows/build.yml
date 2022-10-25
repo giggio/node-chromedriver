@@ -77,7 +77,7 @@ jobs:
           arch: aarch64
           distro: ubuntu20.04
           env: | # this is just so we can cache each version
-            nodeversion: ${{ matrix.node }}
+            GITHUB_WORKFLOW: ${{ github.workflow }}-${{ github.job }}-${{ matrix.node }}
           dockerRunArgs: |
             --volume "$PWD:/app"
           githubToken: ${{ github.token }}
