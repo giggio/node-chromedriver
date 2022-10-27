@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 LABEL maintainer="Giovanni Bassi <giggio@giggio.net>"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -13,7 +13,7 @@ RUN apt-get update && \
 RUN echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
   && chmod 0440 /etc/sudoers.d/$USERNAME
 USER $USERNAME
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-RUN [ "/bin/bash", "-c", "source $HOME/.nvm/nvm.sh && nvm i --no-progress 12.22.7 && nvm i --no-progress 14.18.1 && nvm i --no-progress 16.13.0 && nvm i --no-progress 17.0.1 " ]
-RUN [ "/bin/bash", "-c", "source $HOME/.nvm/nvm.sh && nvm alias default 17" ]
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+RUN [ "/bin/bash", "-c", "source $HOME/.nvm/nvm.sh && nvm i --no-progress 14.20.0 && nvm i --no-progress 16.17.1 && nvm i --no-progress 18.11.0 && nvm i --no-progress 19.0.0 " ]
+RUN [ "/bin/bash", "-c", "source $HOME/.nvm/nvm.sh && nvm alias default 19" ]
 ENV DEBIAN_FRONTEND=dialog

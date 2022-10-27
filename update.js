@@ -12,10 +12,10 @@ async function getLatest() {
     const response = await axios(requestOptions);
     return response.data.trim();
   } catch (err) {
-    console.log(err)
+    console.log(err);
     process.exit(1);
   }
-};
+}
 
 /* Provided a new Chromedriver version such as 77.0.3865.40:
    - update the version inside the ./lib/chromedriver helper file e.g. exports.version = '77.0.3865.40';
@@ -41,5 +41,5 @@ getLatest().then(version => {
     console.log(`Chromedriver version updated to ${version}`);
   }
 }, err => {
-  console.log(err)
+  console.log(err);
 });

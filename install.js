@@ -5,7 +5,6 @@ const fs = require('fs');
 const helper = require('./lib/chromedriver');
 const axios = require('axios').default;
 const path = require('path');
-const del = require('del');
 const child_process = require('child_process');
 const os = require('os');
 const url = require('url');
@@ -267,7 +266,7 @@ async function requestBinary(requestOptions, filePath) {
       if (error.response.data) {
         error.response.data.on('data', data => console.error(data.toString('utf8')));
         try {
-          await finishedAsync(error.response.data)
+          await finishedAsync(error.response.data);
         } catch (error) {
           console.error('Error downloading entire response:', error);
         }
@@ -307,7 +306,8 @@ async function extractDownload(dirToExtractTo) {
 }
 
 async function copyIntoPlace(originPath, targetPath) {
-  await del(targetPath, { force: true });
+  const { deleteAsync } = await import('del');
+  await deleteAsync(targetPath, { force: true });
   console.log(`Copying from ${originPath} to target path ${targetPath}`);
   fs.mkdirSync(targetPath);
 
@@ -347,7 +347,7 @@ function getMacOsRealArch() {
       return 'mac64_m1';
     }
 
-    return 'mac_arm64'
+    return 'mac_arm64';
   }
 
   if (process.arch === 'x64') {
@@ -364,14 +364,14 @@ function isEmulatedRosettaEnvironment() {
     const proc = child_process.spawnSync('sysctl', ['-in', 'sysctl.proc_translated']);
 
     // When run with `-in`, the return code is 0 even if there is no `sysctl.proc_translated`
-    if(proc.status) {
-        throw new Error('Unexpected return code from sysctl: ' + proc.status);
+    if (proc.status) {
+      throw new Error('Unexpected return code from sysctl: ' + proc.status);
     }
 
     // If there is no `sysctl.proc_translated` (i.e. not rosetta) then nothing is printed to
     // stdout
-    if(!proc.stdout) {
-        return false
+    if (!proc.stdout) {
+      return false;
     }
 
     const processTranslated = proc.stdout.toString().trim();

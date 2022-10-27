@@ -6,10 +6,11 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const spawnSync = require('child_process').spawnSync;
-const del = require('del').sync;
+const versions = ['14', '16', '18', '19'];
+const tempInstallPath = path.resolve(os.tmpdir(), 'chromedriver-test');
+const packedFile = path.resolve(tempInstallPath, 'chromedriver.tgz');
 
-const versions = ['6', '8', '10', '11'];
-const tmpdir = os.tmpdir();
+run();
 
 function directoryExists(file) {
   try {
@@ -40,13 +41,6 @@ function removeFolder(dir) {
   });
   fs.rmdirSync(dir);
 }
-
-const tempInstallPath = path.resolve(tmpdir, 'chromedriver-test');
-if (directoryExists(tempInstallPath)) {
-  console.log(`Deleting directory '${tempInstallPath}'.`);
-  removeFolder(tempInstallPath);
-}
-fs.mkdirSync(tempInstallPath);
 
 function checkSpawn(spawnInfo) {
   if (spawnInfo.stdout) {
@@ -89,16 +83,17 @@ function nvmUse(version) {
     checkSpawn(spawnSync('/bin/bash', ['-c', `source $HOME/.nvm/nvm.sh && nvm use ${largestMatchingVersion}`]));
 }
 
-function sleep(milliseconds) {
-  const inAFewMilliseconds = new Date(new Date().getTime() + milliseconds);
-  // eslint-disable-next-line no-empty
-  while (inAFewMilliseconds > new Date()) { }
+async function sleep(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
 }
 
-const packedFile = path.resolve(tempInstallPath, 'chromedriver.tgz');
-
-function pack() {
-  del(path.resolve(__dirname, '*.tgz'));
+async function pack() {
+  for (const file of fs.readdirSync(__dirname).filter(fn => fn.endsWith('.tgz'))) {
+    console.log(`Removing '${file}'.`);
+    fs.rmSync(file, { recursive: true });
+  }
   if (os.platform() === 'win32') {
     checkSpawn(spawnSync('cmd.exe', ['/c', `npm pack`], { cwd: __dirname }));
   } else {
@@ -109,32 +104,8 @@ function pack() {
     console.error("Could not find packed file.");
     process.exit(3);
   }
-  fs.renameSync(fileNames[0], packedFile);
-}
-
-pack();
-
-for (const version of versions) {
-  console.log(`Testing version ${version}...`);
-  const tempInstallPathForVersion = path.resolve(tempInstallPath, version);
-  fs.mkdirSync(tempInstallPathForVersion);
-  nvmUse(version);
-  if (os.platform() === 'win32') {
-    sleep(2000); // wait 2 seconds until everything is in place
-    checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --chromedriver-force-download --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
-    checkFile(tempInstallPathForVersion, version);
-    del(tempInstallPathForVersion, { force: true });
-    fs.mkdirSync(tempInstallPathForVersion);
-    checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
-    checkFile(tempInstallPathForVersion, version);
-  } else {
-    checkSpawn(spawnSync('npm', ['i', '--no-progress', '--chromedriver-force-download', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
-    checkFile(tempInstallPathForVersion, version);
-    del(tempInstallPathForVersion, { force: true });
-    fs.mkdirSync(tempInstallPathForVersion);
-    checkSpawn(spawnSync('npm', ['i', '--no-progress', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
-    checkFile(tempInstallPathForVersion, version);
-  }
+  fs.copyFileSync(fileNames[0], packedFile);
+  fs.unlinkSync(fileNames[0]);
 }
 
 function checkFile(tempInstallPathForVersion, version) {
@@ -148,8 +119,40 @@ function checkFile(tempInstallPathForVersion, version) {
   }
 }
 
-try {
-  removeFolder(tempInstallPath);
-} catch (err) {
-  console.error(`Could not delete folder '${tempInstallPath}'.`);
+async function run() {
+  if (directoryExists(tempInstallPath)) {
+    console.log(`Deleting directory '${tempInstallPath}'.`);
+    removeFolder(tempInstallPath);
+  }
+  fs.mkdirSync(tempInstallPath);
+  await pack();
+
+  for (const version of versions) {
+    console.log(`Testing version ${version}...`);
+    const tempInstallPathForVersion = path.resolve(tempInstallPath, version);
+    fs.mkdirSync(tempInstallPathForVersion);
+    nvmUse(version);
+    if (os.platform() === 'win32') {
+      await sleep(2000); // wait 2 seconds until everything is in place
+      checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --chromedriver-force-download --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
+      checkFile(tempInstallPathForVersion, version);
+      fs.rmSync(tempInstallPathForVersion, { recursive: true, force: true });
+      fs.mkdirSync(tempInstallPathForVersion);
+      checkSpawn(spawnSync('cmd.exe', ['/c', `npm i --no-progress --no-save --no-audit --no-package-lock ${packedFile}`], { cwd: tempInstallPathForVersion }));
+      checkFile(tempInstallPathForVersion, version);
+    } else {
+      checkSpawn(spawnSync('npm', ['i', '--no-progress', '--chromedriver-force-download', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
+      checkFile(tempInstallPathForVersion, version);
+      fs.rmSync(tempInstallPathForVersion, { recursive: true, force: true });
+      fs.mkdirSync(tempInstallPathForVersion);
+      checkSpawn(spawnSync('npm', ['i', '--no-progress', '--no-save', '--no-audit', '--no-package-lock', `${packedFile}`], { cwd: tempInstallPathForVersion }));
+      checkFile(tempInstallPathForVersion, version);
+    }
+  }
+
+  try {
+    removeFolder(tempInstallPath);
+  } catch (err) {
+    console.error(`Could not delete folder '${tempInstallPath}'.`);
+  }
 }
