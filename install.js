@@ -306,8 +306,7 @@ async function extractDownload(dirToExtractTo) {
 }
 
 async function copyIntoPlace(originPath, targetPath) {
-  const { deleteAsync } = await import('del');
-  await deleteAsync(targetPath, { force: true });
+  fs.rmSync(targetPath, { recursive: true, force: true });
   console.log(`Copying from ${originPath} to target path ${targetPath}`);
   fs.mkdirSync(targetPath);
 
