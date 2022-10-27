@@ -13,7 +13,6 @@ on:
       - "*.md"
       - "*.txt"
       - "*.yml"
-      - "*.json"
       - .editorconfig
       - ".github/**"
       - .gitignore
@@ -25,7 +24,6 @@ on:
       - "*.md"
       - "*.txt"
       - "*.yml"
-      - "*.json"
       - .editorconfig
       - ".github/**"
       - .gitignore
