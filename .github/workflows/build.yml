@@ -31,7 +31,7 @@ on:
 
 jobs:
   build:
-    name: Build Windows, Linux and Mac
+    name: Build amd64
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -49,6 +49,9 @@ jobs:
           npm --version
           npm ci
         name: Install npm dependencies
+      - run: npm run lint .
+        name: Lint
+        if: matrix.runner == 'ubuntu-latest'
       - run: |
           set -euo pipefail
           sudo apt-get update
