@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const helper = require('./lib/chromedriver');
-const axios = require('axios').default;
+const axios = require('axios');
 const path = require('path');
 const child_process = require('child_process');
 const os = require('os');
@@ -44,9 +44,12 @@ let platform = '';
       // Refer http://chromedriver.chromium.org/downloads/version-selection
       const chromeVersion = await getChromeVersion(include_chromium);
       console.log("Your Chrome version is " + chromeVersion);
-      const chromeVersionWithoutPatch = /^(.*?)\.\d+$/.exec(chromeVersion)[1];
-      await getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
-      console.log("Compatible ChromeDriver version is " + chromedriver_version);
+      const versionMatch = /^(.*?)\.\d+$/.exec(chromeVersion);
+      if (versionMatch) {
+        const chromeVersionWithoutPatch = versionMatch[1];
+        await getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
+        console.log("Compatible ChromeDriver version is " + chromedriver_version);
+      }
     }
     if (chromedriver_version === 'LATEST') {
       await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE`));
@@ -162,11 +165,10 @@ function findSuitableTempDirectory() {
     path.join(process.cwd(), 'tmp')
   ];
 
-  for (let i = 0; i < candidateTmpDirs.length; i++) {
-    if (!candidateTmpDirs[i]) continue;
-    // Prevent collision with other versions in the dependency tree
+  for (const tempDir of candidateTmpDirs) {
+    if (!tempDir) continue;
     const namespace = chromedriver_version;
-    const candidatePath = path.join(candidateTmpDirs[i], namespace, 'chromedriver');
+    const candidatePath = path.join(tempDir, namespace, 'chromedriver');
     try {
       fs.mkdirSync(candidatePath, { recursive: true });
       const testFile = path.join(candidatePath, now + '.tmp');
@@ -190,11 +192,12 @@ function getRequestOptions(downloadPath) {
 
   if (proxyUrl) {
     const proxyUrlParts = url.parse(proxyUrl);
-    options.proxy = {
-      host: proxyUrlParts.hostname,
-      port: proxyUrlParts.port ? parseInt(proxyUrlParts.port) : 80,
-      protocol: proxyUrlParts.protocol
-    };
+    if (proxyUrlParts.hostname && proxyUrlParts.protocol)
+      options.proxy = {
+        host: proxyUrlParts.hostname,
+        port: proxyUrlParts.port ? parseInt(proxyUrlParts.port) : 80,
+        protocol: proxyUrlParts.protocol
+      };
   }
 
   if (isHttps) {
@@ -244,7 +247,7 @@ function getRequestOptions(downloadPath) {
  */
 async function getChromeDriverVersion(requestOptions) {
   console.log('Finding Chromedriver version.');
-  const response = await axios(requestOptions);
+  const response = await axios.request(requestOptions);
   chromedriver_version = response.data.trim();
   console.log(`Chromedriver version is ${chromedriver_version}.`);
 }
@@ -258,7 +261,7 @@ async function requestBinary(requestOptions, filePath) {
   const outFile = fs.createWriteStream(filePath);
   let response;
   try {
-    response = await axios({ responseType: 'stream', ...requestOptions });
+    response = await axios.request({ responseType: 'stream', ...requestOptions });
   } catch (error) {
     if (error && error.response) {
       if (error.response.status)
@@ -315,14 +318,14 @@ async function copyIntoPlace(originPath, targetPath) {
     .filter(dirent => dirent.isFile() && dirent.name.startsWith('chromedriver') && !dirent.name.endsWith(".debug") && !dirent.name.endsWith(".zip"))
     .map(dirent => dirent.name);
   const promises = files.map(name => {
-    return new Promise((resolve) => {
+    return /** @type {Promise<void>} */(new Promise((resolve) => {
       const file = path.join(originPath, name);
       const reader = fs.createReadStream(file);
       const targetFile = path.join(targetPath, name);
       const writer = fs.createWriteStream(targetFile);
       writer.on("close", () => resolve());
       reader.pipe(writer);
-    });
+    }));
   });
   await Promise.all(promises);
 }
