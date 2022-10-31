@@ -9,6 +9,7 @@ const CURRENT_VERSION = require('./lib/chromedriver').version;
 async function getLatest() {
   const requestOptions = { url: 'https://chromedriver.storage.googleapis.com/LATEST_RELEASE', method: "GET" };
   try {
+    // @ts-expect-error
     const response = await axios(requestOptions);
     return response.data.trim();
   } catch (err) {

@@ -247,6 +247,7 @@ function getRequestOptions(downloadPath) {
  */
 async function getChromeDriverVersion(requestOptions) {
   console.log('Finding Chromedriver version.');
+  // @ts-expect-error
   const response = await axios.request(requestOptions);
   chromedriver_version = response.data.trim();
   console.log(`Chromedriver version is ${chromedriver_version}.`);
@@ -261,6 +262,7 @@ async function requestBinary(requestOptions, filePath) {
   const outFile = fs.createWriteStream(filePath);
   let response;
   try {
+    // @ts-expect-error
     response = await axios.request({ responseType: 'stream', ...requestOptions });
   } catch (error) {
     if (error && error.response) {

@@ -52,6 +52,9 @@ jobs:
       - run: npm run lint .
         name: Lint
         if: matrix.runner == 'ubuntu-latest'
+      - run: npm run typecheck
+        name: Type check
+        if: matrix.runner == 'ubuntu-latest'
       - run: |
           set -euo pipefail
           sudo apt-get update

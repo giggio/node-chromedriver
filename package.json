@@ -24,6 +24,7 @@
   "scripts": {
     "install": "node install.js",
     "update-chromedriver": "node update.js",
+    "typecheck": "tsc",
     "lint": "eslint"
   },
   "dependencies": {
@@ -36,7 +37,8 @@
     "tcp-port-used": "^1.0.1"
   },
   "devDependencies": {
-    "eslint": "^8.26.0"
+    "eslint": "^8.26.0",
+    "typescript": "^4.8.4"
   },
   "engines": {
     "node": ">=10"
