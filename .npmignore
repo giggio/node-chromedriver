@@ -14,4 +14,4 @@ shippable.yml
 azure-pipelines.yml
 .github
 .travis.yml
-
+tsconfig.json
