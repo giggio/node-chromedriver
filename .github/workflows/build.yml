@@ -103,7 +103,7 @@ jobs:
             node --version
             npm --version
             cd /app
-            npm ci --no-progress 2>&1 | tee # todo: remove tee and redirection when https://github.com/npm/cli/issues/3314 is fixed
+            npm ci --no-progress
             BIN="./lib/chromedriver/chromedriver"
             if ! [ -e $BIN ]; then
               echo "Binary not found at $BIN"
