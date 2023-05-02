@@ -1,6 +1,6 @@
 {
   "name": "chromedriver",
-  "version": "112.0.0",
+  "version": "112.0.1",
   "keywords": [
     "chromedriver",
     "selenium"
@@ -41,6 +41,6 @@
     "typescript": "^4.9.3"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   }
 }
