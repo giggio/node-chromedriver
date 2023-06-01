@@ -14,6 +14,6 @@ RUN echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
   && chmod 0440 /etc/sudoers.d/$USERNAME
 USER $USERNAME
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
-RUN [ "/bin/bash", "-c", "source $HOME/.nvm/nvm.sh && nvm i --no-progress 16.20.0 && nvm i --no-progress 18.16.0 && nvm i --no-progress 19.9.0 && nvm i --no-progress 20.0.0" ]
-RUN [ "/bin/bash", "-c", "source $HOME/.nvm/nvm.sh && nvm alias default 19" ]
+RUN [ "/bin/bash", "-c", "source $HOME/.nvm/nvm.sh && nvm i --no-progress 16.20.0 && nvm i --no-progress 18.16.0 && nvm i --no-progress 20.2.0" ]
+RUN [ "/bin/bash", "-c", "source $HOME/.nvm/nvm.sh && nvm alias default 20" ]
 ENV DEBIAN_FRONTEND=dialog
