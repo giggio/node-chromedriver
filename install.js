@@ -83,7 +83,7 @@ function validatePlatform() {
   /** @type string */
   let thePlatform = process.platform;
   if (thePlatform === 'linux') {
-    if (process.arch === 'arm64' || process.arch === 'x64') {
+    if (process.arch === 'arm64' || process.arch === 's390x' || process.arch === 'x64') {
       thePlatform += '64';
     } else {
       console.log('Only Linux 64 bits supported.');
