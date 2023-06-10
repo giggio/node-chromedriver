@@ -26,7 +26,8 @@ if (skipDownload) {
 }
 
 (async function install() {
-  let cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://chromedriver.storage.googleapis.com';
+  let cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://googlechromelabs.github.io';
+  const legacyCdnUrl = process.env.npm_config_chromedriver_legacy_cdnurl || process.env.CHROMEDRIVER_LEGACY_CDNURL || 'https://chromedriver.storage.googleapis.com';
   // adapt http://chromedriver.storage.googleapis.com/
   cdnUrl = cdnUrl.replace(/\/+$/, '');
   let chromedriverVersion = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
@@ -39,29 +40,33 @@ if (skipDownload) {
       console.log("Your Chrome version is " + chromeVersion);
       const versionMatch = /^(.*?)\.\d+$/.exec(chromeVersion);
       if (versionMatch) {
-        const chromeVersionWithoutPatch = versionMatch[1];
-        chromedriverVersion = await getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
+        chromedriverVersion = await getChromeDriverVersion(cdnUrl, legacyCdnUrl, parseInt(versionMatch[1]));
         console.log("Compatible ChromeDriver version is " + chromedriverVersion);
       }
-    }
-    if (chromedriverVersion === 'LATEST') {
-      chromedriverVersion = await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE`));
+    } else if (chromedriverVersion === 'LATEST') {
+      chromedriverVersion = await getChromeDriverVersion(cdnUrl, legacyCdnUrl);
     } else {
       const latestReleaseForVersionMatch = chromedriverVersion.match(/LATEST_(\d+)/);
       if (latestReleaseForVersionMatch) {
-        const majorVersion = latestReleaseForVersionMatch[1];
-        chromedriverVersion = await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`));
+        chromedriverVersion = await getChromeDriverVersion(cdnUrl, legacyCdnUrl, parseInt(latestReleaseForVersionMatch[1]));
       }
     }
-    const tmpPath = findSuitableTempDirectory(chromedriverVersion);
+    let tmpPath = findSuitableTempDirectory(chromedriverVersion);
+    const extractDirectory = tmpPath;
+    const majorVersion = parseInt(chromedriverVersion.split('.')[0]);
+    const useLegacyMethod = majorVersion <= 114;
+    const platform = getPlatform(chromedriverVersion);
+    const downloadedFile = getDownloadFilePath(useLegacyMethod, tmpPath, platform);
+    if (!useLegacyMethod) {
+      tmpPath = path.join(tmpPath, path.basename(downloadedFile, path.extname(downloadedFile)));
+    }
     const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
     const chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
     const chromedriverIsAvailable = await verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriverVersion, chromedriverBinaryFilePath);
     if (!chromedriverIsAvailable) {
       console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
-      const platform = validatePlatform(chromedriverVersion);
-      const downloadedFile = await downloadFile(tmpPath, chromedriverVersion, platform, cdnUrl, detectChromedriverVersion);
-      await extractDownload(tmpPath, chromedriverBinaryFilePath, downloadedFile);
+      await downloadFile(useLegacyMethod ? legacyCdnUrl : cdnUrl, useLegacyMethod, downloadedFile, chromedriverVersion, platform, detectChromedriverVersion);
+      await extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
     }
     const libPath = path.join(__dirname, 'lib', 'chromedriver');
     await copyIntoPlace(tmpPath, libPath);
@@ -75,14 +80,12 @@ if (skipDownload) {
 
 /**
  * @param {string} chromedriverVersion
- * @returns {string}
  */
-function validatePlatform(chromedriverVersion) {
-  /** @type string */
-  let thePlatform = process.platform;
+function getPlatform(chromedriverVersion) {
+  const thePlatform = process.platform;
   if (thePlatform === 'linux') {
     if (process.arch === 'arm64' || process.arch === 's390x' || process.arch === 'x64') {
-      thePlatform += '64';
+      return 'linux64';
     } else {
       console.log('Only Linux 64 bits supported.');
       process.exit(1);
@@ -95,37 +98,56 @@ function validatePlatform(chromedriverVersion) {
       process.exit(1);
     }
 
-    thePlatform = osxPlatform;
-  } else if (thePlatform !== 'win32') {
-    console.log('Unexpected platform or architecture:', process.platform, process.arch);
-    process.exit(1);
+    return osxPlatform;
+  } else if (thePlatform === 'win32') {
+    if (compareVersions(chromedriverVersion, '115') < 0) {
+      return 'win32';
+    }
+    return (process.arch === 'x64') ? 'win64' : 'win32';
   }
 
-  return thePlatform;
+  console.log('Unexpected platform or architecture:', process.platform, process.arch);
+  process.exit(1);
 }
 
 /**
- * @param {string} dirToLoadTo
+ * @param {string} cdnUrl
+ * @param {boolean} useLegacyDownloadMethod
+ * @param {string} downloadedFile
  * @param {string} chromedriverVersion
  * @param {string} platform
- * @param {string} cdnUrl
  * @param {boolean} detectChromedriverVersion
  */
-async function downloadFile(dirToLoadTo, chromedriverVersion, platform, cdnUrl, detectChromedriverVersion) {
+async function downloadFile(cdnUrl, useLegacyDownloadMethod, downloadedFile, chromedriverVersion, platform, detectChromedriverVersion) {
   const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
   if (detectChromedriverVersion && configuredfilePath) {
     console.log('Using file: ', configuredfilePath);
     return configuredfilePath;
   } else {
-    const fileName = `chromedriver_${platform}.zip`;
-    const tempDownloadedFile = path.resolve(dirToLoadTo, fileName);
-    let downloadedFile = tempDownloadedFile;
-    const formattedDownloadUrl = `${cdnUrl}/${chromedriverVersion}/${fileName}`;
-    console.log('Downloading from file: ', formattedDownloadUrl);
-    console.log('Saving to file:', downloadedFile);
-    await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
-    return downloadedFile;
+    const fileName = path.basename(downloadedFile);
+    if (useLegacyDownloadMethod) {
+      const formattedDownloadUrl = `${cdnUrl}/${chromedriverVersion}/${fileName}`;
+      console.log('Downloading from file: ', formattedDownloadUrl);
+      await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
+    } else {
+      const dlBaseUrl = 'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing'; // todo: make this configurable?
+      const formattedDownloadUrl = `${dlBaseUrl}/${chromedriverVersion}/${platform}/${fileName}`;
+      console.log('Downloading from file: ', formattedDownloadUrl);
+      await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
+    }
   }
+}
+
+/**
+ * @param {any} useLegacyPath
+ * @param {string} dirToLoadTo
+ * @param {string} platform
+ */
+function getDownloadFilePath(useLegacyPath, dirToLoadTo, platform) {
+  const fileName = useLegacyPath ? `chromedriver_${platform}.zip` : `chromedriver-${platform}.zip`;
+  const downloadedFile = path.resolve(dirToLoadTo, fileName);
+  console.log('Saving to file:', downloadedFile);
+  return downloadedFile;
 }
 
 /**
@@ -255,16 +277,38 @@ function getRequestOptions(downloadPath) {
 }
 
 /**
- * @param {import('axios').AxiosRequestConfig} requestOptions
+ * @param {string} cdnUrl
+ * @param {string} legacyCdnUrl
+ * @param {number} [majorVersion]
  * @returns {Promise<string>}
  */
-async function getChromeDriverVersion(requestOptions) {
-  console.log('Finding Chromedriver version.');
-  // @ts-expect-error
-  const response = await axios.request(requestOptions);
-  const chromedriverVersion = response.data.trim();
-  console.log(`Chromedriver version is ${chromedriverVersion}.`);
-  return chromedriverVersion;
+async function getChromeDriverVersion(cdnUrl, legacyCdnUrl, majorVersion) {
+  if (majorVersion == null || majorVersion > 114) {
+    console.log('Finding Chromedriver version.');
+    let chromedriverVersion;
+    if (majorVersion) {
+      const requestOptions = getRequestOptions(`${cdnUrl}/chrome-for-testing/latest-versions-per-milestone.json`);
+      // @ts-expect-error
+      const response = await axios.request(requestOptions);
+      chromedriverVersion = response.data?.milestones[majorVersion.toString()]?.version;
+    } else {
+      const requestOptions = getRequestOptions(`${cdnUrl}/chrome-for-testing/last-known-good-versions.json`);
+      // @ts-expect-error
+      const response = await axios.request(requestOptions);
+      chromedriverVersion = response.data?.channels?.Stable?.version;
+    }
+    console.log(`Chromedriver version is ${chromedriverVersion}.`);
+    return chromedriverVersion;
+  } else {
+    console.log('Finding Chromedriver version using legacy method.');
+    const urlPath = majorVersion ? `LATEST_RELEASE_${majorVersion}` : 'LATEST_RELEASE';
+    const requestOptions = getRequestOptions(`${legacyCdnUrl}/${urlPath}`);
+    // @ts-expect-error
+    const response = await axios.request(requestOptions);
+    const chromedriverVersion = response.data.trim();
+    console.log(`Chromedriver version is ${chromedriverVersion}.`);
+    return chromedriverVersion;
+  }
 }
 
 /**
@@ -329,6 +373,10 @@ async function extractDownload(dirToExtractTo, chromedriverBinaryFilePath, downl
   }
 }
 
+/**
+ * @param {string} originPath
+ * @param {string} targetPath
+ */
 async function copyIntoPlace(originPath, targetPath) {
   fs.rmSync(targetPath, { recursive: true, force: true });
   console.log(`Copying from ${originPath} to target path ${targetPath}`);
@@ -369,15 +417,13 @@ function fixFilePermissions() {
  */
 function getMacOsRealArch(chromedriverVersion) {
   if (process.arch === 'arm64' || isEmulatedRosettaEnvironment()) {
-    if (compareVersions(chromedriverVersion, '106.0.5249.61') < 0) {
-      return 'mac64_m1';
-    }
-
-    return 'mac_arm64';
+    return compareVersions(chromedriverVersion, '106.0.5249.61') < 0
+      ? 'mac64_m1'
+      : compareVersions(chromedriverVersion, '115') < 0 ? 'mac_arm64' : 'mac-arm64';
   }
 
   if (process.arch === 'x64') {
-    return 'mac64';
+    return compareVersions(chromedriverVersion, '115') < 0 ? 'mac64' : 'mac-x64';
   }
 
   return null;
