@@ -1,16 +1,16 @@
 'use strict';
 // @ts-check
 
-const fs = require('fs');
+const fs = require('node:fs');
 const helper = require('./lib/chromedriver');
 const axios = require('axios');
-const path = require('path');
-const child_process = require('child_process');
-const os = require('os');
-const url = require('url');
-const https = require('https');
-const { promisify } = require('util');
-const { finished } = require('stream');
+const path = require('node:path');
+const child_process = require('node:child_process');
+const os = require('node:os');
+const url = require('node:url');
+const https = require('node:https');
+const { promisify } = require('node:util');
+const { finished } = require('node:stream');
 const extractZip = require('extract-zip');
 const { getChromeVersion } = require('@testim/chrome-version');
 const HttpsProxyAgent = require('https-proxy-agent');
@@ -19,57 +19,51 @@ const { compareVersions } = require('compare-versions');
 
 const finishedAsync = promisify(finished);
 
-const skipDownload = process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD;
-if (skipDownload === 'true') {
+const skipDownload = (process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD) === 'true';
+if (skipDownload) {
   console.log('Found CHROMEDRIVER_SKIP_DOWNLOAD variable, skipping installation.');
   process.exit(0);
 }
 
-const libPath = path.join(__dirname, 'lib', 'chromedriver');
-let cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://chromedriver.storage.googleapis.com';
-const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
-
-// adapt http://chromedriver.storage.googleapis.com/
-cdnUrl = cdnUrl.replace(/\/+$/, '');
-const detect_chromedriver_version = process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION;
-const include_chromium = (process.env.npm_config_include_chromium || process.env.INCLUDE_CHROMIUM) === 'true';
-let chromedriver_version = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
-let chromedriverBinaryFilePath;
-let downloadedFile = '';
-let platform = '';
-
 (async function install() {
+  let cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://chromedriver.storage.googleapis.com';
+  // adapt http://chromedriver.storage.googleapis.com/
+  cdnUrl = cdnUrl.replace(/\/+$/, '');
+  let chromedriverVersion = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
+  const detectChromedriverVersion = (process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION) === 'true';
   try {
-    if (detect_chromedriver_version === 'true') {
+    if (detectChromedriverVersion) {
+      const includeChromium = (process.env.npm_config_include_chromium || process.env.INCLUDE_CHROMIUM) === 'true';
       // Refer http://chromedriver.chromium.org/downloads/version-selection
-      const chromeVersion = await getChromeVersion(include_chromium);
+      const chromeVersion = await getChromeVersion(includeChromium);
       console.log("Your Chrome version is " + chromeVersion);
       const versionMatch = /^(.*?)\.\d+$/.exec(chromeVersion);
       if (versionMatch) {
         const chromeVersionWithoutPatch = versionMatch[1];
-        await getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
-        console.log("Compatible ChromeDriver version is " + chromedriver_version);
+        chromedriverVersion = await getChromeDriverVersion(getRequestOptions(cdnUrl + '/LATEST_RELEASE_' + chromeVersionWithoutPatch));
+        console.log("Compatible ChromeDriver version is " + chromedriverVersion);
       }
     }
-    if (chromedriver_version === 'LATEST') {
-      await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE`));
+    if (chromedriverVersion === 'LATEST') {
+      chromedriverVersion = await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE`));
     } else {
-      const latestReleaseForVersionMatch = chromedriver_version.match(/LATEST_(\d+)/);
+      const latestReleaseForVersionMatch = chromedriverVersion.match(/LATEST_(\d+)/);
       if (latestReleaseForVersionMatch) {
         const majorVersion = latestReleaseForVersionMatch[1];
-        await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`));
+        chromedriverVersion = await getChromeDriverVersion(getRequestOptions(`${cdnUrl}/LATEST_RELEASE_${majorVersion}`));
       }
     }
-    platform = validatePlatform();
-    const tmpPath = findSuitableTempDirectory();
+    const tmpPath = findSuitableTempDirectory(chromedriverVersion);
     const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
-    chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
-    const chromedriverIsAvailable = await verifyIfChromedriverIsAvailableAndHasCorrectVersion();
+    const chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
+    const chromedriverIsAvailable = await verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriverVersion, chromedriverBinaryFilePath);
     if (!chromedriverIsAvailable) {
       console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
-      await downloadFile(tmpPath);
-      await extractDownload(tmpPath);
+      const platform = validatePlatform(chromedriverVersion);
+      const downloadedFile = await downloadFile(tmpPath, chromedriverVersion, platform, cdnUrl, detectChromedriverVersion);
+      await extractDownload(tmpPath, chromedriverBinaryFilePath, downloadedFile);
     }
+    const libPath = path.join(__dirname, 'lib', 'chromedriver');
     await copyIntoPlace(tmpPath, libPath);
     fixFilePermissions();
     console.log('Done. ChromeDriver binary available at', helper.path);
@@ -79,7 +73,11 @@ let platform = '';
   }
 })();
 
-function validatePlatform() {
+/**
+ * @param {string} chromedriverVersion
+ * @returns {string}
+ */
+function validatePlatform(chromedriverVersion) {
   /** @type string */
   let thePlatform = process.platform;
   if (thePlatform === 'linux') {
@@ -90,7 +88,7 @@ function validatePlatform() {
       process.exit(1);
     }
   } else if (thePlatform === 'darwin' || thePlatform === 'freebsd') {
-    const osxPlatform = getMacOsRealArch();
+    const osxPlatform = getMacOsRealArch(chromedriverVersion);
 
     if (!osxPlatform) {
       console.log('Only Mac 64 bits supported.');
@@ -106,23 +104,35 @@ function validatePlatform() {
   return thePlatform;
 }
 
-async function downloadFile(dirToLoadTo) {
-  if (detect_chromedriver_version !== 'true' && configuredfilePath) {
-    downloadedFile = configuredfilePath;
-    console.log('Using file: ', downloadedFile);
-    return;
+/**
+ * @param {string} dirToLoadTo
+ * @param {string} chromedriverVersion
+ * @param {string} platform
+ * @param {string} cdnUrl
+ * @param {boolean} detectChromedriverVersion
+ */
+async function downloadFile(dirToLoadTo, chromedriverVersion, platform, cdnUrl, detectChromedriverVersion) {
+  const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
+  if (detectChromedriverVersion && configuredfilePath) {
+    console.log('Using file: ', configuredfilePath);
+    return configuredfilePath;
   } else {
     const fileName = `chromedriver_${platform}.zip`;
     const tempDownloadedFile = path.resolve(dirToLoadTo, fileName);
-    downloadedFile = tempDownloadedFile;
-    const formattedDownloadUrl = `${cdnUrl}/${chromedriver_version}/${fileName}`;
+    let downloadedFile = tempDownloadedFile;
+    const formattedDownloadUrl = `${cdnUrl}/${chromedriverVersion}/${fileName}`;
     console.log('Downloading from file: ', formattedDownloadUrl);
     console.log('Saving to file:', downloadedFile);
     await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
+    return downloadedFile;
   }
 }
 
-function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
+/**
+ * @param {string} chromedriverVersion
+ * @param {string} chromedriverBinaryFilePath
+ */
+function verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriverVersion, chromedriverBinaryFilePath) {
   if (!fs.existsSync(chromedriverBinaryFilePath))
     return Promise.resolve(false);
   const forceDownload = process.env.npm_config_chromedriver_force_download === 'true' || process.env.CHROMEDRIVER_FORCE_DOWNLOAD === 'true';
@@ -142,7 +152,7 @@ function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
       const parts = str.split(' ');
       if (parts.length < 3)
         return deferred.resolve(false);
-      if (parts[1].startsWith(chromedriver_version)) {
+      if (parts[1].startsWith(chromedriverVersion)) {
         console.log(`ChromeDriver is already available at '${chromedriverBinaryFilePath}'.`);
         return deferred.resolve(true);
       }
@@ -155,7 +165,10 @@ function verifyIfChromedriverIsAvailableAndHasCorrectVersion() {
   return deferred.promise;
 }
 
-function findSuitableTempDirectory() {
+/**
+ * @param {string} chromedriverVersion
+ */
+function findSuitableTempDirectory(chromedriverVersion) {
   const now = Date.now();
   const candidateTmpDirs = [
     process.env.npm_config_tmp,
@@ -167,7 +180,7 @@ function findSuitableTempDirectory() {
 
   for (const tempDir of candidateTmpDirs) {
     if (!tempDir) continue;
-    const namespace = chromedriver_version;
+    const namespace = chromedriverVersion;
     const candidatePath = path.join(tempDir, namespace, 'chromedriver');
     try {
       fs.mkdirSync(candidatePath, { recursive: true });
@@ -242,15 +255,16 @@ function getRequestOptions(downloadPath) {
 }
 
 /**
- *
  * @param {import('axios').AxiosRequestConfig} requestOptions
+ * @returns {Promise<string>}
  */
 async function getChromeDriverVersion(requestOptions) {
   console.log('Finding Chromedriver version.');
   // @ts-expect-error
   const response = await axios.request(requestOptions);
-  chromedriver_version = response.data.trim();
-  console.log(`Chromedriver version is ${chromedriver_version}.`);
+  const chromedriverVersion = response.data.trim();
+  console.log(`Chromedriver version is ${chromedriverVersion}.`);
+  return chromedriverVersion;
 }
 
 /**
@@ -296,7 +310,12 @@ async function requestBinary(requestOptions, filePath) {
   });
 }
 
-async function extractDownload(dirToExtractTo) {
+/**
+ * @param {string} dirToExtractTo
+ * @param {string} chromedriverBinaryFilePath
+ * @param {string} downloadedFile
+ */
+async function extractDownload(dirToExtractTo, chromedriverBinaryFilePath, downloadedFile) {
   if (path.extname(downloadedFile) !== '.zip') {
     fs.copyFileSync(downloadedFile, chromedriverBinaryFilePath);
     console.log('Skipping zip extraction - binary file found.');
@@ -345,9 +364,12 @@ function fixFilePermissions() {
   }
 }
 
-function getMacOsRealArch() {
+/**
+ * @param {string} chromedriverVersion
+ */
+function getMacOsRealArch(chromedriverVersion) {
   if (process.arch === 'arm64' || isEmulatedRosettaEnvironment()) {
-    if (compareVersions(chromedriver_version, '106.0.5249.61') < 0) {
+    if (compareVersions(chromedriverVersion, '106.0.5249.61') < 0) {
       return 'mac64_m1';
     }
 
