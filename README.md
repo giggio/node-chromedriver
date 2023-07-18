@@ -50,23 +50,50 @@ CHROMEDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
 
 ## Custom binaries url
 
+This was changed for version 115 and greater, but implemented in this package starting with version
+`114.0.2`. To see the configuration to prior versions check out this
+[README.md](https://github.com/giggio/node-chromedriver/tree/114.0.1#custom-binaries-url).
+
+### For versions >= 115
+
 To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_cdnurl`.
-Default is `https://chromedriver.storage.googleapis.com`.
+Default is `https://googlechromelabs.github.io`.
 
 ```shell
 npm install chromedriver --chromedriver_cdnurl=https://npmmirror.com/mirrors/chromedriver
 ```
 
-Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+Or add a property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file:
 
-```
+```ini
 chromedriver_cdnurl=https://npmmirror.com/mirrors/chromedriver
 ```
 
-Another option is to use PATH variable `CHROMEDRIVER_CDNURL`.
+Another option is to use the environment variable `CHROMEDRIVER_CDNURL`.
 
 ```shell
 CHROMEDRIVER_CDNURL=https://npmmirror.com/mirrors/chromedriver npm install chromedriver
+```
+
+### For versions < 115
+
+To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_legacy_cdnurl`.
+Default is `https://chromedriver.storage.googleapis.com`.
+
+```shell
+npm install chromedriver --chromedriver_legacy_cdnurl=https://npmmirror.com/mirrors/chromedriver
+```
+
+Or add a property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file:
+
+```ini
+chromedriver_legacy_cdnurl=https://npmmirror.com/mirrors/chromedriver
+```
+
+Another option is to use the environment variable `CHROMEDRIVER_LEGACY_CDNURL`.
+
+```shell
+CHROMEDRIVER_LEGACY_CDNURL=https://npmmirror.com/mirrors/chromedriver npm install chromedriver
 ```
 
 ## Custom binaries file
