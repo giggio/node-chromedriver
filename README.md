@@ -36,9 +36,9 @@ force it always download by configuring it:
 npm install chromedriver --chromedriver-force-download
 ```
 
-Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+Or add property to your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
-```
+```ini
 chromedriver_force_download=true
 ```
 
@@ -50,41 +50,56 @@ CHROMEDRIVER_FORCE_DOWNLOAD=true npm install chromedriver
 
 ## Custom binaries url
 
-This was changed for version 115 and greater, but implemented in this package starting with version
+This allows you to use your own endpoints for metadata and binaries. It is useful in air gapped
+scenarios or if you have download restrictions, such as firewalls.
+
+This was changed for version 115 and greater
+([see details](https://groups.google.com/g/chromedriver-users/c/clpipqvOGjE)),
+but implemented in this package starting with version
 `114.0.2`. To see the configuration to prior versions check out this
-[README.md](https://github.com/giggio/node-chromedriver/tree/114.0.1#custom-binaries-url).
+[README.md](https://github.com/giggio/node-chromedriver/tree/114.0.1#custom-binaries-url)
+at the latest tag where it was using the legacy urls (`114.0.1`).
 
 ### For versions >= 115
 
-To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_cdnurl`.
-Default is `https://googlechromelabs.github.io`.
+There are two urls that need to be configured, one for metadata and one for binaries.
+The one for metadata is the "CDN url", and the one for binaries is the "CDN binaries url".
+See [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/) to understand
+how these urls work.
+
+Npm config:
+For metadata use `chromedriver_cdnurl`. The default is `https://googlechromelabs.github.io`.
+For binaries use `chromedriver_cdnurl`. The default is `https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing`.
 
 ```shell
-npm install chromedriver --chromedriver_cdnurl=https://npmmirror.com/mirrors/chromedriver
+npm install chromedriver --chromedriver_cdnurl=https://npmmirror.com/metadata --chromedriver_cdnbinariesurl=https://npmmirror.com/binaries
 ```
 
-Or add a property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file:
+Or add these properties to your [`.npmrc`](https://docs.npmjs.com/cli/configuring-npm/npmrc) file:
 
 ```ini
-chromedriver_cdnurl=https://npmmirror.com/mirrors/chromedriver
+chromedriver_cdnurl=https://npmmirror.com/metadata
+chromedriver_cdnbinariesurl=https://npmmirror.com/binaries
 ```
 
-Another option is to use the environment variable `CHROMEDRIVER_CDNURL`.
+Another option is to use the environment variables `CHROMEDRIVER_CDNURL` and `CHROMEDRIVER_CDNBINARIESURL`.
 
 ```shell
-CHROMEDRIVER_CDNURL=https://npmmirror.com/mirrors/chromedriver npm install chromedriver
+CHROMEDRIVER_CDNURL=https://npmmirror.com/metadata CHROMEDRIVER_CDNBINARIESURL=https://npmmirror.com/binaries npm install chromedriver
 ```
 
 ### For versions < 115
+
+There is one url to both metadata and binaries.
 
 To use a mirror of the ChromeDriver binaries use npm config property `chromedriver_legacy_cdnurl`.
 Default is `https://chromedriver.storage.googleapis.com`.
 
 ```shell
-npm install chromedriver --chromedriver_legacy_cdnurl=https://npmmirror.com/mirrors/chromedriver
+npm install chromedriver --chromedriver_legacy_cdnurl=https://npmmirror.com/mirrors/chromedriver --chromedriver_version=LATEST_114
 ```
 
-Or add a property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file:
+Or add a property to your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file:
 
 ```ini
 chromedriver_legacy_cdnurl=https://npmmirror.com/mirrors/chromedriver
@@ -93,7 +108,7 @@ chromedriver_legacy_cdnurl=https://npmmirror.com/mirrors/chromedriver
 Another option is to use the environment variable `CHROMEDRIVER_LEGACY_CDNURL`.
 
 ```shell
-CHROMEDRIVER_LEGACY_CDNURL=https://npmmirror.com/mirrors/chromedriver npm install chromedriver
+CHROMEDRIVER_LEGACY_CDNURL=https://npmmirror.com/mirrors/chromedriver npm install chromedriver --chromedriver_version=LATEST_114
 ```
 
 ## Custom binaries file
@@ -104,9 +119,9 @@ To get the chromedriver from the filesystem instead of a web request use the npm
 npm install chromedriver --chromedriver_filepath=/path/to/chromedriver_mac64.zip
 ```
 
-Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+Or add property to your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
-```
+```ini
 chromedriver_filepath=/path/to/chromedriver_mac64.zip
 ```
 
@@ -147,9 +162,9 @@ To achieve this you can use the npm config property `chromedriver_skip_download`
 npm install chromedriver --chromedriver_skip_download=true
 ```
 
-Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+Or add property to your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
-```
+```ini
 chromedriver_skip_download=true
 ```
 
@@ -245,9 +260,9 @@ use `LATEST` as the version number:
 npm install chromedriver --chromedriver_version=LATEST
 ```
 
-Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+Or add property to your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
-```
+```ini
 chromedriver_version=LATEST
 ```
 
@@ -279,9 +294,9 @@ you can use the npm config property `detect_chromedriver_version`.
 npm install chromedriver --detect_chromedriver_version
 ```
 
-Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+Or add property to your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
-```
+```ini
 detect_chromedriver_version=true
 ```
 
@@ -302,9 +317,9 @@ If you don't have Chrome installed, you can check for Chromium version instead b
 npm install chromedriver --include_chromium
 ```
 
-Or add property into your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
+Or add property to your [`.npmrc`](https://docs.npmjs.com/files/npmrc) file.
 
-```
+```ini
 include_chromium=true
 ```
 

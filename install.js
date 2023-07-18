@@ -26,10 +26,8 @@ if (skipDownload) {
 }
 
 (async function install() {
-  let cdnUrl = process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://googlechromelabs.github.io';
-  const legacyCdnUrl = process.env.npm_config_chromedriver_legacy_cdnurl || process.env.CHROMEDRIVER_LEGACY_CDNURL || 'https://chromedriver.storage.googleapis.com';
-  // adapt http://chromedriver.storage.googleapis.com/
-  cdnUrl = cdnUrl.replace(/\/+$/, '');
+  const cdnUrl = (process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://googlechromelabs.github.io').replace(/\/+$/, '');
+  const legacyCdnUrl = (process.env.npm_config_chromedriver_legacy_cdnurl || process.env.CHROMEDRIVER_LEGACY_CDNURL || 'https://chromedriver.storage.googleapis.com').replace(/\/+$/, '');
   let chromedriverVersion = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
   const detectChromedriverVersion = (process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION) === 'true';
   try {
@@ -65,7 +63,8 @@ if (skipDownload) {
     const chromedriverIsAvailable = await verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriverVersion, chromedriverBinaryFilePath);
     if (!chromedriverIsAvailable) {
       console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
-      await downloadFile(useLegacyMethod ? legacyCdnUrl : cdnUrl, useLegacyMethod, downloadedFile, chromedriverVersion, platform, detectChromedriverVersion);
+      const cdnBinariesUrl = (process.env.npm_config_chromedriver_cdnbinariesurl || process.env.CHROMEDRIVER_CDNBINARIESURL || 'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing').replace(/\/+$/, '');
+      await downloadFile(useLegacyMethod ? legacyCdnUrl : cdnBinariesUrl, useLegacyMethod, downloadedFile, chromedriverVersion, platform, detectChromedriverVersion);
       await extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
     }
     const libPath = path.join(__dirname, 'lib', 'chromedriver');
@@ -130,8 +129,7 @@ async function downloadFile(cdnUrl, useLegacyDownloadMethod, downloadedFile, chr
       console.log('Downloading from file: ', formattedDownloadUrl);
       await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
     } else {
-      const dlBaseUrl = 'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing'; // todo: make this configurable?
-      const formattedDownloadUrl = `${dlBaseUrl}/${chromedriverVersion}/${platform}/${fileName}`;
+      const formattedDownloadUrl = `${cdnUrl}/${chromedriverVersion}/${platform}/${fileName}`;
       console.log('Downloading from file: ', formattedDownloadUrl);
       await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
     }
