@@ -69,7 +69,7 @@ how these urls work.
 
 Npm config:
 For metadata use `chromedriver_cdnurl`. The default is `https://googlechromelabs.github.io`.
-For binaries use `chromedriver_cdnurl`. The default is `https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing`.
+For binaries use `chromedriver_cdnbinariesurl`. The default is `https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing`.
 
 ```shell
 npm install chromedriver --chromedriver_cdnurl=https://npmmirror.com/metadata --chromedriver_cdnbinariesurl=https://npmmirror.com/binaries
