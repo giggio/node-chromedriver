@@ -1,6 +1,6 @@
 {
   "name": "chromedriver",
-  "version": "115.0.1",
+  "version": "116.0.0",
   "keywords": [
     "chromedriver",
     "selenium"
