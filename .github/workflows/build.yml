@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["16.x", "18.x", "20.x"]
+        node: ["18.x", "20.x"]
         runner: ["windows-latest", "ubuntu-latest", "macos-latest"]
     steps:
       - uses: actions/checkout@v2
@@ -71,7 +71,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["16", "18", "20"]
+        node: ["18", "20"]
     steps:
       - uses: actions/checkout@v2
       - uses: uraimo/run-on-arch-action@v2.1.1
@@ -109,14 +109,14 @@ jobs:
               echo "Binary not found at $BIN"
               exit 1
             fi
-  
+
   build_s390x:
     name: Build s390x
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        node: ["16", "18", "20"]
+        node: ["18", "20"]
     steps:
       - uses: actions/checkout@v2
       - uses: uraimo/run-on-arch-action@v2.1.1
