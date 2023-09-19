@@ -54,7 +54,7 @@ if (skipDownload) {
     const majorVersion = parseInt(chromedriverVersion.split('.')[0]);
     const useLegacyMethod = majorVersion <= 114;
     const platform = getPlatform(chromedriverVersion);
-    const downloadedFile = getDownloadFilePath(useLegacyMethod, tmpPath, platform);
+    let downloadedFile = getDownloadFilePath(useLegacyMethod, tmpPath, platform);
     if (!useLegacyMethod) {
       tmpPath = path.join(tmpPath, path.basename(downloadedFile, path.extname(downloadedFile)));
     }
@@ -64,7 +64,7 @@ if (skipDownload) {
     if (!chromedriverIsAvailable) {
       console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
       const cdnBinariesUrl = (process.env.npm_config_chromedriver_cdnbinariesurl || process.env.CHROMEDRIVER_CDNBINARIESURL || 'https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing').replace(/\/+$/, '');
-      await downloadFile(useLegacyMethod ? legacyCdnUrl : cdnBinariesUrl, useLegacyMethod, downloadedFile, chromedriverVersion, platform, detectChromedriverVersion);
+      downloadedFile = await downloadFile(useLegacyMethod ? legacyCdnUrl : cdnBinariesUrl, useLegacyMethod, downloadedFile, chromedriverVersion, platform);
       await extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
     }
     const libPath = path.join(__dirname, 'lib', 'chromedriver');
@@ -115,11 +115,10 @@ function getPlatform(chromedriverVersion) {
  * @param {string} downloadedFile
  * @param {string} chromedriverVersion
  * @param {string} platform
- * @param {boolean} detectChromedriverVersion
  */
-async function downloadFile(cdnUrl, useLegacyDownloadMethod, downloadedFile, chromedriverVersion, platform, detectChromedriverVersion) {
+async function downloadFile(cdnUrl, useLegacyDownloadMethod, downloadedFile, chromedriverVersion, platform) {
   const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
-  if (detectChromedriverVersion && configuredfilePath) {
+  if (configuredfilePath) {
     console.log('Using file: ', configuredfilePath);
     return configuredfilePath;
   } else {
@@ -133,6 +132,7 @@ async function downloadFile(cdnUrl, useLegacyDownloadMethod, downloadedFile, chr
       console.log('Downloading from file: ', formattedDownloadUrl);
       await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
     }
+    return downloadedFile;
   }
 }
 
