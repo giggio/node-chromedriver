@@ -98,7 +98,6 @@ jobs:
             tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner
             rm sha
             rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz"
-            npm install -g npm@latest
           run: |
             node --version
             npm --version
