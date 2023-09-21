@@ -10,12 +10,14 @@ permissions:
   pull-requests: write
 
 jobs:
-  action:
+  check-for-updates:
+    name: Check for updates
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - run: |
+          npm ci
           ./update.js --no-commit
           VERSION=`node --eval 'console.log(require("./package.json").version)'`
           echo "{NEW_VERSION}={$VERSION}" >> "$GITHUB_OUTPUT"
