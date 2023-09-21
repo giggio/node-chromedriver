@@ -4,6 +4,7 @@ const fs = require('fs');
 const semver = require('semver');
 const execSync = require('child_process').execSync;
 const currentChromedriverVersion = require('./lib/chromedriver').version;
+// @ts-expect-error
 const currentVersionInPackageJson = require('./package.json').version;
 
 // fetch the latest chromedriver version
