@@ -13,6 +13,8 @@ jobs:
   action:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - run: |
           ./update.js --no-commit
           VERSION=`node --eval 'console.log(require("./package.json").version)'`
