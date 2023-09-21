@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const semver = require('semver');
 const execSync = require('child_process').execSync;
-const CURRENT_VERSION = require('./lib/chromedriver').version;
+const currentChromedriverVersion = require('./lib/chromedriver').version;
+const currentVersionInPackageJson = require('./package.json').version;
 
 // fetch the latest chromedriver version
 async function getLatest() {
@@ -23,24 +25,29 @@ async function getLatest() {
    - add a git tag using the new node-chromedriver version
    - add a git commit, e.g. Bump version to 77.0.0
 */
-async function writeUpdate(version) {
+async function writeUpdate(newVersion) {
   const helper = fs.readFileSync('./lib/chromedriver.js', 'utf8');
   const versionExport = 'exports.version';
   const regex = new RegExp(`^.*${versionExport}.*$`, 'gm');
-  const updated = helper.replace(regex, `${versionExport} = '${version}';`);
+  const updated = helper.replace(regex, `${versionExport} = '${newVersion}';`);
+  const currentMajor = semver.major(currentVersionInPackageJson);
+  const newMajor = semver.major(semver.coerce(newVersion));
+  const version = currentMajor !== newMajor ? `${newMajor}.0.0` : semver.inc(currentVersionInPackageJson, 'patch');
+  execSync(`npm version ${version} --git-tag-version=false`);
   fs.writeFileSync('./lib/chromedriver.js', updated, 'utf8');
-  const packageVersion = `${version.slice(0, version.indexOf('.'))}.0.0`;
-  execSync(`npm version ${packageVersion} --git-tag-version=false && git add . && git commit -m "Bump version to ${packageVersion}" && git tag -s ${packageVersion} -m ${packageVersion}`);
+  execSync('git add :/');
+  execSync(`git commit -m "Bump version to ${version}"`);
+  execSync(`git tag -s ${version} -m ${version}`);
 }
 
 async function run() {
   try {
-    const version = await getLatest();
-    if (CURRENT_VERSION === version) {
+    const latestVersion = await getLatest();
+    if (currentChromedriverVersion === latestVersion) {
       console.log('Chromedriver version is up to date.');
     } else {
-      writeUpdate(version);
-      console.log(`Chromedriver version updated to ${version}`);
+      writeUpdate(latestVersion);
+      console.log(`Chromedriver version updated to ${latestVersion}`);
     }
   } catch (err) {
     console.log(err);
