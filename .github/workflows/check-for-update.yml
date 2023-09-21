@@ -20,7 +20,7 @@ jobs:
           npm ci
           ./update.js --no-commit
           VERSION=`node --eval 'console.log(require("./package.json").version)'`
-          echo "{NEW_VERSION}={$VERSION}" >> "$GITHUB_OUTPUT"
+          echo "NEW_VERSION=$VERSION" >> "$GITHUB_OUTPUT"
         id: update
         name: Run update
 
