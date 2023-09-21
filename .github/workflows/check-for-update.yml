@@ -1,0 +1,36 @@
+---
+name: "Check for update"
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+
+jobs:
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          ./update.js --no-commit
+          VERSION=`node --eval 'console.log(require("./package.json").version)'`
+          echo "{NEW_VERSION}={$VERSION}" >> "$GITHUB_OUTPUT"
+        id: update
+        name: Run update
+
+      - uses: peter-evans/create-pull-request@v5
+        name: Create Pull Request
+        with:
+          commit-message: Bump version to ${{ steps.update.outputs.NEW_VERSION }}
+          branch: update-${{ steps.update.outputs.NEW_VERSION }}
+          delete-branch: true
+          title: Bump version to ${{ steps.update.outputs.NEW_VERSION }}
+          body: |
+            Update Chromedriver to version `${{ steps.update.outputs.NEW_VERSION }}`.
+            See: https://googlechromelabs.github.io/chrome-for-testing/
+          labels: |
+            update chromedriver
+          assignees: giggio
+          reviewers: giggio

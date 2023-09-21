@@ -15,7 +15,7 @@ async function getLatest() {
     const data = await res.json();
     return data?.channels?.Stable?.version;
   } catch (err) {
-    console.log(err);
+    console.error(err);
     process.exit(1);
   }
 }
@@ -26,7 +26,7 @@ async function getLatest() {
    - add a git tag using the new node-chromedriver version
    - add a git commit, e.g. Bump version to 77.0.0
 */
-async function writeUpdate(newVersion) {
+async function writeUpdate(newVersion, shouldCommit) {
   const helper = fs.readFileSync('./lib/chromedriver.js', 'utf8');
   const versionExport = 'exports.version';
   const regex = new RegExp(`^.*${versionExport}.*$`, 'gm');
@@ -36,23 +36,26 @@ async function writeUpdate(newVersion) {
   const version = currentMajor !== newMajor ? `${newMajor}.0.0` : semver.inc(currentVersionInPackageJson, 'patch');
   execSync(`npm version ${version} --git-tag-version=false`);
   fs.writeFileSync('./lib/chromedriver.js', updated, 'utf8');
+  if (!shouldCommit) return;
   execSync('git add :/');
   execSync(`git commit -m "Bump version to ${version}"`);
   execSync(`git tag -s ${version} -m ${version}`);
 }
 
-async function run() {
+async function run(shouldCommit) {
   try {
     const latestVersion = await getLatest();
     if (currentChromedriverVersion === latestVersion) {
       console.log('Chromedriver version is up to date.');
     } else {
-      writeUpdate(latestVersion);
+      writeUpdate(latestVersion, shouldCommit);
       console.log(`Chromedriver version updated to ${latestVersion}`);
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
+    process.exit(1);
   }
 }
 
-run();
+const shouldCommit = process.argv.indexOf('--no-commit') == -1;
+run(shouldCommit);
