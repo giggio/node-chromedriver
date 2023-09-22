@@ -1,0 +1,53 @@
+---
+name: Create tag
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Create Tag
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          VERSION=`node --eval 'console.log(require("./package.json").version)'`
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+        id: version
+        name: Run update
+
+      - uses: actions/github-script@v6
+        name: Create tag
+        with:
+          script: |
+            const tag = octokit.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'tags/${{ steps.version.outputs.NEW_VERSION }}',
+            });
+            if (tag == null || tag.status == 404)
+              return;
+            const createdTag = github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: ${{ steps.version.outputs.NEW_VERSION }},
+              message: 'Bump version to ${{ steps.version.outputs.NEW_VERSION }}',
+              object: context.sha,
+              type: 'commit'
+            });
+            if (createdTag.status !== 201) {
+              console.error(`Could not create tag ${{ steps.version.outputs.NEW_VERSION }}.`);
+            }
+            const createdRef = github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.version.outputs.NEW_VERSION }}',
+              sha: createdTag.data.sha
+            });
+            if (createdRef.status === 201) {
+              console.log(`Tag ${{ steps.version.outputs.NEW_VERSION }} was created successfully`);
+            } else {
+              console.error(`Could not create ref ${{ steps.version.outputs.NEW_VERSION }}.`);
+            }
