@@ -12,11 +12,13 @@ jobs:
     name: Create Tag
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - run: |
           VERSION=`node --eval 'console.log(require("./package.json").version)'`
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
         id: version
-        name: Run update
+        name: Get version number
 
       - uses: actions/github-script@v6
         name: Create tag
