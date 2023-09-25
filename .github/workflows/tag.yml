@@ -24,14 +24,21 @@ jobs:
         name: Create tag
         with:
           script: |
-            const tag = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'tags/${{ steps.version.outputs.VERSION }}'
-            });
-            if (tag != null && tag.status == 200) {
-              console.error('Tag ${{ steps.version.outputs.VERSION }} already exists.');
-              return;
+            try {
+              const tag = await github.rest.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'tags/${{ steps.version.outputs.VERSION }}'
+              });
+              if (tag != null && tag.status == 200) {
+                console.log('Tag ${{ steps.version.outputs.VERSION }} already exists.');
+                return;
+              }
+            } catch (error) {
+              if (error.status !== 404) {
+                console.error('Error when trying to get tag ${{ steps.version.outputs.VERSION }}.');
+                return;
+              }
             }
             const main = await github.rest.git.getRef({
               owner: context.repo.owner,
