@@ -359,6 +359,7 @@ async function requestBinary(requestOptions, filePath) {
  */
 async function extractDownload(dirToExtractTo, chromedriverBinaryFilePath, downloadedFile) {
   if (path.extname(downloadedFile) !== '.zip') {
+    fs.mkdirSync(path.dirname(chromedriverBinaryFilePath), {recursive: true});
     fs.copyFileSync(downloadedFile, chromedriverBinaryFilePath);
     console.log('Skipping zip extraction - binary file found.');
     return;
