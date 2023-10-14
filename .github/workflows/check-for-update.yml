@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - run: |
-          npm ci
+          npm ci --ignore-scripts --no-audit --no-fund
           VERSION_BEFORE=`node --eval 'console.log(require("./package.json").version)'`
           ./update.js --no-commit
           VERSION=`node --eval 'console.log(require("./package.json").version)'`
