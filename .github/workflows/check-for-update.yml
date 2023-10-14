@@ -18,14 +18,27 @@ jobs:
 
       - run: |
           npm ci
+          VERSION_BEFORE=`node --eval 'console.log(require("./package.json").version)'`
           ./update.js --no-commit
           VERSION=`node --eval 'console.log(require("./package.json").version)'`
+          if [ "$VERSION" == "$VERSION_BEFORE" ]; then
+            echo "No update needed"
+            exit 0
+          fi
           echo "NEW_VERSION=$VERSION" >> "$GITHUB_OUTPUT"
         id: update
         name: Run update
 
+      - uses: tibdex/github-app-token@v1
+        id: generate-token
+        if: steps.update.outputs.NEW_VERSION != ''
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - uses: peter-evans/create-pull-request@v5
         name: Create Pull Request
+        if: steps.update.outputs.NEW_VERSION != ''
         with:
           commit-message: Bump version to ${{ steps.update.outputs.NEW_VERSION }}
           branch: update-${{ steps.update.outputs.NEW_VERSION }}
@@ -38,3 +51,4 @@ jobs:
             update chromedriver
           assignees: giggio
           reviewers: giggio
+          token: ${{ steps.generate-token.outputs.token }}
