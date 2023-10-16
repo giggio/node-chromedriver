@@ -185,6 +185,9 @@ jobs:
         name: Verify install
 
   publish:
+    permissions:
+      contents: read
+      id-token: write
     name: Publish to npm
     runs-on: ubuntu-latest
     needs: [build, build_arm64, build_s390x, build_proxy]
@@ -195,6 +198,6 @@ jobs:
         with:
           node-version: 20.x
           registry-url: "https://registry.npmjs.org"
-      - run: npm publish
+      - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
