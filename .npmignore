@@ -5,6 +5,7 @@ tmp
 Dockerfile
 *.sh
 testInstall.js
+testStart.js
 update.js
 *.tgz
 .vscode

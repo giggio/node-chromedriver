@@ -21,14 +21,14 @@ async function getLatest() {
 }
 
 /* Provided a new Chromedriver version such as 77.0.3865.40:
-   - update the version inside the ./lib/chromedriver helper file e.g. exports.version = '77.0.3865.40';
+   - update the version inside the ./lib/chromedriver helper file e.g. const version = '77.0.3865.40';
    - bumps package.json version number
    - add a git tag using the new node-chromedriver version
    - add a git commit, e.g. Bump version to 77.0.0
 */
 async function writeUpdate(newVersion, shouldCommit) {
   const helper = fs.readFileSync('./lib/chromedriver.js', 'utf8');
-  const versionExport = 'exports.version';
+  const versionExport = 'const version';
   const regex = new RegExp(`^.*${versionExport}.*$`, 'gm');
   const updated = helper.replace(regex, `${versionExport} = '${newVersion}';`);
   const currentMajor = semver.major(currentVersionInPackageJson);
