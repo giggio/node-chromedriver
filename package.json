@@ -1,5 +1,5 @@
 {
-  "name": "chromedriver",
+  "name": "@scolab/node16-chromedriver",
   "version": "119.0.1",
   "keywords": [
     "chromedriver",
@@ -42,6 +42,6 @@
     "typescript": "^5.2.2"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=16"
   }
 }
