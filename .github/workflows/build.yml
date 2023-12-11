@@ -80,7 +80,7 @@ jobs:
         id: build
         with:
           arch: aarch64
-          distro: ubuntu20.04
+          distro: ubuntu22.04
           env: | # this is just so we can cache each version
             GITHUB_WORKFLOW: ${{ github.workflow }}-${{ github.job }}-${{ matrix.node }}
           dockerRunArgs: |
@@ -124,7 +124,7 @@ jobs:
         id: build
         with:
           arch: s390x
-          distro: ubuntu20.04
+          distro: ubuntu22.04
           env: | # this is just so we can cache each version
             GITHUB_WORKFLOW: ${{ github.workflow }}-${{ github.job }}-${{ matrix.node }}
           dockerRunArgs: |
