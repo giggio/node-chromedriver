@@ -31,6 +31,10 @@ on:
 
 jobs:
   build:
+    permissions:
+      actions: write
+      checks: write
+      pull-requests: write
     name: Build amd64
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -65,6 +69,32 @@ jobs:
       - run: ./test-driver.sh
         name: Verify install
         shell: bash
+      - run: npm run test:ci
+        name: Run tests
+        continue-on-error: true
+      - name: Publish Report
+        uses: turing85/publish-report@v1
+        if: ${{ always() }}
+        with:
+          cancel-workflow-on-error: false
+          comment-header: my-comment-header
+          comment-message-success: |
+            {0} passed!
+
+            {1} tests were successful, {2} tests failed, {3} test were skipped.
+
+            The report can be found [here]({4}).
+
+          comment-message-failure: |
+            {0} failed!
+
+            {1} tests were successful, {2} tests failed, {3} test were skipped.
+
+            The report can be found [here]({4}).
+          report-fail-on-error: true
+          report-name: Tests ${{ matrix.runner }}-${{ matrix.node }}
+          report-path: junit.xml
+          report-reporter: jest-junit
 
   build_arm64:
     name: Build arm64

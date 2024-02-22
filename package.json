@@ -25,6 +25,8 @@
     "install": "node install.js",
     "update-chromedriver": "node update.js",
     "typecheck": "tsc",
+    "test": "jest",
+    "test:ci": "jest --ci --reporters=default --reporters=jest-junit",
     "lint": "eslint"
   },
   "dependencies": {
@@ -37,7 +39,10 @@
     "tcp-port-used": "^1.0.2"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
     "semver": "^7.6.0",
     "typescript": "^5.3.3"
   },

@@ -25,5 +25,13 @@
     "no-console": "off",
     "no-var": "error",
     "prefer-const": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*"],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
 }

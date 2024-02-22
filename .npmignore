@@ -16,3 +16,5 @@ azure-pipelines.yml
 .github
 .travis.yml
 tsconfig.json
+tests
+junit.xml
