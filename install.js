@@ -3,20 +3,16 @@
 
 const fs = require('node:fs');
 const helper = require('./lib/chromedriver');
-const axios = require('axios');
+const axios = require('axios').default;
 const path = require('node:path');
 const child_process = require('node:child_process');
 const os = require('node:os');
-const url = require('node:url');
-const https = require('node:https');
+const { ProxyAgent } = require('proxy-agent');
 const { promisify } = require('node:util');
 const { finished } = require('node:stream');
 const extractZip = require('extract-zip');
 const { getChromeVersion } = require('@testim/chrome-version');
-const HttpsProxyAgent = require('https-proxy-agent');
-const getProxyForUrl = require("proxy-from-env").getProxyForUrl;
 const { compareVersions } = require('compare-versions');
-
 const finishedAsync = promisify(finished);
 
 const skipDownload = (process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD) === 'true';
@@ -227,19 +223,8 @@ function findSuitableTempDirectory(chromedriverVersion) {
 function getRequestOptions(downloadPath) {
   /** @type import('axios').AxiosRequestConfig */
   const options = { url: downloadPath, method: "GET" };
-  const urlParts = url.parse(downloadPath);
+  const urlParts = new URL(downloadPath);
   const isHttps = urlParts.protocol === 'https:';
-  const proxyUrl = getProxyForUrl(downloadPath);
-
-  if (proxyUrl) {
-    const proxyUrlParts = url.parse(proxyUrl);
-    if (proxyUrlParts.hostname && proxyUrlParts.protocol)
-      options.proxy = {
-        host: proxyUrlParts.hostname,
-        port: proxyUrlParts.port ? parseInt(proxyUrlParts.port) : 80,
-        protocol: proxyUrlParts.protocol
-      };
-  }
 
   if (isHttps) {
     // Use certificate authority settings from npm
@@ -255,22 +240,22 @@ function getRequestOptions(downloadPath) {
       }
       console.log('Using npmconf cafile.');
     }
-
+    options.httpsAgent = new ProxyAgent({
+      rejectUnauthorized: !!process.env.npm_config_strict_ssl,
+      ca: ca
+    });
+    options.proxy = false;
+  } else {
+    const { getProxyForUrl } = require("proxy-from-env");
+    const proxyUrl = getProxyForUrl(downloadPath);
     if (proxyUrl) {
-      console.log('Using workaround for https-url combined with a proxy.');
-      const httpsProxyAgentOptions = url.parse(proxyUrl);
-      // @ts-ignore
-      httpsProxyAgentOptions.ca = ca;
-      // @ts-ignore
-      httpsProxyAgentOptions.rejectUnauthorized = !!process.env.npm_config_strict_ssl;
-      // @ts-ignore
-      options.httpsAgent = new HttpsProxyAgent(httpsProxyAgentOptions);
-      options.proxy = false;
-    } else {
-      options.httpsAgent = new https.Agent({
-        rejectUnauthorized: !!process.env.npm_config_strict_ssl,
-        ca: ca
-      });
+      const proxyUrlParts = new URL(proxyUrl);
+      if (proxyUrlParts.hostname && proxyUrlParts.protocol)
+        options.proxy = {
+          host: proxyUrlParts.hostname,
+          port: proxyUrlParts.port ? parseInt(proxyUrlParts.port) : 80,
+          protocol: proxyUrlParts.protocol
+        };
     }
   }
 
@@ -294,12 +279,10 @@ async function getChromeDriverVersion(cdnUrl, legacyCdnUrl, majorVersion) {
     let chromedriverVersion;
     if (majorVersion) {
       const requestOptions = getRequestOptions(`${cdnUrl}/chrome-for-testing/latest-versions-per-milestone.json`);
-      // @ts-expect-error
       const response = await axios.request(requestOptions);
       chromedriverVersion = response.data?.milestones[majorVersion.toString()]?.version;
     } else {
       const requestOptions = getRequestOptions(`${cdnUrl}/chrome-for-testing/last-known-good-versions.json`);
-      // @ts-expect-error
       const response = await axios.request(requestOptions);
       chromedriverVersion = response.data?.channels?.Stable?.version;
     }
@@ -309,7 +292,6 @@ async function getChromeDriverVersion(cdnUrl, legacyCdnUrl, majorVersion) {
     console.log('Finding Chromedriver version using legacy method.');
     const urlPath = majorVersion ? `LATEST_RELEASE_${majorVersion}` : 'LATEST_RELEASE';
     const requestOptions = getRequestOptions(`${legacyCdnUrl}/${urlPath}`);
-    // @ts-expect-error
     const response = await axios.request(requestOptions);
     const chromedriverVersion = response.data.trim();
     console.log(`Chromedriver version is ${chromedriverVersion}.`);
@@ -326,7 +308,6 @@ async function getChromeDriverVersion(cdnUrl, legacyCdnUrl, majorVersion) {
 async function getDownloadUrl(cdnUrl, version, platform) {
   const getUrlUrl = `${cdnUrl}/chrome-for-testing/${version}.json`;
   const requestOptions = getRequestOptions(getUrlUrl);
-  // @ts-expect-error
   const response = await axios.request(requestOptions);
   const url = response.data?.downloads?.chromedriver?.find((/** @type {{ platform: string; }} */ c) => c.platform == platform)?.url;
   return url;
@@ -341,7 +322,6 @@ async function requestBinary(requestOptions, filePath) {
   const outFile = fs.createWriteStream(filePath);
   let response;
   try {
-    // @ts-expect-error
     response = await axios.request({ responseType: 'stream', ...requestOptions });
   } catch (error) {
     let errorData = '';
@@ -393,7 +373,8 @@ async function extractDownload(dirToExtractTo, chromedriverBinaryFilePath, downl
   try {
     await extractZip(path.resolve(downloadedFile), { dir: dirToExtractTo });
   } catch (error) {
-    throw new Error('Error extracting archive: ' + error);
+    console.error('Error extracting archive: ' + error);
+    process.exit(1);
   }
 }
 
@@ -461,7 +442,8 @@ function isEmulatedRosettaEnvironment() {
 
     // When run with `-in`, the return code is 0 even if there is no `sysctl.proc_translated`
     if (proc.status) {
-      throw new Error('Unexpected return code from sysctl: ' + proc.status);
+      console.error('Unexpected return code from sysctl: ' + proc.status);
+      process.exit(1);
     }
 
     // If there is no `sysctl.proc_translated` (i.e. not rosetta) then nothing is printed to
