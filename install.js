@@ -54,17 +54,23 @@ if (skipDownload) {
     const majorVersion = parseInt(chromedriverVersion.split('.')[0]);
     const useLegacyMethod = majorVersion <= 114;
     const platform = getPlatform(chromedriverVersion);
-    let downloadedFile = getDownloadFilePath(useLegacyMethod, tmpPath, platform);
-    if (!useLegacyMethod) {
+    const downloadedFile = getDownloadFilePath(useLegacyMethod, tmpPath, platform);
+    if (!useLegacyMethod)
       tmpPath = path.join(tmpPath, path.basename(downloadedFile, path.extname(downloadedFile)));
-    }
     const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
     const chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
     const chromedriverIsAvailable = await verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriverVersion, chromedriverBinaryFilePath);
     if (!chromedriverIsAvailable) {
       console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
-      const cdnBinariesUrl = (process.env.npm_config_chromedriver_cdnbinariesurl || process.env.CHROMEDRIVER_CDNBINARIESURL || 'https://storage.googleapis.com/chrome-for-testing-public').replace(/\/+$/, '');
-      downloadedFile = await downloadFile(useLegacyMethod ? legacyCdnUrl : cdnBinariesUrl, useLegacyMethod, downloadedFile, chromedriverVersion, platform);
+      const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
+      if (configuredfilePath) {
+        console.log('Using file: ', configuredfilePath);
+        return configuredfilePath;
+      }
+      if (useLegacyMethod)
+        await downloadFileLegacy(legacyCdnUrl, downloadedFile, chromedriverVersion);
+      else
+        await downloadFile(cdnUrl, downloadedFile, chromedriverVersion, platform);
       await extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
     }
     const libPath = path.join(__dirname, 'lib', 'chromedriver');
@@ -86,14 +92,14 @@ function getPlatform(chromedriverVersion) {
     if (process.arch === 'arm64' || process.arch === 's390x' || process.arch === 'x64') {
       return 'linux64';
     } else {
-      console.log('Only Linux 64 bits supported.');
+      console.error('Only Linux 64 bits supported.');
       process.exit(1);
     }
   } else if (thePlatform === 'darwin' || thePlatform === 'freebsd') {
     const osxPlatform = getMacOsRealArch(chromedriverVersion);
 
     if (!osxPlatform) {
-      console.log('Only Mac 64 bits supported.');
+      console.error('Only Mac 64 bits supported.');
       process.exit(1);
     }
 
@@ -104,36 +110,38 @@ function getPlatform(chromedriverVersion) {
     }
     return (process.arch === 'x64') ? 'win64' : 'win32';
   }
-
-  console.log('Unexpected platform or architecture:', process.platform, process.arch);
+  console.error('Unexpected platform or architecture:', process.platform, process.arch);
   process.exit(1);
 }
 
 /**
  * @param {string} cdnUrl
- * @param {boolean} useLegacyDownloadMethod
  * @param {string} downloadedFile
  * @param {string} chromedriverVersion
  * @param {string} platform
  */
-async function downloadFile(cdnUrl, useLegacyDownloadMethod, downloadedFile, chromedriverVersion, platform) {
-  const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
-  if (configuredfilePath) {
-    console.log('Using file: ', configuredfilePath);
-    return configuredfilePath;
-  } else {
-    const fileName = path.basename(downloadedFile);
-    if (useLegacyDownloadMethod) {
-      const formattedDownloadUrl = `${cdnUrl}/${chromedriverVersion}/${fileName}`;
-      console.log('Downloading from file: ', formattedDownloadUrl);
-      await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
-    } else {
-      const formattedDownloadUrl = `${cdnUrl}/${chromedriverVersion}/${platform}/${fileName}`;
-      console.log('Downloading from file: ', formattedDownloadUrl);
-      await requestBinary(getRequestOptions(formattedDownloadUrl), downloadedFile);
-    }
-    return downloadedFile;
+async function downloadFile(cdnUrl, downloadedFile, chromedriverVersion, platform) {
+  const cdnBinariesUrl = (process.env.npm_config_chromedriver_cdnbinariesurl || process.env.CHROMEDRIVER_CDNBINARIESURL)?.replace(/\/+$/, '');
+  const url = cdnBinariesUrl
+    ? `${cdnBinariesUrl}/${chromedriverVersion}/${platform}/${path.basename(downloadedFile)}`
+    : await getDownloadUrl(cdnUrl, chromedriverVersion, platform);
+  if (!url) {
+    console.error(`Download url could not be found for version ${chromedriverVersion} and platform '${platform}'`);
+    process.exit(1);
   }
+  console.log('Downloading from file: ', url);
+  await requestBinary(getRequestOptions(url), downloadedFile);
+}
+
+/**
+ * @param {string} cdnUrl
+ * @param {string} downloadedFile
+ * @param {string} chromedriverVersion
+ */
+async function downloadFileLegacy(cdnUrl, downloadedFile, chromedriverVersion) {
+  const url = `${cdnUrl}/${chromedriverVersion}/${path.basename(downloadedFile)}`;
+  console.log('Downloading from file: ', url);
+  await requestBinary(getRequestOptions(url), downloadedFile);
 }
 
 /**
@@ -310,6 +318,21 @@ async function getChromeDriverVersion(cdnUrl, legacyCdnUrl, majorVersion) {
 }
 
 /**
+ * @param {string} cdnUrl
+ * @param {string} version
+ * @param {string} platform
+ * @returns {Promise<[string]>}
+ */
+async function getDownloadUrl(cdnUrl, version, platform) {
+  const getUrlUrl = `${cdnUrl}/chrome-for-testing/${version}.json`;
+  const requestOptions = getRequestOptions(getUrlUrl);
+  // @ts-expect-error
+  const response = await axios.request(requestOptions);
+  const url = response.data?.downloads?.chromedriver?.find((/** @type {{ platform: string; }} */ c) => c.platform == platform)?.url;
+  return url;
+}
+
+/**
  *
  * @param {import('axios').AxiosRequestConfig} requestOptions
  * @param {string} filePath
@@ -321,11 +344,12 @@ async function requestBinary(requestOptions, filePath) {
     // @ts-expect-error
     response = await axios.request({ responseType: 'stream', ...requestOptions });
   } catch (error) {
+    let errorData = '';
     if (error && error.response) {
       if (error.response.status)
         console.error('Error status code:', error.response.status);
       if (error.response.data) {
-        error.response.data.on('data', data => console.error(data.toString('utf8')));
+        error.response.data.on('data', data => errorData += data.toString('utf8'));
         try {
           await finishedAsync(error.response.data);
         } catch (error) {
@@ -333,7 +357,8 @@ async function requestBinary(requestOptions, filePath) {
         }
       }
     }
-    throw new Error('Error with http(s) request: ' + error);
+    console.error(`Error with http(s) request:\n${error}\nError data:\n${errorData}`);
+    process.exit(1);
   }
   let count = 0;
   let notifiedCount = 0;
@@ -359,7 +384,7 @@ async function requestBinary(requestOptions, filePath) {
  */
 async function extractDownload(dirToExtractTo, chromedriverBinaryFilePath, downloadedFile) {
   if (path.extname(downloadedFile) !== '.zip') {
-    fs.mkdirSync(path.dirname(chromedriverBinaryFilePath), {recursive: true});
+    fs.mkdirSync(path.dirname(chromedriverBinaryFilePath), { recursive: true });
     fs.copyFileSync(downloadedFile, chromedriverBinaryFilePath);
     console.log('Skipping zip extraction - binary file found.');
     return;

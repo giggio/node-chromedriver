@@ -68,8 +68,17 @@ See [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/)
 how these urls work.
 
 Npm config:
-For metadata use `chromedriver_cdnurl`. The default is `https://googlechromelabs.github.io`.
-For binaries use `chromedriver_cdnbinariesurl`. The default is `https://storage.googleapis.com/chrome-for-testing-public`.
+
+For metadata use `chromedriver_cdnurl`. The default is `https://googlechromelabs.github.io`. You need to either supply the binary download endpoint, or the binaries url config, see bellow.
+
+For binaries use `chromedriver_cdnbinariesurl`. The default is to search for the download url using
+`$chromedriver_cdnurl/chrome-for-testing/[version].json`, which forms a URL like:
+https://googlechromelabs.github.io/chrome-for-testing/122.0.6261.57.json.
+
+The resulting url will be something like:
+https://storage.googleapis.com/chrome-for-testing-public/122.0.6261.57/linux64/chromedriver-linux64.zip.
+
+Keep in mind that this last url is just an example and it might change (as it has happened in the past).
 
 ```shell
 npm install chromedriver --chromedriver_cdnurl=https://npmmirror.com/metadata --chromedriver_cdnbinariesurl=https://npmmirror.com/binaries
