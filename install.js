@@ -52,7 +52,7 @@ class Installer {
       const majorVersion = parseInt(chromedriverVersion.split('.')[0]);
       const useLegacyMethod = majorVersion <= 114;
       const platform = this.getPlatform(chromedriverVersion);
-      const downloadedFile = this.getDownloadFilePath(useLegacyMethod, tmpPath, platform);
+      let downloadedFile = this.getDownloadFilePath(useLegacyMethod, tmpPath, platform);
       if (!useLegacyMethod)
         tmpPath = path.join(tmpPath, path.basename(downloadedFile, path.extname(downloadedFile)));
       const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
@@ -63,12 +63,13 @@ class Installer {
         const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
         if (configuredfilePath) {
           console.log('Using file: ', configuredfilePath);
-          return configuredfilePath;
+          downloadedFile = configuredfilePath;
+        } else {
+          if (useLegacyMethod)
+            await this.downloadFileLegacy(legacyCdnUrl, downloadedFile, chromedriverVersion);
+          else
+            await this.downloadFile(cdnUrl, downloadedFile, chromedriverVersion, platform);
         }
-        if (useLegacyMethod)
-          await this.downloadFileLegacy(legacyCdnUrl, downloadedFile, chromedriverVersion);
-        else
-          await this.downloadFile(cdnUrl, downloadedFile, chromedriverVersion, platform);
         await this.extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
       }
       const libPath = path.join(__dirname, 'lib', 'chromedriver');

@@ -214,6 +214,31 @@ jobs:
       - run: ./test-driver.sh
         name: Verify install
 
+  build_local_file_install:
+    name: Build with local file install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21.x
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+      - run: |
+          node --version
+          npm --version
+          curl -fsSL --output /tmp/chromedriver-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/123.0.6312.105/linux64/chromedriver-linux64.zip
+          export CHROMEDRIVER_FILEPATH=/tmp/chromedriver-linux64.zip
+          npm ci
+        name: Install npm dependencies
+      - run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y libnss3
+        name: Install OS dependencies
+      - run: ./test-driver.sh
+        name: Verify install
+
   build_legacy:
     name: Build with legacy cdn url
     runs-on: ubuntu-latest
