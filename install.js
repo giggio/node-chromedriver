@@ -58,21 +58,26 @@ class Installer {
       const chromedriverBinaryFileName = process.platform === 'win32' ? 'chromedriver.exe' : 'chromedriver';
       const chromedriverBinaryFilePath = path.resolve(tmpPath, chromedriverBinaryFileName);
       const chromedriverIsAvailable = await this.verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriverVersion, chromedriverBinaryFilePath);
+      const libPath = path.join(__dirname, 'lib', 'chromedriver');
+
       if (!chromedriverIsAvailable) {
         console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
         const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
         if (configuredfilePath) {
           console.log('Using file: ', configuredfilePath);
-          return configuredfilePath;
+          await this.copyCustomBinaryIntoPlace(configuredfilePath, libPath);
         }
-        if (useLegacyMethod)
-          await this.downloadFileLegacy(legacyCdnUrl, downloadedFile, chromedriverVersion);
-        else
-          await this.downloadFile(cdnUrl, downloadedFile, chromedriverVersion, platform);
-        await this.extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
+        else {
+          if (useLegacyMethod)
+            await this.downloadFileLegacy(legacyCdnUrl, downloadedFile, chromedriverVersion);
+          else
+            await this.downloadFile(cdnUrl, downloadedFile, chromedriverVersion, platform);
+
+          await this.extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
+          await this.copyIntoPlace(tmpPath, libPath);
+        }
       }
-      const libPath = path.join(__dirname, 'lib', 'chromedriver');
-      await this.copyIntoPlace(tmpPath, libPath);
+
       this.fixFilePermissions();
       console.log('Done. ChromeDriver binary available at', helper.path);
     } catch (err) {
@@ -406,6 +411,17 @@ class Installer {
     await Promise.all(promises);
   }
 
+  /**
+   * @param {string} originPath
+   * @param {string} targetDirectory
+   */
+  async copyCustomBinaryIntoPlace(originPath, targetDirectory) {
+    fs.rmSync(targetDirectory, { recursive: true, force: true });
+    const targetPath = path.join(targetDirectory, path.basename(originPath));
+    console.log(`Copying from ${originPath} to target path ${targetPath}`);
+    fs.mkdirSync(targetDirectory, { recursive: true });
+    fs.copyFileSync(originPath, targetPath);
+  }
 
   fixFilePermissions() {
     // Check that the binary is user-executable and fix it if it isn't (problems with unzip library)
