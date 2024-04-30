@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["18.x", "20.x", "21.x"]
+        node: ["18.x", "20.x", "21.x", "22.x"]
         runner: ["windows-latest", "ubuntu-latest", "macos-latest"]
     steps:
       - uses: actions/checkout@v4
@@ -102,7 +102,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["20", "21"]
+        node: ["20", "21", "22"]
     steps:
       - uses: actions/checkout@v4
       - uses: uraimo/run-on-arch-action@v2.7.1
@@ -146,7 +146,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["18", "20", "21"]
+        node: ["18", "20", "21", "22"]
     steps:
       - uses: actions/checkout@v4
       - uses: uraimo/run-on-arch-action@v2.7.1
@@ -275,7 +275,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
           registry-url: "https://registry.npmjs.org"
       - run: npm publish --provenance --access public
         env:
