@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["18.x", "20.x", "22.x"]
+        node: ["18.x", "20.x", "22.x", "23.x"]
         runner: ["windows-latest", "ubuntu-latest", "macos-latest"]
     steps:
       - uses: actions/checkout@v4
@@ -102,10 +102,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["20", "22"]
+        node: ["20", "22", "23"]
     steps:
       - uses: actions/checkout@v4
-      - uses: uraimo/run-on-arch-action@v2.7.1
+      - uses: uraimo/run-on-arch-action@v2.8.1
         name: Verify install
         id: build
         with:
@@ -146,10 +146,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["18", "20", "22"]
+        node: ["18", "20", "22", "23"]
     steps:
       - uses: actions/checkout@v4
-      - uses: uraimo/run-on-arch-action@v2.7.1
+      - uses: uraimo/run-on-arch-action@v2.8.1
         name: Verify install
         id: build
         with:
