@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# this script runs on Linux, macOS and Windows
+
 set -xeuo pipefail
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -8,6 +10,13 @@ if ! [ -e $BIN ]; then
   echo "Binary not found at $BIN"
   exit 1
 fi
+
+# exit if not amd64 on linux
+if [ "$OSTYPE" == "linux-gnu" ] && [ "$(uname -m)" != "x86_64" ]; then
+  echo "Linux only has builds for x64, this is '$(uname -m)'"
+  exit 0
+fi
+
 # Start ChromeDriver and make it non-blocking
 $DIR/bin/chromedriver &
 
