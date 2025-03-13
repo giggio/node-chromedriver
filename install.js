@@ -92,7 +92,7 @@ class Installer {
         return 'linux64';
       } else if (process.arch === 'riscv64') {
         // Check if --chromedriver_filepath is provided via env vars
-        const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROME>
+        const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
         if (!configuredfilePath) {
           console.error(
             'Error: RISC-V detected: No official Chromedriver binary is available for RISC-V 64-bit. >
