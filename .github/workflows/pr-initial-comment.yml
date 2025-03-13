@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Initial PR report comment
+
+on:
+  pull_request_target:
+    types:
+      - opened
+
+jobs:
+  pr-comment:
+    name: Initial PR report comment
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create comment
+        uses: turing85/publish-report@v2
+        with:
+          github-token: ${{ github.token }}
+          comment-message-recreate: |
+            ## 🚦Reports 🚦
+            Reports will be posted here as they become available.
+          comment-message-pr-number: ${{ github.event.number }}
+          recreate-comment: true

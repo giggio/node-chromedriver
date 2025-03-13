@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Update PR report comment
+
+on:
+  workflow_run:
+    workflows:
+      - Build app
+    types:
+      - completed
+
+jobs:
+  report:
+    name: Update PR report comment
+    permissions:
+      actions: write
+      checks: write
+      pull-requests: write
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Download PR number
+        uses: actions/download-artifact@v4
+        with:
+          name: pr-number
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+      - name: Display downloaded files
+        run: ls -R
+      - name: Set PR number
+        id: get-pr-number
+        run: |
+          echo "pr-number=$(cat pr-number.txt)" >> "${GITHUB_OUTPUT}"
+      - name: Publish reports
+        uses: turing85/publish-report@v2
+        with:
+          comment-message-pr-number: ${{ steps.get-pr-number.outputs.pr-number }}
+          download-artifact-pattern: test-report-*
+          download-artifact-run-id: ${{ github.event.workflow_run.id }}
+          comment-header: my-comment-header
+          comment-message-success: |
+            {0} passed!
+
+            {1} tests were successful, {2} tests failed, {3} test were skipped.
+
+            The report can be found [here]({4}).
+
+          comment-message-failure: |
+            {0} failed!
+
+            {1} tests were successful, {2} tests failed, {3} test were skipped.
+
+            The report can be found [here]({4}).
+          report-fail-on-error: true
+          report-name: Tests
+          report-path: '**/junit.xml'
+          report-reporter: jest-junit
