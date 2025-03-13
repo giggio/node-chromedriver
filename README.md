@@ -145,7 +145,12 @@ This variable can be used to set either a `.zip` file or the binary itself, eg:
 ```shell
 CHROMEDRIVER_FILEPATH=/bin/chromedriver
 ```
+## Installing on RISC-V 64-bit Systems
+Chromedriver does not provide an official binary for RISC-V 64-bit architectures. To install on a RISC-V system, you must supply your own Chromedriver binary using the `--chromedriver_filepath` option. For example:
 
+```bash
+npm install chromedriver --chromedriver_filepath=/path/to/chromedriver
+```
 ## Custom download options
 
 Install through a proxy.
