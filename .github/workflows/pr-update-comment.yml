@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Download PR number
         uses: actions/download-artifact@v4
         with:
@@ -37,7 +40,6 @@ jobs:
         with:
           comment-message-pr-number: ${{ steps.get-pr-number.outputs.pr-number }}
           download-artifact-pattern: test-report-*
-          download-artifact-merge-multiple: true
           download-artifact-run-id: ${{ github.event.workflow_run.id }}
           comment-header: my-comment-header
           comment-message-success: |
@@ -55,5 +57,5 @@ jobs:
             The report can be found [here]({4}).
           report-fail-on-error: true
           report-name: Tests
-          report-path: junit.xml
+          report-path: '**/junit.xml'
           report-reporter: jest-junit
