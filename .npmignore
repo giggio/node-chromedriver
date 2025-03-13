@@ -18,3 +18,4 @@ azure-pipelines.yml
 tsconfig.json
 tests
 junit.xml
+eslint.config.cjs
