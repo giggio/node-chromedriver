@@ -88,7 +88,7 @@ class Installer {
   getPlatform(chromedriverVersion) {
     const thePlatform = process.platform;
     if (thePlatform === 'linux') {
-      if (process.arch === 'arm64' || process.arch === 's390x' || process.arch === 'x64' || process.arch === 'riscv64') {
+      if (process.arch === 'arm64' || process.arch === 's390x' || process.arch === 'x64') {
         return 'linux64';
       } else if (process.arch === 'riscv64') {
         // Check if --chromedriver_filepath is provided via env vars
