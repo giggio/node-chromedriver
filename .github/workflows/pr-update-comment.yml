@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Update PR report comment
+
+on:
+  workflow_run:
+    workflows:
+      - Build app
+    types:
+      - completed
+
+jobs:
+  report:
+    permissions:
+      actions: write
+      checks: write
+      pull-requests: write
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download PR number
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          name: pr-number
+          run-id: ${{ github.event.workflow_run.id }}
+      - name: Set PR number
+        id: get-pr-data
+        run: |
+          echo "pr-number=$(cat pr-number.txt)" >> "${GITHUB_OUTPUT}"
+          echo "pr-runner-node=$(cat pr-runner-node.txt)" >> "${GITHUB_OUTPUT}"
+      - name: Publish reports
+        uses: turing85/publish-report@v2
+        with:
+          comment-message-pr-number: ${{ steps.get-pr-data.outputs.pr-number }}
+          download-artifact-name: test-report
+          download-artifact-run-id: ${{ github.event.workflow_run.id }}
+          comment-header: my-comment-header
+          comment-message-success: |
+            {0} passed!
+
+            {1} tests were successful, {2} tests failed, {3} test were skipped.
+
+            The report can be found [here]({4}).
+
+          comment-message-failure: |
+            {0} failed!
+
+            {1} tests were successful, {2} tests failed, {3} test were skipped.
+
+            The report can be found [here]({4}).
+          report-fail-on-error: true
+          report-name: Tests ${{ steps.get-pr-data.outputs.pr-runner-node }}
+          report-path: junit.xml
+          report-reporter: jest-junit
