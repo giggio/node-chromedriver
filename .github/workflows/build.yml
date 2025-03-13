@@ -70,19 +70,6 @@ jobs:
           path: junit.xml
           if-no-files-found: error
           retention-days: 1
-      - name: Get PR number
-        id: get-pr-data
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "${{ github.event.number }}" > "pr-number.txt"
-          echo "${{ matrix.runner }}" > "pr-runner.txt"
-          echo "${{ matrix.node }}" > "pr-node.txt"
-      - name: Upload PR number
-        uses: actions/upload-artifact@v4
-        if: github.event_name == 'pull_request'
-        with:
-          name: pr-data-${{ matrix.runner }}-${{ matrix.node }}
-          path: "pr-*.txt"
 
   build_s390x:
     name: Build s390x
@@ -206,6 +193,22 @@ jobs:
         name: Install OS dependencies
       - run: ./test-driver.sh
         name: Verify install
+
+  upload_pr_number:
+    name: Upload PR number
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR number
+        id: get-pr-number
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "${{ github.event.number }}" > "pr-number.txt"
+      - name: Upload PR number
+        uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: pr-number
+          path: "pr-number.txt"
 
   publish:
     permissions:
