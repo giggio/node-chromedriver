@@ -90,6 +90,20 @@ class Installer {
     if (thePlatform === 'linux') {
       if (process.arch === 'arm64' || process.arch === 's390x' || process.arch === 'x64' || process.arch === 'riscv64') {
         return 'linux64';
+      } else if (process.arch === 'riscv64') {
+        // Check if --chromedriver_filepath is provided via env vars
+        const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROME>
+        if (!configuredfilePath) {
+          console.error(
+            'Error: RISC-V detected: No official Chromedriver binary is available for RISC-V 64-bit. >
+            'Please provide a local Chromedriver binary using the --chromedriver_filepath option. ' +
+            'Example: npm install chromedriver --chromedriver_filepath=/path/to/chromedriver ' +
+            'You may need to build Chromedriver from source or obtain it from a third-party source.'
+          );
+        // process.exit(1);
+        }
+        // Return a placeholder platform; actual file will come from configuredfilePath
+        return 'linux64'; // Compatible with downstream logic, though download is skipped
       } else {
         console.error('Only Linux 64 bits supported.');
         process.exit(1);
