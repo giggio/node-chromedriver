@@ -66,7 +66,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: github.event_name == 'pull_request'
         with:
-          name: test-report
+          name: test-report-${{ matrix.runner }}-${{ matrix.node }}
           path: junit.xml
           if-no-files-found: error
           retention-days: 1
@@ -75,13 +75,14 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           echo "${{ github.event.number }}" > "pr-number.txt"
-          echo "${{ matrix.runner }}-${{ matrix.node }}" > "pr-runner-node.txt"
+          echo "${{ matrix.runner }}" > "pr-runner.txt"
+          echo "${{ matrix.node }}" > "pr-node.txt"
       - name: Upload PR number
         uses: actions/upload-artifact@v4
         if: github.event_name == 'pull_request'
         with:
-          name: pr-data
-          path: "*.txt"
+          name: pr-data-${{ matrix.runner }}-${{ matrix.node }}
+          path: "pr-*.txt"
 
   build_s390x:
     name: Build s390x

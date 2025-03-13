@@ -9,6 +9,7 @@ on:
 
 jobs:
   pr-comment:
+    name: Initial PR report comment
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
@@ -20,6 +21,6 @@ jobs:
           github-token: ${{ github.token }}
           comment-message-recreate: |
             ## 🚦Reports 🚦
-            Reports will be posted here as they get available.
+            Reports will be posted here as they become available.
           comment-message-pr-number: ${{ github.event.number }}
           recreate-comment: true

@@ -11,6 +11,7 @@ on:
 
 jobs:
   report:
+    name: Update PR report comment
     permissions:
       actions: write
       checks: write
@@ -23,18 +24,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          name: pr-number
           run-id: ${{ github.event.workflow_run.id }}
+      - name: Display downloaded files
+        run: ls -R
       - name: Set PR number
         id: get-pr-data
         run: |
           echo "pr-number=$(cat pr-number.txt)" >> "${GITHUB_OUTPUT}"
-          echo "pr-runner-node=$(cat pr-runner-node.txt)" >> "${GITHUB_OUTPUT}"
+          echo "pr-runner=$(cat pr-runner.txt)" >> "${GITHUB_OUTPUT}"
+          echo "pr-node=$(cat pr-node.txt)" >> "${GITHUB_OUTPUT}"
       - name: Publish reports
         uses: turing85/publish-report@v2
         with:
           comment-message-pr-number: ${{ steps.get-pr-data.outputs.pr-number }}
-          download-artifact-name: test-report
+          download-artifact-name: test-report-${{ steps.get-pr-data.outputs.pr-runner }}-${{ steps.get-pr-data.outputs.pr-node }}
           download-artifact-run-id: ${{ github.event.workflow_run.id }}
           comment-header: my-comment-header
           comment-message-success: |
