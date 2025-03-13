@@ -16,7 +16,7 @@ function directoryExists(file) {
   try {
     const stat = fs.lstatSync(file);
     return stat.isDirectory();
-  } catch (err) {
+  } catch {
     return false;
   }
 }
@@ -25,7 +25,7 @@ function fileExists(file) {
   try {
     const stat = fs.lstatSync(file);
     return stat.isFile();
-  } catch (err) {
+  } catch {
     return false;
   }
 }
@@ -152,7 +152,7 @@ async function run() {
 
   try {
     removeFolder(tempInstallPath);
-  } catch (err) {
+  } catch {
     console.error(`Could not delete folder '${tempInstallPath}'.`);
   }
 }

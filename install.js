@@ -200,7 +200,7 @@ class Installer {
         deferred.resolve(false);
       });
     }
-    catch (error) {
+    catch {
       deferred.resolve(false);
     }
     return deferred.promise;
