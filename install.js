@@ -17,20 +17,26 @@ const finishedAsync = promisify(finished);
 const process = require('node:process');
 const console = require('node:console');
 
+function getNpmEnvVar(name) {
+  return process.env[name.toUpperCase()] ??
+    process.env[`npm_package_config_${name}`] ??
+    process.env[`npm_config_${name}`];
+}
+
 class Installer {
   async install() {
-    const skipDownload = (process.env.npm_config_chromedriver_skip_download || process.env.CHROMEDRIVER_SKIP_DOWNLOAD) === 'true';
+    const skipDownload = (getNpmEnvVar('chromedriver_skip_download') === 'true');
     if (skipDownload) {
       console.log('Found CHROMEDRIVER_SKIP_DOWNLOAD variable, skipping installation.');
       process.exit(0);
     }
-    const cdnUrl = (process.env.npm_config_chromedriver_cdnurl || process.env.CHROMEDRIVER_CDNURL || 'https://googlechromelabs.github.io').replace(/\/+$/, '');
-    const legacyCdnUrl = (process.env.npm_config_chromedriver_legacy_cdnurl || process.env.CHROMEDRIVER_LEGACY_CDNURL || 'https://chromedriver.storage.googleapis.com').replace(/\/+$/, '');
-    let chromedriverVersion = process.env.npm_config_chromedriver_version || process.env.CHROMEDRIVER_VERSION || helper.version;
-    const detectChromedriverVersion = (process.env.npm_config_detect_chromedriver_version || process.env.DETECT_CHROMEDRIVER_VERSION) === 'true';
+    const cdnUrl = (getNpmEnvVar('chromedriver_cdnurl') || 'https://googlechromelabs.github.io').replace(/\/+$/, '');
+    const legacyCdnUrl = (getNpmEnvVar('chromedriver_legacy_cdnurl') || 'https://chromedriver.storage.googleapis.com').replace(/\/+$/, '');
+    let chromedriverVersion = getNpmEnvVar('chromedriver_version') || helper.version;
+    const detectChromedriverVersion = (getNpmEnvVar('detect_chromedriver_version') === 'true');
     try {
       if (detectChromedriverVersion) {
-        const includeChromium = (process.env.npm_config_include_chromium || process.env.INCLUDE_CHROMIUM) === 'true';
+        const includeChromium = (getNpmEnvVar('include_chromium') === 'true');
         // Refer http://chromedriver.chromium.org/downloads/version-selection
         const chromeVersion = await getChromeVersion(includeChromium);
         console.log("Your Chrome version is " + chromeVersion);
@@ -60,7 +66,7 @@ class Installer {
       const chromedriverIsAvailable = await this.verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriverVersion, chromedriverBinaryFilePath);
       if (!chromedriverIsAvailable) {
         console.log('Current existing ChromeDriver binary is unavailable, proceeding with download and extraction.');
-        const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
+        const configuredfilePath = getNpmEnvVar('chromedriver_filepath');
         if (configuredfilePath) {
           console.log('Using file: ', configuredfilePath);
           downloadedFile = configuredfilePath;
@@ -92,7 +98,7 @@ class Installer {
         return 'linux64';
       } else if (process.arch === 'riscv64') {
         // Check if --chromedriver_filepath is provided via env vars
-        const configuredfilePath = process.env.npm_config_chromedriver_filepath || process.env.CHROMEDRIVER_FILEPATH;
+        const configuredfilePath = getNpmEnvVar('chromedriver_filepath');
         if (!configuredfilePath) {
           console.error(
             'Error: RISC-V detected: No official Chromedriver binary is available for RISC-V 64-bit. ' +
@@ -134,7 +140,7 @@ class Installer {
    * @param {string} platform
    */
   async downloadFile(cdnUrl, downloadedFile, chromedriverVersion, platform) {
-    const cdnBinariesUrl = (process.env.npm_config_chromedriver_cdnbinariesurl || process.env.CHROMEDRIVER_CDNBINARIESURL)?.replace(/\/+$/, '');
+    const cdnBinariesUrl = (getNpmEnvVar('chromedriver_cdnbinariesurl'))?.replace(/\/+$/, '');
     const url = cdnBinariesUrl
       ? `${cdnBinariesUrl}/${chromedriverVersion}/${platform}/${path.basename(downloadedFile)}`
       : await this.getDownloadUrl(cdnUrl, chromedriverVersion, platform);
@@ -176,7 +182,7 @@ class Installer {
   verifyIfChromedriverIsAvailableAndHasCorrectVersion(chromedriverVersion, chromedriverBinaryFilePath) {
     if (!fs.existsSync(chromedriverBinaryFilePath))
       return Promise.resolve(false);
-    const forceDownload = process.env.npm_config_chromedriver_force_download === 'true' || process.env.CHROMEDRIVER_FORCE_DOWNLOAD === 'true';
+    const forceDownload = getNpmEnvVar('chromedriver_force_download') === 'true';
     if (forceDownload)
       return Promise.resolve(false);
     console.log('ChromeDriver binary exists. Validating...');
