@@ -48,7 +48,7 @@ async function run(shouldCommit) {
     if (currentChromedriverVersion === latestVersion) {
       console.log('Chromedriver version is up to date.');
     } else {
-      writeUpdate(latestVersion, shouldCommit);
+      await writeUpdate(latestVersion, shouldCommit);
       console.log(`Chromedriver version updated to ${latestVersion}`);
     }
   } catch (err) {
