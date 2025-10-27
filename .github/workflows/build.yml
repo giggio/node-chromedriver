@@ -80,12 +80,12 @@ jobs:
         node: ["20", "22", "24", "25"]
     steps:
       - uses: actions/checkout@v4
-      - uses: uraimo/run-on-arch-action@v2.8.1
+      - uses: uraimo/run-on-arch-action@v3
         name: Verify install
         id: build
         with:
           arch: s390x
-          distro: ubuntu22.04
+          distro: ubuntu24.04
           env: | # this is just so we can cache each version
             GITHUB_WORKFLOW: ${{ github.workflow }}-${{ github.job }}-${{ matrix.node }}
           dockerRunArgs: |
