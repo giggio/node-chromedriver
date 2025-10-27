@@ -77,7 +77,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["20", "22", "24", "25"]
+        node: ["20", "22", "24"] # 25 is currently failing with missing shared library libatomic.so.1. See: https://github.com/giggio/node-chromedriver/actions/runs/18846584726/job/53772131575#step:3:329
     steps:
       - uses: actions/checkout@v4
       - uses: uraimo/run-on-arch-action@v3
