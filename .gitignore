@@ -4,3 +4,4 @@ tmp
 npm-debug.log
 *.tgz
 junit.xml
+.direnv
