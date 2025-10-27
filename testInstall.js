@@ -6,7 +6,7 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const spawnSync = require('child_process').spawnSync;
-const versions = ['20', '22', '24'];
+const versions = ['20', '22', '24', '25'];
 const tempInstallPath = path.resolve(os.tmpdir(), 'chromedriver-test');
 const packedFile = path.resolve(tempInstallPath, 'chromedriver.tgz');
 
