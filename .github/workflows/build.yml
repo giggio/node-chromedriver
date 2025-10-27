@@ -37,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         node: ["20.x", "22.x", "24.x", "25.x"]
-        runner: ["windows-latest", "ubuntu-latest", "ubuntu-24.04-arm", "macos-latest"]
+        runner: ["windows-latest", "ubuntu-latest", "ubuntu-24.04-arm", "macos-latest", "macos-15-intel"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
