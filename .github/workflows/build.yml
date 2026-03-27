@@ -1,7 +1,5 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-
 name: Build app
-
 on:
   workflow_dispatch:
   push:
@@ -28,7 +26,6 @@ on:
       - ".github/**"
       - .gitignore
       - .npmignore
-
 jobs:
   build:
     name: Build amd64 and arm64
@@ -70,14 +67,13 @@ jobs:
           path: junit.xml
           if-no-files-found: error
           retention-days: 1
-
   build_s390x:
     name: Build s390x
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        node: ["20", "22", "24"] # 25 is currently failing with missing shared library libatomic.so.1. See: https://github.com/giggio/node-chromedriver/actions/runs/18846584726/job/53772131575#step:3:329
+        node: ["20", "24"]
     steps:
       - uses: actions/checkout@v4
       - uses: uraimo/run-on-arch-action@v3
@@ -115,7 +111,6 @@ jobs:
               echo "Binary not found at $BIN"
               exit 1
             fi
-
   build_proxy:
     name: Build with proxy
     runs-on: ubuntu-latest
@@ -144,7 +139,6 @@ jobs:
         name: Install OS dependencies
       - run: ./test-driver.sh
         name: Verify install
-
   build_local_file_install:
     name: Build with local file install
     runs-on: ubuntu-latest
@@ -169,7 +163,6 @@ jobs:
         name: Install OS dependencies
       - run: ./test-driver.sh
         name: Verify install
-
   build_legacy:
     name: Build with legacy cdn url
     runs-on: ubuntu-latest
@@ -193,7 +186,6 @@ jobs:
         name: Install OS dependencies
       - run: ./test-driver.sh
         name: Verify install
-
   upload_pr_number:
     name: Upload PR number
     runs-on: ubuntu-latest
@@ -209,7 +201,6 @@ jobs:
         with:
           name: pr-number
           path: "pr-number.txt"
-
   publish:
     permissions:
       contents: read
