@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const semver = require('semver');
-const execSync = require('child_process').execSync;
-const currentChromedriverVersion = require('./lib/chromedriver').version;
+const fs = require("fs");
+const semver = require("semver");
+const execSync = require("child_process").execSync;
+const currentChromedriverVersion = require("./lib/chromedriver").version;
 // @ts-expect-error
-const currentVersionInPackageJson = require('./package.json').version;
+const currentVersionInPackageJson = require("./package.json").version;
 
 // fetch the latest chromedriver version
 async function getLatest() {
-  const url = 'https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json';
+  const url = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json";
   try {
     const res = await fetch(url);
     const data = await res.json();
@@ -27,17 +27,20 @@ async function getLatest() {
    - add a git commit, e.g. Bump version to 77.0.0
 */
 async function writeUpdate(newVersion, shouldCommit) {
-  const helper = fs.readFileSync('./lib/chromedriver.js', 'utf8');
-  const versionExport = 'const version';
-  const regex = new RegExp(`^.*${versionExport}.*$`, 'gm');
-  const updated = helper.replace(regex, `${versionExport} = '${newVersion}';`);
+  const helper = fs.readFileSync("./lib/chromedriver.js", "utf8");
+  const versionExport = "const version";
+  const regex = new RegExp(`^.*${versionExport}.*$`, "gm");
+  const updated = helper.replace(regex, `${versionExport} = "${newVersion}";`);
   const currentMajor = semver.major(currentVersionInPackageJson);
   const newMajor = semver.major(semver.coerce(newVersion));
-  const version = currentMajor !== newMajor ? `${newMajor}.0.0` : semver.inc(currentVersionInPackageJson, 'patch');
+  const version =
+    currentMajor !== newMajor
+      ? `${newMajor}.0.0`
+      : semver.inc(currentVersionInPackageJson, "patch");
   execSync(`npm version ${version} --git-tag-version=false`);
-  fs.writeFileSync('./lib/chromedriver.js', updated, 'utf8');
+  fs.writeFileSync("./lib/chromedriver.js", updated, "utf8");
   if (!shouldCommit) return;
-  execSync('git add :/');
+  execSync("git add :/");
   execSync(`git commit -m "Bump version to ${version}"`);
   execSync(`git tag -s ${version} -m ${version}`);
 }
@@ -46,7 +49,7 @@ async function run(shouldCommit) {
   try {
     const latestVersion = await getLatest();
     if (currentChromedriverVersion === latestVersion) {
-      console.log('Chromedriver version is up to date.');
+      console.log("Chromedriver version is up to date.");
     } else {
       await writeUpdate(latestVersion, shouldCommit);
       console.log(`Chromedriver version updated to ${latestVersion}`);
@@ -57,5 +60,5 @@ async function run(shouldCommit) {
   }
 }
 
-const shouldCommit = process.argv.indexOf('--no-commit') == -1;
+const shouldCommit = process.argv.indexOf("--no-commit") == -1;
 run(shouldCommit);
