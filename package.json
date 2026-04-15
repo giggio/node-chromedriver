@@ -41,8 +41,12 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
+    "@types/axios": "^0.9.36",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.6.0",
+    "@types/proxy-from-env": "^1.0.4",
+    "@types/semver": "^7.7.1",
+    "@types/tcp-port-used": "^1.0.4",
     "eslint": "^10.2.0",
     "globals": "^17.5.0",
     "jest": "^30.3.0",

@@ -5,13 +5,11 @@
     "sourceMap": false,
     "allowJs": true,
     "checkJs": true,
-    "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "noImplicitAny": false,
+    "types": ["jest"]
   },
   "include": [
     "**/*.js"
-  ],
-  "exclude": [
-    "node_modules"
   ]
 }

@@ -18,6 +18,7 @@ describe("install", () => {
   };
   jest.mock("node:process", () => mockProcess);
   jest.mock("node:console", () => mockConsole);
+  jest.mock("proxy-agent", () => ({ ProxyAgent: jest.fn() }));
   beforeAll(() => {});
   /** @type {import('../install')} */
   let installer;
@@ -50,21 +51,15 @@ describe("install", () => {
     ["win32", "x86", "114.0.0", "win32"],
     ["win32", "x64", "114.0.0", "win32"],
     ["linux", "arm64", "114.0.0", "linux64"],
-  ])(
-    "finds platform for %s/%s, version %s is %s",
-    (
-      /** @type {NodeJS.Platform} */ platform,
-      /** @type {NodeJS.Architecture} */ arch,
-      version,
-      result,
-    ) => {
-      mockProcess.platform = platform;
-      mockProcess.arch = arch;
-      expect(installer.getPlatform(version)).toBe(result);
-      expect(mockProcess.exit.mock.calls).toHaveLength(0);
-      expect(mockConsole.error.mock.calls).toHaveLength(0);
-    },
-  );
+  ])("finds platform for %s/%s, version %s is %s", (platform, arch, version, result) => {
+    // @ts-expect-error String works
+    mockProcess.platform = platform;
+    // @ts-expect-error String works
+    mockProcess.arch = arch;
+    expect(installer.getPlatform(version)).toBe(result);
+    expect(mockProcess.exit.mock.calls).toHaveLength(0);
+    expect(mockConsole.error.mock.calls).toHaveLength(0);
+  });
   it.each([
     ["darwin", "x64", "116.0.0", false, "mac-x64"],
     ["darwin", "x64", "114.0.0", false, "mac64"],
@@ -77,14 +72,10 @@ describe("install", () => {
     ["darwin", "arm64", "105.0.0", false, "mac64_m1"],
   ])(
     "finds platform for Mac %s/%s, version %s, emulated rosetta is %s is %s",
-    (
-      /** @type {NodeJS.Platform} */ platform,
-      /** @type {NodeJS.Architecture} */ arch,
-      version,
-      isEmulatedRosettaEnvironment,
-      result,
-    ) => {
+    (platform, arch, version, isEmulatedRosettaEnvironment, result) => {
+      // @ts-expect-error String works
       mockProcess.platform = platform;
+      // @ts-expect-error String works
       mockProcess.arch = arch;
       mockInstall.isEmulatedRosettaEnvironment = isEmulatedRosettaEnvironment;
       expect(installer.getPlatform(version)).toBe(result);

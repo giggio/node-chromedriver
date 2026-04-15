@@ -235,7 +235,7 @@ class Installer {
         fs.writeFileSync(testFile, 'test');
         fs.unlinkSync(testFile);
         return candidatePath;
-      } catch (e) {
+      } catch (/** @type {any} */e) {
         console.log(candidatePath, 'is not writable:', e.message);
       }
     }
@@ -346,7 +346,7 @@ class Installer {
     let response;
     try {
       response = await axios.request({ responseType: 'stream', ...requestOptions });
-    } catch (error) {
+    } catch (/** @type {any} */ error) {
       let errorData = '';
       if (error && error.response) {
         if (error.response.status)

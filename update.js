@@ -4,7 +4,6 @@ const fs = require("fs");
 const semver = require("semver");
 const execSync = require("child_process").execSync;
 const currentChromedriverVersion = require("./lib/chromedriver").version;
-// @ts-expect-error
 const currentVersionInPackageJson = require("./package.json").version;
 
 // fetch the latest chromedriver version
@@ -32,7 +31,9 @@ async function writeUpdate(newVersion, shouldCommit) {
   const regex = new RegExp(`^.*${versionExport}.*$`, "gm");
   const updated = helper.replace(regex, `${versionExport} = "${newVersion}";`);
   const currentMajor = semver.major(currentVersionInPackageJson);
-  const newMajor = semver.major(semver.coerce(newVersion));
+  const newVersionSemver = semver.coerce(newVersion);
+  if (newVersionSemver == null) throw new Error("Invalid version: " + newVersion);
+  const newMajor = semver.major(newVersionSemver);
   const version =
     currentMajor !== newMajor
       ? `${newMajor}.0.0`
