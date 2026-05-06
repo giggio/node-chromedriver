@@ -33,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["20.x", "22.x", "24.x", "25.x"]
+        node: ["22.x", "24.x", "25.x", "26.x"]
         runner: ["windows-latest", "ubuntu-latest", "ubuntu-24.04-arm", "macos-latest", "macos-15-intel"]
     steps:
       - uses: actions/checkout@v4
@@ -73,7 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["20", "24"]
+        node: ["24", "26"]
     steps:
       - uses: actions/checkout@v4
       - uses: uraimo/run-on-arch-action@v3
@@ -90,7 +90,7 @@ jobs:
           install: |
             set -euo pipefail
             apt-get update
-            apt-get -y install xz-utils curl libnss3
+            apt-get -y install xz-utils curl libnss3 libatomic1
             curl -fsSL --output sha https://nodejs.org/dist/latest-v${{ matrix.node }}.x/SHASUMS256.txt
             FULL_FILE=`grep 'node-v${{ matrix.node }}.*-linux-s390x.tar.gz' sha | tr -s ' ' | cut -d' ' -f2`
             NODE_VERSION=`echo $FULL_FILE | grep --color=never -Eo '[0-9]{2,}\.[0-9]{1,}\.[0-9]{1,}'`
@@ -123,7 +123,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24.x
+          node-version: 26.x
           registry-url: "https://registry.npmjs.org"
           cache: npm
       - run: |
@@ -146,7 +146,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24.x
+          node-version: 26.x
           registry-url: "https://registry.npmjs.org"
           cache: npm
       - run: |
@@ -170,7 +170,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24.x
+          node-version: 26.x
           registry-url: "https://registry.npmjs.org"
           cache: npm
       - run: |
@@ -213,6 +213,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24.x
+          node-version: 26.x
           registry-url: "https://registry.npmjs.org"
       - run: npm publish --provenance
