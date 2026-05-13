@@ -10,7 +10,7 @@ const os = require('node:os');
 const { ProxyAgent } = require('proxy-agent');
 const { promisify } = require('node:util');
 const { finished } = require('node:stream');
-const extractZip = require('extract-zip');
+const AdmZip = require("adm-zip");
 const { getChromeVersion } = require('@testim/chrome-version');
 const { compareVersions } = require('compare-versions');
 const finishedAsync = promisify(finished);
@@ -76,7 +76,7 @@ class Installer {
           else
             await this.downloadFile(cdnUrl, downloadedFile, chromedriverVersion, platform);
         }
-        await this.extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
+        this.extractDownload(extractDirectory, chromedriverBinaryFilePath, downloadedFile);
       }
       const libPath = path.join(__dirname, 'lib', 'chromedriver');
       await this.copyIntoPlace(tmpPath, libPath);
@@ -385,7 +385,7 @@ class Installer {
    * @param {string} chromedriverBinaryFilePath
    * @param {string} downloadedFile
    */
-  async extractDownload(dirToExtractTo, chromedriverBinaryFilePath, downloadedFile) {
+  extractDownload(dirToExtractTo, chromedriverBinaryFilePath, downloadedFile) {
     if (path.extname(downloadedFile) !== '.zip') {
       fs.mkdirSync(path.dirname(chromedriverBinaryFilePath), { recursive: true });
       fs.copyFileSync(downloadedFile, chromedriverBinaryFilePath);
@@ -394,7 +394,7 @@ class Installer {
     }
     console.log(`Extracting zip contents to ${dirToExtractTo}.`);
     try {
-      await extractZip(path.resolve(downloadedFile), { dir: dirToExtractTo });
+      new AdmZip(path.resolve(downloadedFile)).extractAllTo(dirToExtractTo, true);
     } catch (error) {
       console.error('Error extracting archive: ' + error);
       process.exit(1);
