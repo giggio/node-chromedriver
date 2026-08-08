@@ -3,7 +3,7 @@
 
 const fs = require('node:fs');
 const helper = require('./lib/chromedriver');
-const axios = require('axios').default;
+const axios = require('axios');
 const path = require('node:path');
 const child_process = require('node:child_process');
 const os = require('node:os');
@@ -186,6 +186,7 @@ class Installer {
     if (forceDownload)
       return Promise.resolve(false);
     console.log('ChromeDriver binary exists. Validating...');
+    /** @type {Deferred<boolean>} */
     const deferred = new Deferred();
     try {
       fs.accessSync(chromedriverBinaryFilePath, fs.constants.X_OK);
@@ -485,14 +486,22 @@ class Installer {
 
 }
 
-function Deferred() {
-  this.resolve = null;
-  this.reject = null;
-  this.promise = new Promise(function (resolve, reject) {
-    this.resolve = resolve;
-    this.reject = reject;
-  }.bind(this));
-  Object.freeze(this);
+/**
+ * @template T
+ */
+class Deferred {
+  constructor() {
+    /** @type {(value: T | PromiseLike<T>) => void} */
+    this.resolve = () => { };
+    /** @type {(reason?: unknown) => void} */
+    this.reject = () => { };
+    /** @type {Promise<T>} */
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+    Object.freeze(this);
+  }
 }
 
 if (require.main === module)
