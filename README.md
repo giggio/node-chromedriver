@@ -450,6 +450,21 @@ chromedriver
   });
 ```
 
+Passing `--port=0` asks the OS for a free port, which avoids colliding on the
+default port when several instances run in parallel. The port that was assigned
+is on the returned process once the promise resolves:
+
+```javascript
+chromedriver
+  .start(['--port=0'], true)
+  .then((cp) => {
+    console.log('chromedriver is ready on port ' + cp.port);
+  });
+```
+
+Without the promise there is nothing to wait on, so with `--port=0` the assigned
+port is not known and `cp.port` is left unset.
+
 Note: if your tests are ran asynchronously, chromedriver.stop() will have to be
 executed as a callback at the end of your tests
 
