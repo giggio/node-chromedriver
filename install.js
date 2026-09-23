@@ -504,7 +504,6 @@ class Deferred {
   }
 }
 
+module.exports = Installer;
 if (require.main === module)
-  new Installer().install();
-else if (process.env.NODE_ENV === 'test')
-  module.exports = Installer;
+  new Installer().install();  
